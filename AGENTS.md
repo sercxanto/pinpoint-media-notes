@@ -61,8 +61,14 @@ through the test suite; manual testing in Obsidian is the maintainer's job.
 src/
   main.ts        plugin class: settings load/save, commands
   settings.ts    settings model, defaults, settings tab (declarative API, Obsidian 1.13+)
-  core/          pure logic, no `obsidian` import (planned, phase 1)
-  io/            the only places that touch the network (requestUrl) and the vault (planned)
+  core/          pure logic, no `obsidian` import
+    errors.ts      ConfigError (stop the import), EntryError (report, continue)
+    text.ts        nfc, sanitizeFileName, noteStem
+    frontmatter.ts yamlScalar, buildFrontmatter, buildNote
+    paths.ts       vault-relative folder check for settings and imports
+  io/
+    http.ts        httpGet: the only caller of requestUrl (HttpGet type for fakes)
+    vault.ts       VaultFiles interface and its implementation over app.vault
   book/, tmdb/   the two importers (planned, phases 2 and 3)
   ui/            modals (planned)
 tests/
@@ -136,6 +142,21 @@ Record decisions here with a short reason.
   porting brief, not `book-import-spec.md`: every real IDN also passes the
   ISBN-10 check digit test, so the check digit cannot decide.
 - **License:** MIT.
+- **YAML quoting beyond the spec's list:** also quoted are values containing
+  ` #` (starts a comment), a tab, ending in `:`, starting with `'`, the
+  reserved words `y`, `n`, `~` (any case), and date-like values
+  (`2021-05-01`). Backslashes are escaped inside quotes. Each of these would
+  otherwise be misread or invalid YAML; none of them changes the spec's
+  example notes, which are reproduced exactly in `tests/core/frontmatter.test.ts`.
+- **All scalars are single-line**, not only `description`: line breaks become
+  one space.
+- **File names:** leading dots are stripped as well, because Obsidian ignores
+  dotfiles. A title that sanitises to nothing is an `EntryError`.
+- **Folder settings:** the vault root is not accepted as a notes or image
+  folder; the spec requires a folder. An empty field is allowed while editing
+  settings and is reported when an import starts.
+- **Collision check** uses `vault.adapter.exists`, which asks the file system,
+  so a case-insensitive file system reports a clash the vault index would miss.
 
 ## Before publishing to the community list
 

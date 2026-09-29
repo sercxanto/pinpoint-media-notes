@@ -1,4 +1,5 @@
 import { PluginSettingTab, type App, type SettingDefinitionItem } from "obsidian";
+import { validateFolderInput } from "./core/paths";
 import type PinpointMediaNotesPlugin from "./main";
 
 export interface PinpointSettings {
@@ -46,7 +47,12 @@ export class PinpointSettingTab extends PluginSettingTab {
 					{
 						name: "Image folder",
 						desc: "Vault-relative folder for covers and posters.",
-						control: { type: "folder", key: "assetsDir", defaultValue: "assets" },
+						control: {
+							type: "folder",
+							key: "assetsDir",
+							defaultValue: "assets",
+							validate: validateFolderInput,
+						},
 					},
 				],
 			},
@@ -57,7 +63,11 @@ export class PinpointSettingTab extends PluginSettingTab {
 					{
 						name: "Book notes folder",
 						desc: "Vault-relative folder for book, e-book and audiobook notes.",
-						control: { type: "folder", key: "bookNotesDir" },
+						control: {
+							type: "folder",
+							key: "bookNotesDir",
+							validate: validateFolderInput,
+						},
 					},
 					{
 						name: "Cover size",
@@ -81,7 +91,11 @@ export class PinpointSettingTab extends PluginSettingTab {
 					{
 						name: "Movie and series notes folder",
 						desc: "Vault-relative folder for movie and series notes.",
-						control: { type: "folder", key: "tmdbNotesDir" },
+						control: {
+							type: "folder",
+							key: "tmdbNotesDir",
+							validate: validateFolderInput,
+						},
 					},
 					{
 						name: "TMDB read access token",

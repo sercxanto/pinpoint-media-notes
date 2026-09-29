@@ -8,14 +8,14 @@ commit.
 Status values: `open`, `in progress`, `review` (done, waiting for the
 maintainer), `done` (committed).
 
-| Phase | Content                                                              | Status      |
-| ----- | -------------------------------------------------------------------- | ----------- |
-| 0     | Scaffold, lint, tests, handover docs                                 | done        |
-| 1     | Shared core                                                          | in progress |
-| 2a    | Book import: input, MARC, mapping, note, import order                | open        |
-| 2b    | Book import: cover fallback, bot check, record picker, contract test | open        |
-| 3     | TMDB import                                                          | open        |
-| 4     | README complete, manual test checklist                               | open        |
+| Phase | Content                                                              | Status |
+| ----- | -------------------------------------------------------------------- | ------ |
+| 0     | Scaffold, lint, tests, handover docs                                 | done   |
+| 1     | Shared core                                                          | done   |
+| 2a    | Book import: input, MARC, mapping, note, import order                | open   |
+| 2b    | Book import: cover fallback, bot check, record picker, contract test | open   |
+| 3     | TMDB import                                                          | open   |
+| 4     | README complete, manual test checklist                               | open   |
 
 ## Phase 0: scaffold
 
@@ -37,11 +37,18 @@ Notes:
 
 Pure functions in `src/core/`, no `obsidian` import, fully unit-tested.
 
-- [ ] `sanitize.ts`: NFC helper, file-name sanitising (strip character set, collapse whitespace, trim)
-- [ ] `frontmatter.ts`: YAML scalar quoting (full rule set from the specs), block sequences, `[]`, single-line description, builder that keeps a given key order
-- [ ] `paths.ts`: validate vault-relative folders (no absolute path, no `..`, normalised separators); used by the settings tab `validate` and again before each import
-- [ ] `errors.ts`: `ConfigError` (stop, name what is missing) and `EntryError` (report, continue)
-- [ ] `io/http.ts` and `io/vault.ts` seams with their mock counterparts, if they fit here; otherwise in 2a
+- [x] `text.ts`: `nfc`, `sanitizeFileName`, `noteStem` (title, year, type suffix)
+- [x] `frontmatter.ts`: YAML scalar quoting, block sequences, `[]`, single-line scalars, `buildFrontmatter`/`buildNote` keeping the given key order; both spec example notes reproduced character for character
+- [x] `paths.ts`: `checkVaultFolder`, `validateFolderInput` (wired into the settings tab), `requireVaultFolder` (throws `ConfigError` naming the setting)
+- [x] `errors.ts`: `ConfigError`, `EntryError`
+- [x] `io/http.ts` (`httpGet`, the only `requestUrl` caller) and `io/vault.ts` (`VaultFiles` interface and its Obsidian implementation); the obsidian mock gained `requestUrl`, `normalizePath` and an in-memory `Vault`
+
+Notes:
+
+- Importer tests should depend on the `HttpGet` and `VaultFiles` interfaces
+  and use small in-memory fakes, not the obsidian mock.
+- The quoting rules go beyond the spec where the spec's list would produce
+  invalid or misread YAML; see _Decisions_ in `AGENTS.md`.
 
 ## Phase 2a: book import, core path
 
