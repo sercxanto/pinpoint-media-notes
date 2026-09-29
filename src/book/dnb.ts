@@ -7,6 +7,15 @@ import { parseSruResponse, type MarcRecord } from "./marc";
 const SRU_ENDPOINT = "https://services.dnb.de/sru/dnb";
 const COVER_ENDPOINT = "https://portal.dnb.de/opac/mvb/cover";
 
+/**
+ * Sent with every DNB request. The cover host's bot filter challenges any
+ * browser-like User-Agent (containing `Mozilla`) with an HTML page, and
+ * Obsidian's own is one. A client that names itself is let through.
+ */
+export const DNB_HEADERS: Record<string, string> = {
+	"User-Agent": "pinpoint-media-notes (Obsidian plugin)",
+};
+
 /** `NUM` searches ISBNs (and other numbers), `IDN` the record number. */
 export type SruIndex = "NUM" | "IDN";
 
@@ -27,7 +36,7 @@ export function coverUrl(isbn13: string, size: CoverSize): string {
 
 async function get(http: HttpGet, url: string, what: string): Promise<HttpResponse> {
 	try {
-		return await http(url);
+		return await http(url, DNB_HEADERS);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		throw new EntryError(`Could not reach the ${what}: ${reason}`);
@@ -53,7 +62,7 @@ export type BlurbResult = { ok: true; text: string } | { ok: false; reason: stri
 export async function fetchBlurb(http: HttpGet, url: string): Promise<BlurbResult> {
 	let response: HttpResponse;
 	try {
-		response = await http(url);
+		response = await http(url, DNB_HEADERS);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		return { ok: false, reason: `the blurb could not be fetched (${reason})` };
@@ -85,7 +94,7 @@ export async function fetchCover(
 ): Promise<CoverResult> {
 	let response: HttpResponse;
 	try {
-		response = await http(coverUrl(isbn13, size));
+		response = await http(coverUrl(isbn13, size), DNB_HEADERS);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		return {

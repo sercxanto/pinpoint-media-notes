@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fetchBlurb, fetchCover, searchCatalogue } from "../../src/book/dnb";
+import { coverUrl, fetchBlurb, fetchCover, searchCatalogue } from "../../src/book/dnb";
 import { importBook } from "../../src/book/importer";
 import { readBookRecord, recordIsbn, type BookRecord } from "../../src/book/record";
 import { fakeFiles } from "../helpers";
@@ -78,6 +78,16 @@ describe("DNB blurb and cover services", () => {
 	it("serves a cover as image/*", async () => {
 		const cover = await fetchCover(nodeHttp, METHODE.isbn, "l");
 		expect(cover.ok ? "image" : cover.reason).toBe("image");
+	});
+
+	// Documents why DNB_HEADERS exists: if this starts failing, the filter
+	// changed and the User-Agent may no longer be needed (or enough).
+	it("challenges a browser-like User-Agent with an HTML page", async () => {
+		const response = await nodeHttp(coverUrl(METHODE.isbn, "l"), {
+			"User-Agent": "Mozilla/5.0 obsidian/1.13.1 Electron",
+		});
+		expect(response.status).toBe(200);
+		expect(response.header("Content-Type")).toMatch(/^text\/html/);
 	});
 
 	it("answers 404 for an ISBN without cover", async () => {

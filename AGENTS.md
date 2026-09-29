@@ -209,6 +209,12 @@ Record decisions here with a short reason.
 - **Record picker** lists every record, unsupported material included, so the
   user sees what the lookup returned; choosing such a record reports it as
   unsupported. Closing the picker skips the entry.
+- **User-Agent for the DNB:** every DNB request sends
+  `User-Agent: pinpoint-media-notes (Obsidian plugin)` (`DNB_HEADERS` in
+  `dnb.ts`). The cover host's bot filter (Anubis) challenges every User-Agent
+  containing `Mozilla`, which includes Obsidian's default, and lets clients
+  that name themselves through, as it did the original script. Found in the
+  first manual test (2026-09-29); a contract test watches the filter's rule.
 - **Contract tests use `fetch`** through `tests/contract/node-http.ts`; the
   ESLint `fetch` ban is lifted for `tests/contract/` only. Production code
   still goes through `requestUrl`.

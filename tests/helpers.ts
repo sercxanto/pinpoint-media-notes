@@ -55,8 +55,10 @@ export interface FakeResponse {
  */
 export function fakeHttp(routes: Record<string, FakeResponse | Error>, log: string[] = []) {
 	const calls: string[] = [];
-	const get: HttpGet = (url) => {
+	const headers: (Record<string, string> | undefined)[] = [];
+	const get: HttpGet = (url, sent) => {
 		calls.push(url);
+		headers.push(sent);
 		log.push(`GET ${url}`);
 		const route = routes[url];
 		if (route instanceof Error) return Promise.reject(route);
@@ -70,7 +72,7 @@ export function fakeHttp(routes: Record<string, FakeResponse | Error>, log: stri
 		};
 		return Promise.resolve(response);
 	};
-	return { get, calls };
+	return { get, calls, headers };
 }
 
 /** In-memory VaultFiles; records writes in the shared event log. */

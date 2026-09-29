@@ -78,6 +78,15 @@ describe("importBook", () => {
 		expect([...files.folders].sort()).toEqual(["Books", "assets"]);
 	});
 
+	it("names itself to every DNB service, so the cover bot filter lets it through", async () => {
+		const { http, run } = setup(happyRoutes);
+		await run(ISBN);
+		expect(http.calls).toHaveLength(3);
+		for (const sent of http.headers) {
+			expect(sent?.["User-Agent"]).toBe("pinpoint-media-notes (Obsidian plugin)");
+		}
+	});
+
 	it("builds the SRU and cover URLs from the spec", () => {
 		expect(sruUrl("NUM", ISBN)).toBe(
 			"https://services.dnb.de/sru/dnb?version=1.1&operation=searchRetrieve&recordSchema=MARC21-xml&maximumRecords=10&query=NUM%3D9783442178582",
