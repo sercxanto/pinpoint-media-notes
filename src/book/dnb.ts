@@ -64,8 +64,14 @@ export async function fetchBlurb(http: HttpGet, url: string): Promise<BlurbResul
 	return { ok: true, text: truncateBlurb(blurbText(response.text())) };
 }
 
+/**
+ * `missing`: the server has no usable cover for this ISBN, another edition's
+ * may do. `blocked`: the server did not serve covers at all (bot check,
+ * error, unreachable); asking again for another ISBN would get the same.
+ */
 export type CoverResult =
-	{ ok: true; data: ArrayBuffer; extension: string } | { ok: false; reason: string };
+	| { ok: true; data: ArrayBuffer; extension: string }
+	| { ok: false; failure: "missing" | "blocked"; reason: string };
 
 /**
  * Downloads one cover. A bot filter answers challenged requests with HTTP 200
@@ -82,7 +88,11 @@ export async function fetchCover(
 		response = await http(coverUrl(isbn13, size));
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
-		return { ok: false, reason: `the cover server could not be reached (${reason})` };
+		return {
+			ok: false,
+			failure: "blocked",
+			reason: `the cover server could not be reached (${reason})`,
+		};
 	}
 	const contentType =
 		(response.header("Content-Type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
@@ -91,22 +101,29 @@ export async function fetchCover(
 		if (extension === undefined) {
 			return {
 				ok: false,
+				failure: "missing",
 				reason: `the cover server sent an unsupported image type, ${contentType}`,
 			};
 		}
 		return { ok: true, data: response.arrayBuffer(), extension };
 	}
 	if (response.status === 404) {
-		return { ok: false, reason: `the cover server has no cover for ISBN ${isbn13}` };
+		return {
+			ok: false,
+			failure: "missing",
+			reason: `the cover server has no cover for ISBN ${isbn13}`,
+		};
 	}
 	if (response.status === 200 && contentType === "text/html") {
 		return {
 			ok: false,
+			failure: "blocked",
 			reason: "the cover server answered with text/html instead of an image, probably its bot check",
 		};
 	}
 	return {
 		ok: false,
+		failure: "blocked",
 		reason: `the cover server answered with HTTP ${response.status} and ${contentType || "no content type"} instead of an image`,
 	};
 }

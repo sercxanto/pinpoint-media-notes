@@ -7,7 +7,7 @@ import { COVER_EXTENSIONS, fetchBlurb, fetchCover, searchCatalogue } from "./dnb
 import { parseBookInput, type BookQuery } from "./input";
 import type { MarcRecord } from "./marc";
 import { bookNote, bookStem } from "./note";
-import { describeRecord, readBookRecord, type BookRecord } from "./record";
+import { readBookRecord, recordIsbn, type BookRecord } from "./record";
 
 export interface BookImportConfig {
 	notesDir: string;
@@ -97,19 +97,6 @@ export async function importBook(input: string, deps: BookImportDeps): Promise<B
 	};
 }
 
-/**
- * Stand-in for the record picker (phase 2b): lists the records with their
- * links, so the user can import the intended one by its link.
- */
-export function refuseSeveralRecords(records: BookRecord[]): Promise<BookRecord | null> {
-	const lines = records.map((book, i) => `${i + 1}. ${describeRecord(book)}`);
-	return Promise.reject(
-		new EntryError(
-			`Several catalogue records match. Import the one you mean by its link:\n${lines.join("\n")}`,
-		),
-	);
-}
-
 interface Lookup {
 	records: MarcRecord[];
 	/** How an ambiguous input was read, for the report. */
@@ -152,13 +139,16 @@ interface CoverOutcome {
 	message: string;
 }
 
-/** Reuses an existing image of the target name, otherwise downloads the edition's own cover. */
+/**
+ * Reuses an existing image of the target name; otherwise downloads the first
+ * cover along the fallback chain, stored under the note's own name.
+ */
 async function provideCover(
 	deps: BookImportDeps,
 	book: BookRecord,
 	stem: string,
 ): Promise<CoverOutcome> {
-	const { http, files, config } = deps;
+	const { files, config } = deps;
 
 	for (const extension of COVER_EXTENSIONS) {
 		const path = `${config.assetsDir}/${stem}.${extension}`;
@@ -166,18 +156,109 @@ async function provideCover(
 			return { path, message: `Kept the existing cover "${path}".` };
 	}
 
-	if (book.isbn === null) return { path: null, message: "No cover: the record has no ISBN." };
+	const found = await findCover(deps, book);
+	if (!found.ok) return { path: null, message: `No cover: ${found.reason}.` };
 
-	const cover = await fetchCover(http, book.isbn, config.coverSize);
-	if (!cover.ok) return { path: null, message: `No cover: ${cover.reason}.` };
-
-	const path = `${config.assetsDir}/${stem}.${cover.extension}`;
+	const path = `${config.assetsDir}/${stem}.${found.extension}`;
 	try {
 		await files.ensureFolder(config.assetsDir);
-		await files.createBinary(path, cover.data);
+		await files.createBinary(path, found.data);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		throw new EntryError(`Could not save the cover "${path}": ${reason}`);
 	}
-	return { path, message: `Cover from ISBN ${book.isbn}.` };
+	return { path, message: coverMessage(found.source) };
+}
+
+/** Where a candidate ISBN came from. */
+type CoverSource =
+	| { kind: "own"; isbn: string }
+	| { kind: "isbn"; isbn: string }
+	| { kind: "record"; isbn: string; idn: string };
+
+type FoundCover =
+	| { ok: true; data: ArrayBuffer; extension: string; source: CoverSource }
+	| { ok: false; reason: string };
+
+/**
+ * Tries the edition's own ISBN, then each `776 $z`, then the ISBN of each
+ * record linked in `776 $w`, until one is an image. Stops early when the
+ * server serves no covers at all (bot check, errors), because asking for
+ * other ISBNs would meet the same answer.
+ */
+async function findCover(deps: BookImportDeps, book: BookRecord): Promise<FoundCover> {
+	const { http, config } = deps;
+	const tried: { isbn: string; reason: string }[] = [];
+	const unresolved: string[] = [];
+
+	for await (const source of coverCandidates(http, book, unresolved)) {
+		const cover = await fetchCover(http, source.isbn, config.coverSize);
+		if (cover.ok) return { ...cover, source };
+		if (cover.failure === "blocked") return cover;
+		tried.push({ isbn: source.isbn, reason: cover.reason });
+	}
+
+	const lookups = unresolved.map((idn) => `, https://d-nb.info/${idn} could not be looked up`);
+	if (tried.length === 0) {
+		const reason =
+			book.otherEditionIsbns.length + book.otherEditionIdns.length === 0
+				? "the record has no ISBN"
+				: "neither the record nor its other editions have an ISBN";
+		return { ok: false, reason: reason + lookups.join("") };
+	}
+	if (tried.length === 1 && tried[0]) {
+		return { ok: false, reason: tried[0].reason + lookups.join("") };
+	}
+	const isbns = tried.map((attempt) => attempt.isbn).join(", ");
+	return {
+		ok: false,
+		reason: `the cover server has no usable cover for ISBN ${isbns}${lookups.join("")}`,
+	};
+}
+
+/**
+ * Candidate ISBNs in fallback order, each once. Linked records are looked up
+ * only when the earlier candidates are used up; a failed lookup is recorded
+ * in `unresolved` and skipped.
+ */
+async function* coverCandidates(
+	http: HttpGet,
+	book: BookRecord,
+	unresolved: string[],
+): AsyncGenerator<CoverSource> {
+	const seen = new Set<string>();
+	const fresh = (isbn: string | null): isbn is string => {
+		if (isbn === null || seen.has(isbn)) return false;
+		seen.add(isbn);
+		return true;
+	};
+
+	if (fresh(book.isbn)) yield { kind: "own", isbn: book.isbn };
+	for (const isbn of book.otherEditionIsbns) {
+		if (fresh(isbn)) yield { kind: "isbn", isbn };
+	}
+	for (const idn of book.otherEditionIdns) {
+		let isbn: string | null;
+		try {
+			const [linked] = await searchCatalogue(http, "IDN", idn);
+			isbn = linked ? recordIsbn(linked) : null;
+		} catch (error) {
+			if (!(error instanceof EntryError)) throw error;
+			unresolved.push(idn);
+			continue;
+		}
+		if (fresh(isbn)) yield { kind: "record", isbn, idn };
+	}
+}
+
+/** Names the source, and flags a cover taken from another edition. */
+function coverMessage(source: CoverSource): string {
+	switch (source.kind) {
+		case "own":
+			return `Cover from ISBN ${source.isbn}.`;
+		case "isbn":
+			return `Cover from ISBN ${source.isbn}, another edition; its artwork may differ.`;
+		case "record":
+			return `Cover from ISBN ${source.isbn}, another edition (https://d-nb.info/${source.idn}); its artwork may differ.`;
+	}
 }

@@ -1,10 +1,11 @@
 import { Notice, Plugin } from "obsidian";
-import { bookImportConfig, importBook, refuseSeveralRecords } from "./book/importer";
+import { bookImportConfig, importBook } from "./book/importer";
 import { errorMessage } from "./core/errors";
 import { httpGet } from "./io/http";
 import { vaultFiles } from "./io/vault";
 import { DEFAULT_SETTINGS, PinpointSettingTab, type PinpointSettings } from "./settings";
 import { ImportModal } from "./ui/import-modal";
+import { RecordPickerModal } from "./ui/record-picker";
 
 /** Result messages run to several sentences; give time to read them. */
 const NOTICE_MS = 10_000;
@@ -53,7 +54,7 @@ export default class PinpointMediaNotesPlugin extends Plugin {
 				http: httpGet,
 				files: vaultFiles(this.app.vault),
 				config: bookImportConfig(this.settings),
-				chooseRecord: refuseSeveralRecords,
+				chooseRecord: (records) => new RecordPickerModal(this.app, records).pick(),
 			});
 			new Notice(result.message, NOTICE_MS);
 			return true;

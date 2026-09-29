@@ -104,10 +104,14 @@ export class Plugin {
 	}
 }
 
-/** Records whether it is open; the UI itself is not rendered in tests. */
+/**
+ * Records whether it is open. `open` does not call `onOpen`: the UI itself is
+ * not rendered in tests. `close` calls `onClose`, as Obsidian does.
+ */
 export class Modal {
 	app: App;
 	isOpen = false;
+	contentEl = { empty: (): void => undefined };
 
 	constructor(app: App) {
 		this.app = app;
@@ -119,7 +123,10 @@ export class Modal {
 
 	close(): void {
 		this.isOpen = false;
+		this.onClose();
 	}
+
+	onClose(): void {}
 }
 
 /** Referenced by the import modal's `onOpen`, which tests do not render. */

@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { coverUrl, sruUrl } from "../../src/book/dnb";
-import {
-	bookImportConfig,
-	importBook,
-	refuseSeveralRecords,
-	type BookImportConfig,
-} from "../../src/book/importer";
+import { bookImportConfig, importBook, type BookImportConfig } from "../../src/book/importer";
 import type { BookRecord } from "../../src/book/record";
 import { ConfigError, EntryError } from "../../src/core/errors";
 import { DEFAULT_SETTINGS } from "../../src/settings";
@@ -16,6 +11,7 @@ import {
 	marcRecord,
 	sruResponse,
 	type FakeResponse,
+	type TestField,
 } from "../helpers";
 
 const CONFIG: BookImportConfig = { notesDir: "Books", assetsDir: "assets", coverSize: "l" };
@@ -35,10 +31,14 @@ const blurb: FakeResponse = {
 };
 const cover: FakeResponse = { contentType: "image/jpeg", body: JPEG };
 
+function noChoiceExpected(_records: BookRecord[]): Promise<BookRecord | null> {
+	return Promise.reject(new Error("unexpected record choice"));
+}
+
 function setup(
 	routes: Record<string, FakeResponse | Error>,
 	existing: string[] = [],
-	chooseRecord = vi.fn(refuseSeveralRecords),
+	chooseRecord = vi.fn(noChoiceExpected),
 ) {
 	const log: string[] = [];
 	const http = fakeHttp(routes, log);
@@ -123,33 +123,41 @@ describe("importBook", () => {
 		expect(files.files.get(NOTE)).toContain("\ncover:\n");
 	});
 
+	it("does not try other editions once the bot check answers", async () => {
+		const { log, run } = setup({
+			...happyRoutes,
+			[coverUrl(ISBN, "l")]: { contentType: "text/html", body: "<html></html>" },
+		});
+		await run(ISBN);
+		expect(log).toEqual([
+			`GET ${sruUrl("NUM", ISBN)}`,
+			`GET ${BLURB}`,
+			`GET ${coverUrl(ISBN, "l")}`,
+			`note ${NOTE}`,
+		]);
+	});
+
 	it.each<[string, FakeResponse | Error, string]>([
-		[
-			"a missing cover",
-			{ status: 404, contentType: "text/html" },
-			`the cover server has no cover for ISBN ${ISBN}`,
-		],
 		[
 			"an error page",
 			{ status: 503, contentType: "text/plain" },
 			"the cover server answered with HTTP 503 and text/plain instead of an image",
 		],
 		[
-			"an unknown image type",
-			{ contentType: "image/tiff", body: JPEG },
-			"the cover server sent an unsupported image type, image/tiff",
-		],
-		[
 			"a network failure",
 			new Error("ETIMEDOUT"),
 			"the cover server could not be reached (ETIMEDOUT)",
 		],
-	])("reports %s and still writes the note", async (_, response, reason) => {
-		const { files, run } = setup({ ...happyRoutes, [coverUrl(ISBN, "l")]: response });
-		const result = await run(ISBN);
-		expect(result.message).toContain(`No cover: ${reason}.`);
-		expect([...files.files.keys()]).toEqual([NOTE]);
-	});
+	])(
+		"reports %s, tries no other edition and still writes the note",
+		async (_, response, reason) => {
+			const { log, files, run } = setup({ ...happyRoutes, [coverUrl(ISBN, "l")]: response });
+			const result = await run(ISBN);
+			expect(result.message).toBe(`Created "${NOTE}". No cover: ${reason}.`);
+			expect(log.filter((entry) => entry.startsWith("GET"))).toHaveLength(3);
+			expect([...files.files.keys()]).toEqual([NOTE]);
+		},
+	);
 
 	it("accepts a cover by Content-Type even with an odd status", async () => {
 		const { run } = setup({
@@ -166,7 +174,7 @@ describe("importBook", () => {
 			http: http.get,
 			files: fakeFiles([], log).vault,
 			config: { ...CONFIG, coverSize: "s" },
-			chooseRecord: refuseSeveralRecords,
+			chooseRecord: noChoiceExpected,
 		});
 		expect(http.calls).toContain(coverUrl(ISBN, "s"));
 	});
@@ -257,6 +265,152 @@ describe("importBook", () => {
 		expect(files.files.size).toBe(0);
 	});
 
+	describe("cover fallback", () => {
+		// The fixture links an audiobook by ISBN (776 $z) and the e-book by
+		// record number (776 $w).
+		const AUDIO = "9783844538458";
+		const EBOOK_IDN = "1208614460";
+		const EBOOK = "9783641260149";
+		const ebookRecord: FakeResponse = {
+			body: sruResponse([
+				marcRecord(EBOOK_IDN, [
+					["020", [["a", EBOOK]]],
+					["245", [["a", "Die 1 % Methode"]]],
+				]),
+			]),
+		};
+		const missing: FakeResponse = { status: 404, contentType: "text/html" };
+		const chainRoutes = {
+			...happyRoutes,
+			[coverUrl(ISBN, "l")]: missing,
+			[coverUrl(AUDIO, "l")]: missing,
+			[sruUrl("IDN", EBOOK_IDN)]: ebookRecord,
+			[coverUrl(EBOOK, "l")]: missing,
+		};
+
+		it("takes the cover of an edition listed by ISBN and flags it", async () => {
+			const { log, files, run } = setup({ ...chainRoutes, [coverUrl(AUDIO, "l")]: cover });
+			const result = await run(ISBN);
+			expect(log).toEqual([
+				`GET ${sruUrl("NUM", ISBN)}`,
+				`GET ${BLURB}`,
+				`GET ${coverUrl(ISBN, "l")}`,
+				`GET ${coverUrl(AUDIO, "l")}`,
+				`image ${IMAGE}`,
+				`note ${NOTE}`,
+			]);
+			expect(result.message).toBe(
+				`Created "${NOTE}". Cover from ISBN ${AUDIO}, another edition; its artwork may differ.`,
+			);
+			expect(files.files.get(IMAGE)).toBe(JPEG);
+		});
+
+		it("looks up a linked record only after the listed ISBNs", async () => {
+			const { log, run } = setup({ ...chainRoutes, [coverUrl(EBOOK, "l")]: cover });
+			const result = await run(ISBN);
+			expect(log.slice(2)).toEqual([
+				`GET ${coverUrl(ISBN, "l")}`,
+				`GET ${coverUrl(AUDIO, "l")}`,
+				`GET ${sruUrl("IDN", EBOOK_IDN)}`,
+				`GET ${coverUrl(EBOOK, "l")}`,
+				`image ${IMAGE}`,
+				`note ${NOTE}`,
+			]);
+			expect(result.message).toContain(
+				`Cover from ISBN ${EBOOK}, another edition (https://d-nb.info/${EBOOK_IDN}); its artwork may differ.`,
+			);
+		});
+
+		it("names every ISBN tried when no edition has a cover", async () => {
+			const { files, run } = setup(chainRoutes);
+			const result = await run(ISBN);
+			expect(result.message).toBe(
+				`Created "${NOTE}". No cover: the cover server has no usable cover for ISBN ${ISBN}, ${AUDIO}, ${EBOOK}.`,
+			);
+			expect([...files.files.keys()]).toEqual([NOTE]);
+		});
+
+		it("moves on past an unsupported image type", async () => {
+			const { run } = setup({
+				...chainRoutes,
+				[coverUrl(ISBN, "l")]: { contentType: "image/tiff", body: JPEG },
+				[coverUrl(AUDIO, "l")]: cover,
+			});
+			expect((await run(ISBN)).message).toContain(`Cover from ISBN ${AUDIO}`);
+		});
+
+		it("reports a linked record that could not be looked up", async () => {
+			const { run } = setup({
+				...chainRoutes,
+				[sruUrl("IDN", EBOOK_IDN)]: new Error("offline"),
+			});
+			expect((await run(ISBN)).message).toBe(
+				`Created "${NOTE}". No cover: the cover server has no usable cover for ISBN ${ISBN}, ${AUDIO}, https://d-nb.info/${EBOOK_IDN} could not be looked up.`,
+			);
+		});
+
+		it("asks for each ISBN once", async () => {
+			const record = marcRecord("1111111111", [
+				["020", [["a", ISBN]]],
+				["245", [["a", "Titel"]]],
+				["336", [["a", "Text"]]],
+				["338", [["a", "Band"]]],
+				["776", [["z", ISBN]]],
+				["776", [["w", `(DE-101)${IDN}`]]],
+			]);
+			const { http, run } = setup({
+				[sruUrl("NUM", ISBN)]: { body: sruResponse([record]) },
+				[sruUrl("IDN", IDN)]: found,
+				[coverUrl(ISBN, "l")]: missing,
+			});
+			const result = await run(ISBN);
+			expect(http.calls.filter((url) => url === coverUrl(ISBN, "l"))).toHaveLength(1);
+			expect(http.calls).toContain(sruUrl("IDN", IDN));
+			expect(result.message).toContain(
+				`No cover: the cover server has no cover for ISBN ${ISBN}.`,
+			);
+		});
+
+		it("uses another edition when the record has no ISBN of its own", async () => {
+			const record = marcRecord("1111111111", [
+				["245", [["a", "Titel"]]],
+				["336", [["a", "Text"]]],
+				["338", [["a", "Online-Ressource"]]],
+				["776", [["z", AUDIO]]],
+			]);
+			const { run } = setup({
+				[sruUrl("NUM", ISBN)]: { body: sruResponse([record]) },
+				[coverUrl(AUDIO, "l")]: cover,
+			});
+			expect((await run(ISBN)).message).toContain(
+				`Cover from ISBN ${AUDIO}, another edition`,
+			);
+		});
+
+		it.each<[string, TestField[], string]>([
+			["no ISBN and no links", [], "the record has no ISBN"],
+			[
+				"no ISBN anywhere",
+				[["776", [["w", "(DE-101)1208614460"]]]],
+				"neither the record nor its other editions have an ISBN",
+			],
+		])("reports a record with %s", async (_, links, reason) => {
+			const record = marcRecord("1111111111", [
+				["245", [["a", "Titel"]]],
+				["336", [["a", "Text"]]],
+				["338", [["a", "Band"]]],
+				...links,
+			]);
+			const { run } = setup({
+				[sruUrl("NUM", ISBN)]: { body: sruResponse([record]) },
+				[sruUrl("IDN", EBOOK_IDN)]: {
+					body: sruResponse([marcRecord(EBOOK_IDN, [["245", [["a", "T"]]]])]),
+				},
+			});
+			expect((await run(ISBN)).message).toContain(`No cover: ${reason}.`);
+		});
+	});
+
 	describe("several records", () => {
 		const routes = {
 			[sruUrl("NUM", ISBN)]: { body: fixture("book/sru-kaenguru-rebellion.xml") },
@@ -287,14 +441,6 @@ describe("importBook", () => {
 			);
 			await expect(run(ISBN)).rejects.toThrow("no record chosen");
 			expect(files.files.size).toBe(0);
-		});
-
-		it("lists the records with their links until the picker exists", async () => {
-			const { run } = setup(routes);
-			await expect(run(ISBN)).rejects.toThrow(
-				"Several catalogue records match. Import the one you mean by its link:\n" +
-					"1. Die Känguru-Rebellion (2026), audiobook, ISBN 9783957133373, https://d-nb.info/1379107830\n",
-			);
 		});
 	});
 });

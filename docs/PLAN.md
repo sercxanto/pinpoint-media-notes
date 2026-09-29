@@ -13,7 +13,7 @@ maintainer), `done` (committed).
 | 0     | Scaffold, lint, tests, handover docs                                 | done   |
 | 1     | Shared core                                                          | done   |
 | 2a    | Book import: input, MARC, mapping, note, import order                | done   |
-| 2b    | Book import: cover fallback, bot check, record picker, contract test | open   |
+| 2b    | Book import: cover fallback, bot check, record picker, contract test | done   |
 | 3     | TMDB import                                                          | open   |
 | 4     | README complete, manual test checklist                               | open   |
 
@@ -92,10 +92,42 @@ Notes:
 ## Phase 2b: book import, covers and edge cases
 
 - [x] Cover download with `Content-Type` check and message when blocked (done in 2a)
-- [ ] Fallback chain: own ISBN, `776 $z`, `776 $w` via SRU
-- [ ] Report which ISBN supplied the cover, flag foreign editions
-- [ ] Record picker modal when a lookup returns several records
-- [ ] Contract test against the live DNB
+- [x] Fallback chain: own ISBN, `776 $z`, `776 $w` via SRU
+- [x] Report which ISBN supplied the cover, flag foreign editions
+- [x] Record picker modal when a lookup returns several records
+- [x] Contract test against the live DNB
+
+Notes:
+
+- `BookRecord` gained `otherEditionIsbns` (`776 $z`, as ISBN-13) and
+  `otherEditionIdns` (`776 $w` with the `(DE-101)` prefix only; other
+  libraries' numbers and a link to the record itself are dropped).
+  `recordIsbn` reads the ISBN of a linked record without mapping the rest.
+- The chain lives in `importer.ts` (`findCover`, `coverCandidates`). Linked
+  records are looked up lazily, only when the own ISBN and every `776 $z`
+  have failed. Each ISBN is asked for once.
+- `fetchCover` now classifies a failure as `missing` (404, unsupported image
+  type: try the next edition) or `blocked` (bot check, other HTTP status,
+  network: stop the chain, see _Decisions_).
+- Messages: `Cover from ISBN X.` for the own edition; `Cover from ISBN X,
+another edition; its artwork may differ.` otherwise, with the
+  `d-nb.info` link when it came from a `776 $w` record. Without a cover the
+  message lists every ISBN tried and every linked record that could not be
+  looked up.
+- Record picker: `src/ui/record-picker.ts`, a modal over the import modal
+  with one row per record (title and year; type, ISBN, `d-nb.info` link) and
+  an "Import" button each. Closing it skips the entry. Unsupported material
+  is listed too; choosing it gives the usual "unsupported material" message.
+  `refuseSeveralRecords` is gone. The obsidian mock's `Modal.close` now calls
+  `onClose`, as Obsidian does; `onOpen` is still not run in tests.
+- Contract test `tests/contract/dnb.contract.test.ts` (9 checks, passed live
+  on 2026-09-29): SRU by ISBN and by record number, `776 $w` resolution, empty
+  result, blurb, cover as `image/*`, 404 for a coverless ISBN, and one
+  `importBook` end to end. Field shapes are checked against
+  `BOOK_RECORD_SHAPE` (`tests/contract/book-shape.ts`, typed against
+  `BookRecord`); the offline field-coverage test checks its keys too. HTTP in
+  the contract tests goes through `fetch` (`node-http.ts`); ESLint's
+  `fetch` ban is lifted for `tests/contract/` only.
 
 ## Phase 3: TMDB import
 

@@ -72,19 +72,22 @@ src/
   book/          book importer
     input.ts       ISBN/IDN/link parsing, check digits
     marc.ts        SRU response → MARC records (DOMParser), NFC and marker stripping on read
-    record.ts      MARC → BookRecord, BOOK_RECORD_SOURCES (field-coverage table)
+    record.ts      MARC → BookRecord, BOOK_RECORD_SOURCES (field-coverage table), recordIsbn
     blurb.ts       blurb HTML → text, truncation
     note.ts        file stem with type suffix, note builder
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
-    importer.ts    importBook: the per-entry order; bookImportConfig
+    importer.ts    importBook: the per-entry order, cover fallback chain; bookImportConfig
   tmdb/          TMDB importer (planned, phase 3)
   ui/
     import-modal.ts  text field modal, stays open for the next entry
+    record-picker.ts choose one of several catalogue records; closing skips
 tests/
   __mocks__/obsidian.ts   hand-written fake of the obsidian API (aliased in vitest.config.ts)
   helpers.ts              fixtures, fake HttpGet and VaultFiles, MARC record builder
   fixtures/               recorded API responses
   contract/               live-API checks, only via `npm run test:contract`
+    book-shape.ts           BOOK_RECORD_SHAPE: per-field shape checks, typed against BookRecord
+    node-http.ts            HttpGet over fetch, because requestUrl exists only in Obsidian
 
 Tests run under jsdom, because the book importer uses the `DOMParser` that
 Obsidian provides.
@@ -196,6 +199,19 @@ Record decisions here with a short reason.
 - **Series index:** the first number in `490 $v`, else `830 $v`; a decimal
   comma becomes a dot.
 - **Authors** are de-duplicated (a name can appear in `100` and `700`).
+- **Cover fallback stops early** when the cover server is blocked (bot check
+  page, an HTTP status other than 404, network failure): asking for other
+  editions would meet the same answer and only add load on a filtered host.
+  A 404 or an unsupported image type moves on to the next candidate.
+- **`776 $w`** is used only with the `(DE-101)` prefix (the DNB's own record
+  numbers); a failed lookup of a linked record skips that candidate and is
+  named in the result if no cover is found.
+- **Record picker** lists every record, unsupported material included, so the
+  user sees what the lookup returned; choosing such a record reports it as
+  unsupported. Closing the picker skips the entry.
+- **Contract tests use `fetch`** through `tests/contract/node-http.ts`; the
+  ESLint `fetch` ban is lifted for `tests/contract/` only. Production code
+  still goes through `requestUrl`.
 
 ## Before publishing to the community list
 

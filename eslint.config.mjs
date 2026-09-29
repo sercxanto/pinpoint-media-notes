@@ -23,5 +23,13 @@ export default defineConfig([
 			"obsidianmd/no-nodejs-modules": "off",
 		},
 	},
+	{
+		// The live-API checks talk to the network from Node, where requestUrl
+		// does not exist.
+		files: ["tests/contract/**/*.ts"],
+		rules: {
+			"no-restricted-globals": "off",
+		},
+	},
 	prettier,
 ]);

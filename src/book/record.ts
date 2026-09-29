@@ -23,6 +23,10 @@ export interface BookRecord {
 	media: string;
 	/** The DNB's own blurb page, if the record links one. */
 	blurbUrl: string | null;
+	/** ISBN-13s of other editions of the work, from `776 $z`; cover fallback. */
+	otherEditionIsbns: string[];
+	/** DNB record numbers of other editions, from `776 $w`; cover fallback. */
+	otherEditionIdns: string[];
 }
 
 /**
@@ -42,6 +46,8 @@ export const BOOK_RECORD_SOURCES = {
 	type: "336 $a + 338 $a",
 	media: "336 $a + 338 $a",
 	blurbUrl: "856 $u where $3 is Inhaltstext, DNB host only",
+	otherEditionIsbns: "776 $z",
+	otherEditionIdns: "776 $w of the form (DE-101)<idn>",
 } as const satisfies Record<keyof BookRecord, string>;
 
 /** Maps one MARC record. Throws an EntryError if it lacks an IDN or a title. */
@@ -59,13 +65,15 @@ export function readBookRecord(marc: MarcRecord): BookRecord {
 		title,
 		originalTitle: firstSubfield(marc, "240", "a") ?? title,
 		authors: readAuthors(marc),
-		isbn: readIsbn(marc),
+		isbn: recordIsbn(marc),
 		year: readYear(marc),
 		series: firstSubfield(marc, "490", "a") ?? firstSubfield(marc, "830", "a"),
 		seriesIndex: readSeriesIndex(marc),
 		type: bookType(contents, carriers),
 		media: `${contents.join(", ") || "no content type"} / ${carriers.join(", ") || "no carrier type"}`,
 		blurbUrl: readBlurbUrl(marc),
+		otherEditionIsbns: readOtherEditionIsbns(marc),
+		otherEditionIdns: readOtherEditionIdns(marc, idn),
 	};
 }
 
@@ -77,10 +85,17 @@ function readAuthors(marc: MarcRecord): string[] {
 	return [...new Set(names)];
 }
 
-function readIsbn(marc: MarcRecord): string | null {
-	const values = fields(marc, "020")
-		.flatMap((field) => subfields(field, "a"))
-		.map((value) => value.replace(/[\s-]/g, "").toUpperCase());
+/**
+ * The record's ISBN-13 from `020 $a`. Also used on records linked in `776 $w`,
+ * which are only read for their ISBN.
+ */
+export function recordIsbn(marc: MarcRecord): string | null {
+	return firstIsbn13(fields(marc, "020").flatMap((field) => subfields(field, "a")));
+}
+
+/** The first ISBN-13 among the values, else the first valid ISBN-10 converted. */
+function firstIsbn13(raw: string[]): string | null {
+	const values = raw.map((value) => value.replace(/[\s-]/g, "").toUpperCase());
 	for (const value of values) {
 		const isbn13 = /(?:^|\D)(97[89]\d{10})(?!\d)/.exec(value)?.[1];
 		if (isbn13) return isbn13;
@@ -91,6 +106,28 @@ function readIsbn(marc: MarcRecord): string | null {
 		if (isbn10 && isValidIsbn10(isbn10)) return isbn10To13(isbn10);
 	}
 	return null;
+}
+
+/** One ISBN-13 per `776 $z`, in record order, without duplicates. */
+function readOtherEditionIsbns(marc: MarcRecord): string[] {
+	const isbns = fields(marc, "776")
+		.flatMap((field) => subfields(field, "z"))
+		.map((value) => firstIsbn13([value]))
+		.filter((isbn) => isbn !== null);
+	return [...new Set(isbns)];
+}
+
+/**
+ * `776 $w` links carry the holding library's prefix; only `(DE-101)`, the
+ * DNB's own, is a record number the catalogue can look up. A link back to
+ * the record itself is dropped.
+ */
+function readOtherEditionIdns(marc: MarcRecord, idn: string): string[] {
+	const idns = fields(marc, "776")
+		.flatMap((field) => subfields(field, "w"))
+		.map((value) => /^\(DE-101\)\s*(\d{7,9}[\dX])$/i.exec(value)?.[1]?.toUpperCase())
+		.filter((linked): linked is string => linked !== undefined && linked !== idn);
+	return [...new Set(idns)];
 }
 
 /** The first four-digit run, publication statement (264 ind2 1) preferred over copyright dates. */
@@ -157,9 +194,15 @@ export function isDnbBlurbUrl(url: string): boolean {
 	}
 }
 
-/** One line per record, for the user to choose from. */
-export function describeRecord(book: BookRecord): string {
+/**
+ * A record for the user to choose from: title and year, then what tells
+ * editions apart (type, ISBN, link to the catalogue record).
+ */
+export function describeRecord(book: BookRecord): { name: string; details: string } {
 	const year = book.year === null ? "no year" : String(book.year);
 	const isbn = book.isbn === null ? "no ISBN" : `ISBN ${book.isbn}`;
-	return `${book.title} (${year}), ${book.type ?? book.media}, ${isbn}, https://d-nb.info/${book.idn}`;
+	return {
+		name: `${book.title} (${year})`,
+		details: `${book.type ?? book.media}, ${isbn}, https://d-nb.info/${book.idn}`,
+	};
 }

@@ -7,6 +7,7 @@ import {
 	readBookRecord,
 	type BookRecord,
 } from "../../src/book/record";
+import { BOOK_RECORD_SHAPE, shapeMismatches } from "../contract/book-shape";
 import { fixture, marcRecord, sruResponse, type TestField } from "../helpers";
 
 function readOne(fields: TestField[]): BookRecord {
@@ -41,6 +42,8 @@ describe("readBookRecord on real catalogue records", () => {
 			type: "book",
 			media: "Text / Band",
 			blurbUrl: "https://services.dnb.de/plus/idn/1198618736/blurb/",
+			otherEditionIsbns: ["9783844538458"],
+			otherEditionIdns: ["1208614460"],
 		});
 	});
 
@@ -58,8 +61,16 @@ describe("readBookRecord on real catalogue records", () => {
 			type: "audiobook",
 			media: "gesprochenes Wort / Audiodisk",
 			blurbUrl: "https://services.dnb.de/plus/idn/1379107830/blurb/",
+			otherEditionIsbns: ["9783844944549"],
+			otherEditionIdns: [],
 		});
-		expect(paperback).toMatchObject({ idn: "1379188067", type: "book", year: 2026 });
+		expect(paperback).toMatchObject({
+			idn: "1379188067",
+			type: "book",
+			year: 2026,
+			otherEditionIsbns: [],
+			otherEditionIdns: ["139261385X"],
+		});
 		expect(ebook).toEqual<BookRecord>({
 			idn: "139261385X",
 			title: "Die Känguru-Rebellion",
@@ -72,6 +83,8 @@ describe("readBookRecord on real catalogue records", () => {
 			type: "ebook",
 			media: "Text / Online-Ressource",
 			blurbUrl: null,
+			otherEditionIsbns: [],
+			otherEditionIdns: ["1379188067"],
 		});
 		// 100 carries the reading artist ($4 art), the author is in 700,
 		// the narrator in another 700 ($4 nrt).
@@ -82,7 +95,11 @@ describe("readBookRecord on real catalogue records", () => {
 			year: 2026,
 		});
 		// The illustrator ($4 ill) is not an author.
-		expect(illustrated).toMatchObject({ idn: "1395073848", authors: ["Kling, Marc-Uwe"] });
+		expect(illustrated).toMatchObject({
+			idn: "1395073848",
+			authors: ["Kling, Marc-Uwe"],
+			otherEditionIsbns: ["9783548074108", "9783843737876"],
+		});
 	});
 
 	it("ignores publisher homepages labelled Inhaltstext", () => {
@@ -182,6 +199,27 @@ describe("readBookRecord field rules", () => {
 			"9783442178582",
 		);
 		expect(readOne(TEXT_BAND).isbn).toBeNull();
+	});
+
+	it("reads other editions from 776: ISBNs from $z, DNB record numbers from $w", () => {
+		const book = readOne([
+			...TEXT_BAND,
+			["776", [["z", "978-3-442-17858-2"]]],
+			[
+				"776",
+				[
+					["w", "(DE-101)1208614460"],
+					["w", "(DE-600)2345678-9"],
+				],
+			],
+			["776", [["z", "3442178584"]]],
+			["776", [["z", "kein ISBN"]]],
+			["776", [["w", "(DE-101)1234567890"]]],
+			["776", [["w", "(DE-101)139261385x"]]],
+		]);
+		// Duplicates, other libraries' numbers, the record itself and junk are dropped.
+		expect(book.otherEditionIsbns).toEqual(["9783442178582"]);
+		expect(book.otherEditionIdns).toEqual(["1208614460", "139261385X"]);
 	});
 
 	it("prefers the publication statement for the year, then 260", () => {
@@ -299,6 +337,11 @@ describe("field coverage", () => {
 		expect(Object.keys(BOOK_RECORD_SOURCES).sort()).toEqual(Object.keys(methode()).sort());
 	});
 
+	it("has a shape check in the contract test for every field", () => {
+		expect(Object.keys(BOOK_RECORD_SHAPE).sort()).toEqual(Object.keys(methode()).sort());
+		for (const book of [methode(), ...kaenguru()]) expect(shapeMismatches(book)).toEqual([]);
+	});
+
 	it("sees every field filled by at least one real catalogue record", () => {
 		const records = [methode(), ...kaenguru()];
 		const empty = Object.keys(BOOK_RECORD_SOURCES).filter((key) =>
@@ -315,11 +358,13 @@ describe("field coverage", () => {
 
 describe("describeRecord", () => {
 	it("gives title, year, type, ISBN and link", () => {
-		expect(describeRecord(kaenguru()[2]!)).toBe(
-			"Die Känguru-Rebellion (2026), ebook, ISBN 9783843737876, https://d-nb.info/139261385X",
-		);
-		expect(describeRecord(readOne([["245", [["a", "Karte"]]]]))).toBe(
-			"Karte (no year), no content type / no carrier type, no ISBN, https://d-nb.info/1234567890",
-		);
+		expect(describeRecord(kaenguru()[2]!)).toEqual({
+			name: "Die Känguru-Rebellion (2026)",
+			details: "ebook, ISBN 9783843737876, https://d-nb.info/139261385X",
+		});
+		expect(describeRecord(readOne([["245", [["a", "Karte"]]]]))).toEqual({
+			name: "Karte (no year)",
+			details: "no content type / no carrier type, no ISBN, https://d-nb.info/1234567890",
+		});
 	});
 });
