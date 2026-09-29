@@ -1,0 +1,31 @@
+{
+	"adult": false,
+	"backdrop_path": "/q8NbQzkQYMmZ1pKQtZBgPQz6hBf.jpg",
+	"belongs_to_collection": null,
+	"budget": 0,
+	"genres": [
+		{ "id": 35, "name": "Komödie" },
+		{ "id": 18, "name": "Drama" }
+	],
+	"homepage": "",
+	"id": 800815,
+	"imdb_id": "tt8740768",
+	"origin_country": ["AR", "ES"],
+	"original_language": "es",
+	"original_title": "Competencia oficial",
+	"overview": "Eine exzentrische Regisseurin bringt zwei rivalisierende Schauspieler zusammen.",
+	"popularity": 3.5,
+	"poster_path": "/3VqKmtBv4sG1iVFYWKPrJmVZXYT.jpg",
+	"production_companies": [],
+	"production_countries": [],
+	"release_date": "2021-09-17",
+	"revenue": 0,
+	"runtime": 114,
+	"spoken_languages": [],
+	"status": "Released",
+	"tagline": "",
+	"title": "Der beste Film aller Zeiten",
+	"video": false,
+	"vote_average": 6.9,
+	"vote_count": 400
+}

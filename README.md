@@ -10,8 +10,10 @@ identifier, instead of a title search:
 Each note gets a fixed frontmatter schema and a local copy of the cover or
 poster.
 
-> **Status:** in development. The book import works; the TMDB import does
-> not exist yet. The full documentation follows once both importers work.
+> **Status:** in development. Both importers work; the full documentation
+> follows. For the movie and series import, set the notes folder and your
+> TMDB API read access token in the plugin settings, then run **Pinpoint
+> Media Notes: Import movie or series** and paste a TMDB link.
 
 ## Installing a development build
 

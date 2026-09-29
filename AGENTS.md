@@ -77,9 +77,14 @@ src/
     note.ts        file stem with type suffix, note builder
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
     importer.ts    importBook: the per-entry order, cover fallback chain; bookImportConfig
-  tmdb/          TMDB importer (planned, phase 3)
+  tmdb/          TMDB importer
+    input.ts       link parsing (movie/tv + id), canonicalUrl
+    api.ts         URLs, bearer headers, getJson (401 → ConfigError, NFC on read), fetchPoster, redact
+    entry.ts       response → TmdbEntry, TMDB_ENTRY_SOURCES (field-coverage table), translation fallback
+    note.ts        file stem, note builder
+    importer.ts    importTmdb: the per-entry order, poster; tmdbImportConfig
   ui/
-    import-modal.ts  text field modal, stays open for the next entry
+    import-modal.ts  text field modal, stays open for the next entry; closes on a ConfigError
     record-picker.ts choose one of several catalogue records; closing skips
 tests/
   __mocks__/obsidian.ts   hand-written fake of the obsidian API (aliased in vitest.config.ts)
@@ -87,6 +92,7 @@ tests/
   fixtures/               recorded API responses
   contract/               live-API checks, only via `npm run test:contract`
     book-shape.ts           BOOK_RECORD_SHAPE: per-field shape checks, typed against BookRecord
+    tmdb-shape.ts           TMDB_ENTRY_SHAPE: the same for TmdbEntry
     node-http.ts            HttpGet over fetch, because requestUrl exists only in Obsidian
 
 Tests run under jsdom, because the book importer uses the `DOMParser` that
@@ -218,6 +224,34 @@ Record decisions here with a short reason.
 - **Contract tests use `fetch`** through `tests/contract/node-http.ts`; the
   ESLint `fetch` ban is lifted for `tests/contract/` only. Production code
   still goes through `requestUrl`.
+- **TMDB token storage:** plaintext in `data.json`, shown as a masked
+  (password) field; chosen by the maintainer (2026-09-29) over Obsidian's
+  `SecretStorage`, which would keep it out of `data.json` but has to be
+  entered on every device. The field is a `render` item, because the
+  declarative `text` control cannot be masked.
+- **HTTP 401 from TMDB** is a `ConfigError`: no further entry can succeed,
+  so the import modal closes. Every other TMDB failure is per entry.
+- **API key instead of token:** a 32-character hex value in the token
+  setting is rejected by the config check; it is the API key shown next to
+  the token and does not work as a bearer token.
+- **Token redaction:** `getJson` removes the token from any lower-level
+  error message before it becomes an `EntryError`; own messages never contain
+  it. The token is sent to `api.themoviedb.org` only, never to the image host.
+- **Translation fallback** is triggered by an empty `overview` or a null
+  `poster_path` (the spec's triggers) and then fills every field that is
+  empty, keeping localised values. If the fallback request fails, the note is
+  written with what the first answer had and the failure is mentioned; a 401
+  still stops. The message names the fields taken from the default language.
+- **TMDB collision check** comes after the details (and fallback), before
+  `external_ids` and the poster: the file name may depend on the fallback.
+- **`external_ids` failure** fails the entry (unlike blurb and cover): the
+  IMDb id is identity data, and a retry is cheap.
+- **Poster:** extension from `poster_path` (lower-cased), as the spec says;
+  a `poster_path` that is not a plain `/<name>.<ext>` is not followed. The
+  download must be HTTP 200 with `image/*`; otherwise the note is written
+  without cover and the reason reported, as for DNB covers.
+- **TMDB contract tests** skip themselves without `TMDB_READ_ACCESS_TOKEN`,
+  except the 401 check, which needs no token.
 
 ## Before publishing to the community list
 

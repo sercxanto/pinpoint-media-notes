@@ -1,4 +1,4 @@
-import { PluginSettingTab, type App, type SettingDefinitionItem } from "obsidian";
+import { PluginSettingTab, type App, type Setting, type SettingDefinitionItem } from "obsidian";
 import { validateFolderInput } from "./core/paths";
 import type PinpointMediaNotesPlugin from "./main";
 
@@ -32,6 +32,10 @@ export const DEFAULT_SETTINGS: PinpointSettings = {
 };
 
 const POSTER_SIZES = ["w92", "w154", "w185", "w342", "w500", "w780", "original"];
+
+const TOKEN_NAME = "TMDB read access token";
+const TOKEN_DESC =
+	"The long API read access token from your TMDB account settings, not the short API key. Stored in the plugin's data.json, like all settings.";
 
 export class PinpointSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: PinpointMediaNotesPlugin) {
@@ -98,9 +102,9 @@ export class PinpointSettingTab extends PluginSettingTab {
 						},
 					},
 					{
-						name: "TMDB read access token",
-						desc: "The long API read access token from your TMDB account settings, not the short API key.",
-						control: { type: "text", key: "tmdbToken" },
+						name: TOKEN_NAME,
+						desc: TOKEN_DESC,
+						render: (setting) => this.renderTokenField(setting),
 					},
 					{
 						name: "Language",
@@ -119,5 +123,23 @@ export class PinpointSettingTab extends PluginSettingTab {
 				],
 			},
 		];
+	}
+
+	/**
+	 * A masked text field. The declarative `text` control shows its value in
+	 * clear, so this row is rendered by hand, over the same value accessors.
+	 */
+	renderTokenField(setting: Setting): void {
+		setting.setName(TOKEN_NAME).setDesc(TOKEN_DESC);
+		setting.addText((text) => {
+			text.inputEl.type = "password";
+			text.inputEl.autocomplete = "off";
+			text.inputEl.spellcheck = false;
+			const stored = this.getControlValue("tmdbToken");
+			text.setValue(typeof stored === "string" ? stored : "");
+			text.onChange((value) => {
+				void this.setControlValue("tmdbToken", value.trim());
+			});
+		});
 	}
 }

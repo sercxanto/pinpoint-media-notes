@@ -14,7 +14,7 @@ maintainer), `done` (committed).
 | 1     | Shared core                                                          | done   |
 | 2a    | Book import: input, MARC, mapping, note, import order                | done   |
 | 2b    | Book import: cover fallback, bot check, record picker, contract test | done   |
-| 3     | TMDB import                                                          | open   |
+| 3     | TMDB import                                                          | done   |
 | 4     | README complete, manual test checklist                               | open   |
 
 ## Phase 0: scaffold
@@ -131,14 +131,47 @@ another edition; its artwork may differ.` otherwise, with the
 
 ## Phase 3: TMDB import
 
-- [ ] URL parsing
-- [ ] Movie request; series with a second request for `external_ids`
-- [ ] Translation fallback: refill empty fields only
-- [ ] Field mapping, file name, note builder with golden test, field-coverage test
-- [ ] Poster download
-- [ ] Token masked in settings, never in messages; config check before import
-- [ ] Command and modal
-- [ ] Contract test against the live API (token from environment)
+- [x] URL parsing
+- [x] Movie request; series with a second request for `external_ids`
+- [x] Translation fallback: refill empty fields only
+- [x] Field mapping, file name, note builder with golden test, field-coverage test
+- [x] Poster download
+- [x] Token masked in settings, never in messages; config check before import
+- [x] Command and modal
+- [x] Contract test against the live API (token from environment)
+
+Notes:
+
+- Code in `src/tmdb/`: `input.ts` (link parsing, canonical `url`), `api.ts`
+  (URLs, bearer headers, `getJson` with NFC over the whole response,
+  `fetchPoster`, `redact`), `entry.ts` (field mapping, `TMDB_ENTRY_SOURCES`,
+  fallback merge), `note.ts` (stem, note), `importer.ts` (orchestration,
+  config check). The command is "Import movie or series"
+  (`import-movie-or-series`), using the same modal as the book import.
+- Order per entry: details in the configured language; the same request
+  without `language` if `overview` is empty or `poster_path` is null; name
+  and collision check; for a series `external_ids`; poster; note. A skipped
+  series costs at most two requests.
+- The import modal's `onSubmit` now resolves to `next` (clear the field),
+  `retry` (keep the input) or `stop` (close the modal). `stop` is used for a
+  `ConfigError` during an import, i.e. TMDB answering 401.
+- Token field: the declarative `text` control cannot be masked, so the token
+  row is a `render` item with a password input over
+  `getControlValue`/`setControlValue`. The obsidian mock gained those two.
+  The maintainer chose plaintext in `data.json` over Obsidian's
+  `SecretStorage` (see _Decisions_).
+- Fixtures in `tests/fixtures/tmdb/` have the shape of real responses; the
+  texts are the spec's example or invented, because TMDB overviews are user
+  contributions. The series fixtures (Breaking Bad, `de-DE` without
+  overview and poster, the untranslated answer, `external_ids`) cover the
+  fallback path.
+- Contract test `tests/contract/tmdb.contract.test.ts`: six checks need
+  `TMDB_READ_ACCESS_TOKEN` and are skipped without it; one (a bad token gets
+  401, read as `ConfigError`) needs no token. All seven passed live on
+  2026-09-29, run by the maintainer with a token (the dev container has
+  none).
+  Field shapes are in `tests/contract/tmdb-shape.ts`, typed against
+  `TmdbEntry`.
 
 ## Phase 4: documentation
 

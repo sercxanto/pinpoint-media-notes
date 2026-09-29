@@ -144,4 +144,20 @@ export class PluginSettingTab {
 	getSettingDefinitions(): SettingDefinitionItem[] {
 		return [];
 	}
+
+	/** Reads from `plugin.settings`, as Obsidian's default does. */
+	getControlValue(key: string): unknown {
+		return this.settings()[key];
+	}
+
+	/** Mutates and persists `plugin.settings`, as Obsidian's default does. */
+	setControlValue(key: string, value: unknown): Promise<void> {
+		const settings = this.settings();
+		settings[key] = value;
+		return this.plugin.saveData(settings);
+	}
+
+	private settings(): Record<string, unknown> {
+		return (this.plugin as unknown as { settings: Record<string, unknown> }).settings;
+	}
 }

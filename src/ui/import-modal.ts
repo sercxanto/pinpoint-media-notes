@@ -1,14 +1,17 @@
 import { Modal, Setting, type App, type TextComponent } from "obsidian";
 
+/**
+ * What the modal does after an entry: `next` clears the field for the next
+ * entry, `retry` keeps the input for correcting a typo, `stop` closes the
+ * modal because no entry can succeed until a setting is fixed.
+ */
+export type SubmitOutcome = "next" | "retry" | "stop";
+
 export interface ImportModalOptions {
 	title: string;
 	placeholder: string;
-	/**
-	 * Imports one entry; reporting is up to the caller. Resolves to true when
-	 * the field should be cleared for the next entry, false to keep the input
-	 * for correcting a typo.
-	 */
-	onSubmit(input: string): Promise<boolean>;
+	/** Imports one entry; reporting is up to the caller. */
+	onSubmit(input: string): Promise<SubmitOutcome>;
 }
 
 /**
@@ -60,7 +63,9 @@ export class ImportModal extends Modal {
 		this.busy = true;
 		text.setDisabled(true);
 		try {
-			if (await this.options.onSubmit(input)) text.setValue("");
+			const outcome = await this.options.onSubmit(input);
+			if (outcome === "next") text.setValue("");
+			if (outcome === "stop") this.close();
 		} finally {
 			this.busy = false;
 			text.setDisabled(false);
