@@ -69,11 +69,25 @@ src/
   io/
     http.ts        httpGet: the only caller of requestUrl (HttpGet type for fakes)
     vault.ts       VaultFiles interface and its implementation over app.vault
-  book/, tmdb/   the two importers (planned, phases 2 and 3)
-  ui/            modals (planned)
+  book/          book importer
+    input.ts       ISBN/IDN/link parsing, check digits
+    marc.ts        SRU response → MARC records (DOMParser), NFC and marker stripping on read
+    record.ts      MARC → BookRecord, BOOK_RECORD_SOURCES (field-coverage table)
+    blurb.ts       blurb HTML → text, truncation
+    note.ts        file stem with type suffix, note builder
+    dnb.ts         SRU, blurb and cover requests (over HttpGet)
+    importer.ts    importBook: the per-entry order; bookImportConfig
+  tmdb/          TMDB importer (planned, phase 3)
+  ui/
+    import-modal.ts  text field modal, stays open for the next entry
 tests/
   __mocks__/obsidian.ts   hand-written fake of the obsidian API (aliased in vitest.config.ts)
+  helpers.ts              fixtures, fake HttpGet and VaultFiles, MARC record builder
+  fixtures/               recorded API responses
   contract/               live-API checks, only via `npm run test:contract`
+
+Tests run under jsdom, because the book importer uses the `DOMParser` that
+Obsidian provides.
 ```
 
 Principles:
@@ -157,6 +171,31 @@ Record decisions here with a short reason.
   settings and is reported when an import starts.
 - **Collision check** uses `vault.adapter.exists`, which asks the file system,
   so a case-insensitive file system reports a clash the vault index would miss.
+- **XML and HTML parsing** use the `DOMParser` built into Obsidian, no
+  library. Tests run under jsdom.
+- **10 characters with a wrong ISBN-10 check digit** are rejected as a typo,
+  not looked up as IDN: IDNs use the same check digit scheme, so such an input
+  is neither.
+- **Input extras:** a leading `ISBN`, `ISBN-10:` or `ISBN-13:` is ignored;
+  `d-nb.info` links may carry extra path, query or fragment. `d-nb.info/gnd/…`
+  (authority records) is rejected.
+- **Collision check comes right after the lookup**, before the blurb request,
+  so a skipped entry costs one request only.
+- **Existing cover:** the extension comes from the response, so before any
+  download the importer looks for `<stem>.<ext>` for every accepted image
+  type (`jpg`, `png`, `gif`, `webp`, `avif`) and reuses the first one found.
+  Other `image/*` types are reported as unsupported rather than guessed.
+- **Blurb failure** (HTTP error, network) leaves `description` empty and is
+  mentioned in the result; it does not skip the entry. Same for the cover.
+- **Blurb host:** only `services.dnb.de` counts as the DNB's own
+  `Inhaltstext` link; publishers' homepages carry the same label.
+- **Year:** `264` with second indicator `1` (publication) first, then other
+  `264`s (copyright, …), then `260`.
+- **ISBN:** the first ISBN-13 in `020 $a`; a record with only an ISBN-10 gets
+  it converted, because the cover service needs ISBN-13.
+- **Series index:** the first number in `490 $v`, else `830 $v`; a decimal
+  comma becomes a dot.
+- **Authors** are de-duplicated (a name can appear in `100` and `700`).
 
 ## Before publishing to the community list
 

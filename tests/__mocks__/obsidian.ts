@@ -3,13 +3,13 @@
 // the plugin's actual usage and extend it only when production code starts
 // using something new.
 
-import type { RequestUrlParam, RequestUrlResponse, SettingDefinitionItem } from "obsidian";
+import type { Command, RequestUrlParam, RequestUrlResponse, SettingDefinitionItem } from "obsidian";
 
 /** Every `new Notice(...)` lands here so tests can assert on user messages. */
 export const notices: string[] = [];
 
 export class Notice {
-	constructor(message: string | DocumentFragment) {
+	constructor(message: string | DocumentFragment, _duration?: number) {
 		notices.push(typeof message === "string" ? message : (message.textContent ?? ""));
 	}
 }
@@ -79,6 +79,7 @@ export class Plugin {
 	/** What `saveData` last wrote and `loadData` returns. */
 	data: unknown = null;
 	settingTabs: PluginSettingTab[] = [];
+	commands: Command[] = [];
 
 	constructor(app: App) {
 		this.app = app;
@@ -96,7 +97,33 @@ export class Plugin {
 	addSettingTab(tab: PluginSettingTab): void {
 		this.settingTabs.push(tab);
 	}
+
+	addCommand(command: Command): Command {
+		this.commands.push(command);
+		return command;
+	}
 }
+
+/** Records whether it is open; the UI itself is not rendered in tests. */
+export class Modal {
+	app: App;
+	isOpen = false;
+
+	constructor(app: App) {
+		this.app = app;
+	}
+
+	open(): void {
+		this.isOpen = true;
+	}
+
+	close(): void {
+		this.isOpen = false;
+	}
+}
+
+/** Referenced by the import modal's `onOpen`, which tests do not render. */
+export class Setting {}
 
 export class PluginSettingTab {
 	app: App;

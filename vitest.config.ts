@@ -10,6 +10,9 @@ export default defineConfig({
 		},
 	},
 	test: {
+		// Obsidian runs in a browser context; the book importer uses its
+		// DOMParser for MARC-XML and blurb HTML.
+		environment: "jsdom",
 		include: ["tests/**/*.test.ts"],
 		// Live-API checks only run via `npm run test:contract`.
 		exclude: ["tests/contract/**", "node_modules/**"],

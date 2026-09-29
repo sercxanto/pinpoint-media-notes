@@ -1,0 +1,1299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/"><version>1.1</version><numberOfRecords>5</numberOfRecords><records><record><recordSchema>MARC21-xml</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">
+    <leader>00000pim a2200000 c 4500</leader>
+    <controlfield tag="001">1379107830</controlfield>
+    <controlfield tag="003">DE-101</controlfield>
+    <controlfield tag="005">20260415220046.0</controlfield>
+    <controlfield tag="007">sd||||||||||||</controlfield>
+    <controlfield tag="007">co||||||||||||</controlfield>
+    <controlfield tag="008">251016s2026    gw |||||q|||||||||||ger  </controlfield>
+    <datafield tag="015" ind1=" " ind2=" ">
+      <subfield code="a">26,A16</subfield>
+      <subfield code="z">25,N43</subfield>
+      <subfield code="2">dnb</subfield>
+    </datafield>
+    <datafield tag="016" ind1="7" ind2=" ">
+      <subfield code="2">DE-101</subfield>
+      <subfield code="a">1379107830</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9783957133373</subfield>
+      <subfield code="c">: EUR 16.99 (DE) (freier Preis), EUR 17.50 (AT) (freier Preis), CHF 22.90 (freier Preis)</subfield>
+      <subfield code="9">978-3-95713-337-3</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3957133378</subfield>
+      <subfield code="9">3-95713-337-8</subfield>
+    </datafield>
+    <datafield tag="024" ind1="3" ind2=" ">
+      <subfield code="a">9783957133373</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DE-599)DNB1379107830</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1585489053</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">1245</subfield>
+      <subfield code="b">ger</subfield>
+      <subfield code="c">DE-101</subfield>
+      <subfield code="d">9999</subfield>
+      <subfield code="e">rda</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">ger</subfield>
+    </datafield>
+    <datafield tag="044" ind1=" " ind2=" ">
+      <subfield code="c">XA-DE-HH</subfield>
+    </datafield>
+    <datafield tag="082" ind1="7" ind2="4">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">830</subfield>
+      <subfield code="a">B</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23sdnb</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="0">(DE-588)13796398X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/13796398X</subfield>
+      <subfield code="0">(DE-101)13796398X</subfield>
+      <subfield code="0">(isni)0000000063258704</subfield>
+      <subfield code="a">Kling, Marc-Uwe</subfield>
+      <subfield code="d">1982-</subfield>
+      <subfield code="e">Verfasser</subfield>
+      <subfield code="4">aut</subfield>
+      <subfield code="e">Erzähler</subfield>
+      <subfield code="4">nrt</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">&#152;Die&#156; Känguru-Rebellion</subfield>
+      <subfield code="c">Marc-Uwe Kling</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">Ungekürzte Live-Lesung vom Autor</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">Hamburg</subfield>
+      <subfield code="b">Hörbuch Hamburg HHV GmbH</subfield>
+      <subfield code="c">[2026]</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">6 CDs</subfield>
+      <subfield code="c">155 g</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">gesprochenes Wort</subfield>
+      <subfield code="b">spw</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">audio</subfield>
+      <subfield code="b">s</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">Audiodisk</subfield>
+      <subfield code="b">sd</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform)CD-Audio</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))CD Standard Audio Format</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000: FICTION / Humorous / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(VLB-WN)5180: Audio-CD, Kassette / Belletristik/Comic, Cartoon, Humor, Satire</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Känguru</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kleinkünstler</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Aufstand</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolte</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolution</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kommunismus</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Links</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Zustände</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Gesellschaft</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Poetry-Slam</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Lesebühne</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)4522869-3</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4522869-3</subfield>
+      <subfield code="0">(DE-101)955174880</subfield>
+      <subfield code="a">CD</subfield>
+      <subfield code="2">gnd-carrier</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)4329497-2</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4329497-2</subfield>
+      <subfield code="0">(DE-101)940089343</subfield>
+      <subfield code="a">Hörbuch</subfield>
+      <subfield code="2">gnd-content</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)1071854844</subfield>
+      <subfield code="0">https://d-nb.info/gnd/1071854844</subfield>
+      <subfield code="0">(DE-101)1071854844</subfield>
+      <subfield code="a">Fiktionale Darstellung</subfield>
+      <subfield code="2">gnd-content</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)1010836455</subfield>
+      <subfield code="a">Humor, Satire</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="710" ind1="2" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="0">(DE-588)106596448X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/106596448X</subfield>
+      <subfield code="0">(DE-101)106596448X</subfield>
+      <subfield code="a">Hörbuch Hamburg HHV GmbH</subfield>
+      <subfield code="e">Verlag</subfield>
+      <subfield code="4">pbl</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Online-Ausgabe</subfield>
+      <subfield code="z">9783844944549</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">DE-101a</subfield>
+      <subfield code="a">DE-101b</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">https://services.dnb.de/plus/idn/1379107830/blurb/</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">http://www.hoerbuch-hamburg.de/</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">dnb</subfield>
+      <subfield code="d">20260407</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">adb</subfield>
+      <subfield code="d">20251016</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#adb</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">dnb</subfield>
+      <subfield code="d">20260408</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb</subfield>
+    </datafield>
+    <datafield tag="925" ind1="r" ind2=" ">
+      <subfield code="a">ra</subfield>
+    </datafield>
+    <datafield tag="926" ind1="1" ind2=" ">
+      <subfield code="a">FU</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="q">Publisher</subfield>
+      <subfield code="v">1.6</subfield>
+      <subfield code="x">Belletristik: Humor</subfield>
+    </datafield>
+    <datafield tag="926" ind1="2" ind2=" ">
+      <subfield code="a">FB</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="q">Publisher</subfield>
+      <subfield code="v">1.6</subfield>
+      <subfield code="x">Belletristik: allgemein und literarisch</subfield>
+    </datafield>
+  </record></recordData><recordPosition>1</recordPosition></record><record><recordSchema>MARC21-xml</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">
+    <leader>00000pam a2200000 c 4500</leader>
+    <controlfield tag="001">1379188067</controlfield>
+    <controlfield tag="003">DE-101</controlfield>
+    <controlfield tag="005">20260922223754.0</controlfield>
+    <controlfield tag="007">tu</controlfield>
+    <controlfield tag="008">251017s2026    gw ||||| |||| 00||||ger  </controlfield>
+    <datafield tag="015" ind1=" " ind2=" ">
+      <subfield code="a">26,A40</subfield>
+      <subfield code="z">25,N43</subfield>
+      <subfield code="2">dnb</subfield>
+    </datafield>
+    <datafield tag="016" ind1="7" ind2=" ">
+      <subfield code="2">DE-101</subfield>
+      <subfield code="a">1379188067</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9783548074108</subfield>
+      <subfield code="c">Broschur : EUR 14.99 (DE), EUR 15.50 (AT), CHF 16.90 (freier Preis)</subfield>
+      <subfield code="9">978-3-548-07410-8</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3548074103</subfield>
+      <subfield code="9">3-548-07410-3</subfield>
+    </datafield>
+    <datafield tag="024" ind1="3" ind2=" ">
+      <subfield code="a">9783548074108</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DE-599)DNB1379188067</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1546487419</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">1145</subfield>
+      <subfield code="b">ger</subfield>
+      <subfield code="c">DE-101</subfield>
+      <subfield code="d">9999</subfield>
+      <subfield code="e">rda</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">ger</subfield>
+    </datafield>
+    <datafield tag="044" ind1=" " ind2=" ">
+      <subfield code="c">XA-DE-BE</subfield>
+    </datafield>
+    <datafield tag="082" ind1="7" ind2="4">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">830</subfield>
+      <subfield code="a">B</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23sdnb</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="0">(DE-588)13796398X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/13796398X</subfield>
+      <subfield code="0">(DE-101)13796398X</subfield>
+      <subfield code="0">(isni)0000000063258704</subfield>
+      <subfield code="a">Kling, Marc-Uwe</subfield>
+      <subfield code="d">1982-</subfield>
+      <subfield code="e">Verfasser</subfield>
+      <subfield code="4">aut</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="240" ind1="1" ind2="0">
+      <subfield code="0">(DE-588)1403294852</subfield>
+      <subfield code="0">https://d-nb.info/gnd/1403294852</subfield>
+      <subfield code="0">(DE-101)1403294852</subfield>
+      <subfield code="a">&#152;Die&#156; Känguru-Rebellion</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">&#152;Die&#156; Känguru-Rebellion</subfield>
+      <subfield code="c">Marc-Uwe Kling</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">Originalausgabe im Ullstein Taschenbuch, 1. Auflage</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">Berlin</subfield>
+      <subfield code="b">Ullstein</subfield>
+      <subfield code="c">März 2026</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">280 Seiten</subfield>
+      <subfield code="c">19 cm, 277 g</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">Text</subfield>
+      <subfield code="b">txt</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">ohne Hilfsmittel zu benutzen</subfield>
+      <subfield code="b">n</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">Band</subfield>
+      <subfield code="b">nc</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform)Paperback / softback</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))Taschenbuch</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)HUM000000: HUMOR / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(VLB-WN)2185: Taschenbuch / Belletristik/Comic, Cartoon, Humor, Satire/Humor, Satire, Kabarett</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000: FICTION / Humorous / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Känguru</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kleinkünstler</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Aufstand</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolte</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolution</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kommunismus</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Links</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Zustände</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Gesellschaft</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Poetry Slam</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Lesebühne</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)HUM000000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)1071854844</subfield>
+      <subfield code="0">https://d-nb.info/gnd/1071854844</subfield>
+      <subfield code="0">(DE-101)1071854844</subfield>
+      <subfield code="a">Fiktionale Darstellung</subfield>
+      <subfield code="2">gnd-content</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)1010836455</subfield>
+      <subfield code="a">Humor, Satire</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="710" ind1="2" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="0">(DE-588)16052082-4</subfield>
+      <subfield code="0">https://d-nb.info/gnd/16052082-4</subfield>
+      <subfield code="0">(DE-101)999436384</subfield>
+      <subfield code="a">Ullstein Taschenbuchverlag</subfield>
+      <subfield code="e">Verlag</subfield>
+      <subfield code="4">pbl</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Online-Ausgabe</subfield>
+      <subfield code="a">Kling, Marc-Uwe, 1982-</subfield>
+      <subfield code="t">&#152;Die&#156; Känguru-Rebellion</subfield>
+      <subfield code="d">Berlin : Ullstein Ebooks, 2026</subfield>
+      <subfield code="h">Online-Ressource, 224 Seiten</subfield>
+      <subfield code="w">(DE-101)139261385X</subfield>
+      <subfield code="b">1. Auflage</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">DE-101a</subfield>
+      <subfield code="a">DE-101b</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">https://services.dnb.de/plus/idn/1379188067/blurb/</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">https://www.ullstein.de</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">dnb</subfield>
+      <subfield code="d">20260921</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">uml</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#uml</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">dnb</subfield>
+      <subfield code="d">20260922</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb</subfield>
+    </datafield>
+    <datafield tag="925" ind1="r" ind2=" ">
+      <subfield code="a">ra</subfield>
+    </datafield>
+    <datafield tag="926" ind1="1" ind2=" ">
+      <subfield code="a">WH</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="q">Publisher</subfield>
+      <subfield code="v">1.6</subfield>
+      <subfield code="x">Humor</subfield>
+    </datafield>
+  </record></recordData><recordPosition>2</recordPosition></record><record><recordSchema>MARC21-xml</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">
+    <leader>00000nam a2200000uc 4500</leader>
+    <controlfield tag="001">139261385X</controlfield>
+    <controlfield tag="003">DE-101</controlfield>
+    <controlfield tag="005">20260904224455.0</controlfield>
+    <controlfield tag="007">cr||||||||||||</controlfield>
+    <controlfield tag="008">260311s2026    gw |||||o|||| 00||||ger  </controlfield>
+    <datafield tag="015" ind1=" " ind2=" ">
+      <subfield code="a">26,O04</subfield>
+      <subfield code="2">dnb</subfield>
+    </datafield>
+    <datafield tag="016" ind1="7" ind2=" ">
+      <subfield code="2">DE-101</subfield>
+      <subfield code="a">139261385X</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9783843737876</subfield>
+      <subfield code="9">978-3-8437-3787-6</subfield>
+    </datafield>
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="2">urn</subfield>
+      <subfield code="a">urn:nbn:de:101:1-2603110611252.027585254957</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DE-599)DNB139261385X</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1583823252</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">1140</subfield>
+      <subfield code="b">ger</subfield>
+      <subfield code="c">DE-101</subfield>
+      <subfield code="d">9999</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">ger</subfield>
+    </datafield>
+    <datafield tag="044" ind1=" " ind2=" ">
+      <subfield code="c">XA-DE-BE</subfield>
+    </datafield>
+    <datafield tag="082" ind1="7" ind2="4">
+      <subfield code="8">4\p</subfield>
+      <subfield code="a">830</subfield>
+      <subfield code="a">B</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23sdnb</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="0">(DE-588)13796398X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/13796398X</subfield>
+      <subfield code="0">(DE-101)13796398X</subfield>
+      <subfield code="0">(isni)0000000063258704</subfield>
+      <subfield code="a">Kling, Marc-Uwe</subfield>
+      <subfield code="d">1982-</subfield>
+      <subfield code="e">Verfasser</subfield>
+      <subfield code="4">aut</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">&#152;Die&#156; Känguru-Rebellion</subfield>
+      <subfield code="b">5</subfield>
+      <subfield code="c">Marc-Uwe Kling</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">1. Auflage</subfield>
+    </datafield>
+    <datafield tag="256" ind1=" " ind2=" ">
+      <subfield code="a">5877589 Bytes</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">Berlin</subfield>
+      <subfield code="b">Ullstein Ebooks</subfield>
+      <subfield code="c">2026</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">Online-Ressource, 224 Seiten</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">Text</subfield>
+      <subfield code="b">txt</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">Computermedien</subfield>
+      <subfield code="b">c</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">Online-Ressource</subfield>
+      <subfield code="b">cr</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="490" ind1="1" ind2=" ">
+      <subfield code="a">Die Känguru-Werke</subfield>
+      <subfield code="v">5</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit, Version der Online-Ressource: EPUB 3.0</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Accessibility summary;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Epub Accessibility Specification 1.1;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Table of contents navigation;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Single logical reading order;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Short alternative textual descriptions;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Language tagging provided;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Use of color is not sole means of conveying information;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Use of high contrast between text and background color;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: ARIA roles provided;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: Landmark navigation;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: WCAG v2.2;</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Hinweis zur Barrierefreiheit der Online-Ressource: WCAG level AA;</subfield>
+    </datafield>
+    <datafield tag="583" ind1="1" ind2=" ">
+      <subfield code="a">Archivierung/Langzeitarchivierung gewährleistet</subfield>
+      <subfield code="5">DE-101</subfield>
+      <subfield code="2">pdager</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform)Digital download</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))EPUB</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)HUM000000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(VLB-WN)9185</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Känguru</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kleinkünstler</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Aufstand</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolte</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolution</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kommunismus</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Links</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Zustände</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Gesellschaft</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Poetry Slam</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Lesebühne</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)HUM000000: HUMOR / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000: FICTION / Humorous / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Zielgruppe)ab 14 bis 99 Jahre</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Illustration</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Abbildungen</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">illustriert</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Vorwort</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Farbschnitt</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)1010836455</subfield>
+      <subfield code="a">Humor, Satire</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)101071841X</subfield>
+      <subfield code="a">Jugendbücher ab 12 Jahre</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="710" ind1="2" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="0">(DE-588)16052082-4</subfield>
+      <subfield code="0">https://d-nb.info/gnd/16052082-4</subfield>
+      <subfield code="0">(DE-101)999436384</subfield>
+      <subfield code="a">Ullstein Taschenbuchverlag</subfield>
+      <subfield code="e">Verlag</subfield>
+      <subfield code="4">pbl</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Druck-Ausgabe</subfield>
+      <subfield code="a">Kling, Marc-Uwe, 1982-</subfield>
+      <subfield code="t">&#152;Die&#156; Känguru-Rebellion</subfield>
+      <subfield code="d">Berlin : Ullstein, 2026</subfield>
+      <subfield code="h">280 Seiten</subfield>
+      <subfield code="w">(DE-101)1379188067</subfield>
+      <subfield code="b">1. Auflage</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2="0">
+      <subfield code="a">Die Känguru-Werke</subfield>
+      <subfield code="v">5</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">DE-101a</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="0">
+      <subfield code="u">https://nbn-resolving.org/urn:nbn:de:101:1-2603110611252.027585254957</subfield>
+      <subfield code="x">Resolving-System</subfield>
+    </datafield>
+    <datafield tag="856" ind1=" " ind2="0">
+      <subfield code="u">https://d-nb.info/139261385X/34</subfield>
+      <subfield code="x">Langzeitarchivierung Nationalbibliothek</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2=" ">
+      <subfield code="q">epub</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2=" ">
+      <subfield code="u">https://www.ullstein-buchverlage.de/</subfield>
+      <subfield code="x">Verlag</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">dnb-pa</subfield>
+      <subfield code="d">20260904</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb-pa</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">uml-pa</subfield>
+      <subfield code="d">20260312</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#uml-pa</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">4\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="925" ind1="r" ind2=" ">
+      <subfield code="a">ro</subfield>
+      <subfield code="a">ra</subfield>
+    </datafield>
+    <datafield tag="926" ind1="1" ind2=" ">
+      <subfield code="a">WH</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="v">1.6</subfield>
+    </datafield>
+    <datafield tag="927" ind1=" " ind2=" ">
+      <subfield code="a">182943744</subfield>
+    </datafield>
+  </record></recordData><recordPosition>3</recordPosition></record><record><recordSchema>MARC21-xml</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">
+    <leader>00000nim a2200000uc 4500</leader>
+    <controlfield tag="001">1392644321</controlfield>
+    <controlfield tag="003">DE-101</controlfield>
+    <controlfield tag="005">20260409160856.0</controlfield>
+    <controlfield tag="007">s|||||||||||||</controlfield>
+    <controlfield tag="007">cr||||||||||||</controlfield>
+    <controlfield tag="008">260311s2026    gw |||||o|||||||||||ger  </controlfield>
+    <datafield tag="015" ind1=" " ind2=" ">
+      <subfield code="a">26,O04</subfield>
+      <subfield code="2">dnb</subfield>
+    </datafield>
+    <datafield tag="016" ind1="7" ind2=" ">
+      <subfield code="2">DE-101</subfield>
+      <subfield code="a">1392644321</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9783844944549</subfield>
+      <subfield code="9">978-3-8449-4454-9</subfield>
+    </datafield>
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="2">urn</subfield>
+      <subfield code="a">urn:nbn:de:101:1-2603111313417.876634237947</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DE-599)DNB1392644321</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1583889279</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">1140</subfield>
+      <subfield code="b">ger</subfield>
+      <subfield code="c">DE-101</subfield>
+      <subfield code="d">9999</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">ger</subfield>
+    </datafield>
+    <datafield tag="044" ind1=" " ind2=" ">
+      <subfield code="c">XA-DE-HH</subfield>
+    </datafield>
+    <datafield tag="082" ind1="7" ind2="4">
+      <subfield code="8">5\p</subfield>
+      <subfield code="a">830</subfield>
+      <subfield code="a">B</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23sdnb</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">Marc-Uwe Kling, Marc-Uwe</subfield>
+      <subfield code="e">Künstler</subfield>
+      <subfield code="4">art</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">&#152;Die&#156; Känguru-Rebellion (Die Känguru-Werke 5)</subfield>
+      <subfield code="b">5</subfield>
+      <subfield code="c">Marc-Uwe Kling</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">1. Auflage, ungekürzte Ausgabe</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="4">
+      <subfield code="c">2026</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="4">
+      <subfield code="c">2026</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">Hamburg</subfield>
+      <subfield code="b">Hörbuch Hamburg</subfield>
+      <subfield code="c">2026</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">Online-Ressource</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">gesprochenes Wort</subfield>
+      <subfield code="b">spw</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">Computermedien</subfield>
+      <subfield code="b">c</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">Online-Ressource</subfield>
+      <subfield code="b">cr</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="490" ind1="1" ind2=" ">
+      <subfield code="a">Die Känguru-Werke</subfield>
+      <subfield code="v">5</subfield>
+    </datafield>
+    <datafield tag="583" ind1="1" ind2=" ">
+      <subfield code="a">Archivierung/Langzeitarchivierung gewährleistet</subfield>
+      <subfield code="5">DE-101</subfield>
+      <subfield code="2">pdager</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform)Downloadable audio file</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))MP3</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(VLB-WN)9185</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC000000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Känguru</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kleinkünstler</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Aufstand</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolte</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolution</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kommunismus</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Links</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Zustände</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Gesellschaft</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Poetry-Slam</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Lesebühne</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)1010836455</subfield>
+      <subfield code="a">Humor, Satire</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="0">(DE-588)13796398X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/13796398X</subfield>
+      <subfield code="0">(DE-101)13796398X</subfield>
+      <subfield code="0">(isni)0000000063258704</subfield>
+      <subfield code="a">Kling, Marc-Uwe</subfield>
+      <subfield code="d">1982-</subfield>
+      <subfield code="e">Verfasser</subfield>
+      <subfield code="4">aut</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="8">4\p</subfield>
+      <subfield code="0">(DE-588)13796398X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/13796398X</subfield>
+      <subfield code="0">(DE-101)13796398X</subfield>
+      <subfield code="0">(isni)0000000063258704</subfield>
+      <subfield code="a">Kling, Marc-Uwe</subfield>
+      <subfield code="d">1982-</subfield>
+      <subfield code="e">Erzähler</subfield>
+      <subfield code="4">nrt</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Druck-Ausgabe</subfield>
+      <subfield code="z">9783957133373</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2="0">
+      <subfield code="a">Die Känguru-Werke</subfield>
+      <subfield code="v">5</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">DE-101a</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="0">
+      <subfield code="u">https://nbn-resolving.org/urn:nbn:de:101:1-2603111313417.876634237947</subfield>
+      <subfield code="x">Resolving-System</subfield>
+    </datafield>
+    <datafield tag="856" ind1=" " ind2="0">
+      <subfield code="u">https://d-nb.info/1392644321/34</subfield>
+      <subfield code="x">Langzeitarchivierung Nationalbibliothek</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2=" ">
+      <subfield code="q">mp3</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2=" ">
+      <subfield code="u">http://www.hoerbuch-hamburg.de</subfield>
+      <subfield code="x">Verlag</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">4\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">5\p</subfield>
+      <subfield code="a">npi</subfield>
+      <subfield code="d">20260311</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#npi</subfield>
+    </datafield>
+    <datafield tag="925" ind1="r" ind2=" ">
+      <subfield code="a">ro</subfield>
+      <subfield code="a">ra</subfield>
+    </datafield>
+    <datafield tag="926" ind1="1" ind2=" ">
+      <subfield code="a">FU</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="v">1.6</subfield>
+    </datafield>
+    <datafield tag="926" ind1="2" ind2=" ">
+      <subfield code="a">FB</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="v">1.6</subfield>
+    </datafield>
+    <datafield tag="927" ind1=" " ind2=" ">
+      <subfield code="a">306675716</subfield>
+    </datafield>
+  </record></recordData><recordPosition>4</recordPosition></record><record><recordSchema>MARC21-xml</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">
+    <leader>00000nam a22000008c 4500</leader>
+    <controlfield tag="001">1395073848</controlfield>
+    <controlfield tag="003">DE-101</controlfield>
+    <controlfield tag="005">20260904224455.0</controlfield>
+    <controlfield tag="007">tu</controlfield>
+    <controlfield tag="008">260403s2026    gw ||||| |||| 00||||ger  </controlfield>
+    <datafield tag="015" ind1=" " ind2=" ">
+      <subfield code="a">26,N15</subfield>
+      <subfield code="2">dnb</subfield>
+    </datafield>
+    <datafield tag="016" ind1="7" ind2=" ">
+      <subfield code="2">DE-101</subfield>
+      <subfield code="a">1395073848</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9783690860208</subfield>
+      <subfield code="c">Broschur : EUR 16.99 (DE), EUR 17.50 (AT), CHF 19.50 (freier Preis)</subfield>
+      <subfield code="9">978-3-69086-020-8</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3690860202</subfield>
+      <subfield code="9">3-69086-020-2</subfield>
+    </datafield>
+    <datafield tag="024" ind1="3" ind2=" ">
+      <subfield code="a">9783690860208</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DE-599)DNB1395073848</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1583712116</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">1145</subfield>
+      <subfield code="b">ger</subfield>
+      <subfield code="c">DE-101</subfield>
+      <subfield code="d">9999</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">ger</subfield>
+    </datafield>
+    <datafield tag="044" ind1=" " ind2=" ">
+      <subfield code="c">XA-DE-BE</subfield>
+    </datafield>
+    <datafield tag="082" ind1="7" ind2="4">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">830</subfield>
+      <subfield code="a">B</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23sdnb</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="0">(DE-588)13796398X</subfield>
+      <subfield code="0">https://d-nb.info/gnd/13796398X</subfield>
+      <subfield code="0">(DE-101)13796398X</subfield>
+      <subfield code="0">(isni)0000000063258704</subfield>
+      <subfield code="a">Kling, Marc-Uwe</subfield>
+      <subfield code="d">1982-</subfield>
+      <subfield code="e">Verfasser</subfield>
+      <subfield code="4">aut</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">&#152;Die&#156; Känguru-Rebellion (Die Känguru-Werke 5)</subfield>
+      <subfield code="b">Illustrierte Ausgabe | Mit 66 Illustrationen von Bernd Kissel</subfield>
+      <subfield code="c">Marc-Uwe Kling</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">1. Auflage</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">Berlin</subfield>
+      <subfield code="b">Ullstein Jugendbuch</subfield>
+      <subfield code="c">2026</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">336 Seiten</subfield>
+      <subfield code="b">40 Illustrationen</subfield>
+      <subfield code="c">20.5 cm, 397 g</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">Text</subfield>
+      <subfield code="b">txt</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">ohne Hilfsmittel zu benutzen</subfield>
+      <subfield code="b">n</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">Band</subfield>
+      <subfield code="b">nc</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="490" ind1="1" ind2=" ">
+      <subfield code="a">Die Känguru-Werke</subfield>
+      <subfield code="v">5</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform)Paperback / softback</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))Paperback</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Zielgruppe)ab 14 bis 99 Jahre</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)HUM000000: HUMOR / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(VLB-WN)1185: Hardcover, Softcover / Belletristik/Comic, Cartoon, Humor, Satire/Humor, Satire, Kabarett</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000: FICTION / Humorous / General</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Känguru</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kleinkünstler</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Aufstand</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolte</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Revolution</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Kommunismus</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Links</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Zustände</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Gesellschaft</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Poetry Slam</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Lesebühne</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Illustration</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Abbildungen</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">illustriert</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Vorwort</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Farbschnitt</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)HUM000000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)FIC016000</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)101071841X</subfield>
+      <subfield code="a">Jugendbücher ab 12 Jahre</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="0">(DE-101)1010836455</subfield>
+      <subfield code="a">Humor, Satire</subfield>
+      <subfield code="2">gatbeg</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="0">(DE-588)133946061</subfield>
+      <subfield code="0">https://d-nb.info/gnd/133946061</subfield>
+      <subfield code="0">(DE-101)133946061</subfield>
+      <subfield code="0">(isni)0000000463601276</subfield>
+      <subfield code="a">Kissel, Bernd</subfield>
+      <subfield code="d">1978-</subfield>
+      <subfield code="e">Illustrator</subfield>
+      <subfield code="4">ill</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Druck-Ausgabe</subfield>
+      <subfield code="z">9783548074108</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Online-Ausgabe</subfield>
+      <subfield code="z">9783843737876</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2="0">
+      <subfield code="a">Die Känguru-Werke</subfield>
+      <subfield code="v">5</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">https://services.dnb.de/plus/idn/1395073848/blurb/</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">https://www.ullstein.de</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">vlb</subfield>
+      <subfield code="d">20260403</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#vlb</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">vlb</subfield>
+      <subfield code="d">20260403</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#vlb</subfield>
+    </datafield>
+    <datafield tag="883" ind1="1" ind2=" ">
+      <subfield code="8">3\p</subfield>
+      <subfield code="a">vlb</subfield>
+      <subfield code="d">20260403</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#vlb</subfield>
+    </datafield>
+    <datafield tag="925" ind1="r" ind2=" ">
+      <subfield code="a">ra</subfield>
+    </datafield>
+    <datafield tag="925" ind1="w" ind2=" ">
+      <subfield code="a">f</subfield>
+    </datafield>
+    <datafield tag="926" ind1="1" ind2=" ">
+      <subfield code="a">WH</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="q">Publisher</subfield>
+      <subfield code="v">1.6</subfield>
+      <subfield code="x">Humor</subfield>
+    </datafield>
+  </record></recordData><recordPosition>5</recordPosition></record></records><echoedSearchRetrieveRequest><version>1.1</version><query>tit=Känguru-Rebellion</query><xQuery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/><maximumRecords>10</maximumRecords><recordSchema>MARC21-xml</recordSchema></echoedSearchRetrieveRequest></searchRetrieveResponse>

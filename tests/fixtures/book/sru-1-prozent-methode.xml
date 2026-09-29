@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/"><version>1.1</version><numberOfRecords>1</numberOfRecords><records><record><recordSchema>MARC21-xml</recordSchema><recordPacking>xml</recordPacking><recordData><record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">
+    <leader>00000pam a2200000 c 4500</leader>
+    <controlfield tag="001">1198618736</controlfield>
+    <controlfield tag="003">DE-101</controlfield>
+    <controlfield tag="005">20250311171753.0</controlfield>
+    <controlfield tag="007">tu</controlfield>
+    <controlfield tag="008">191103s2020    gw ||||| |||| 00||||ger  </controlfield>
+    <datafield tag="015" ind1=" " ind2=" ">
+      <subfield code="a">21,A17</subfield>
+      <subfield code="z">19,N45</subfield>
+      <subfield code="2">dnb</subfield>
+    </datafield>
+    <datafield tag="016" ind1="7" ind2=" ">
+      <subfield code="2">DE-101</subfield>
+      <subfield code="a">1198618736</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9783442178582</subfield>
+      <subfield code="c">Broschur : circa EUR 13.00 (DE), circa EUR 13.40 (AT), circa CHF 18.90 (freier Preis)</subfield>
+      <subfield code="9">978-3-442-17858-2</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3442178584</subfield>
+      <subfield code="9">3-442-17858-4</subfield>
+    </datafield>
+    <datafield tag="024" ind1="3" ind2=" ">
+      <subfield code="a">9783442178582</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DE-599)DNB1198618736</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1248720140</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)1126577183</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">1245</subfield>
+      <subfield code="b">ger</subfield>
+      <subfield code="c">DE-101</subfield>
+      <subfield code="d">9999</subfield>
+      <subfield code="e">rda</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">ger</subfield>
+      <subfield code="h">eng</subfield>
+    </datafield>
+    <datafield tag="044" ind1=" " ind2=" ">
+      <subfield code="c">XA-DE-BY</subfield>
+    </datafield>
+    <datafield tag="082" ind1="0" ind2="4">
+      <subfield code="8">3\u</subfield>
+      <subfield code="a">152.33</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23/ger</subfield>
+    </datafield>
+    <datafield tag="083" ind1="7" ind2=" ">
+      <subfield code="8">4\p</subfield>
+      <subfield code="a">150</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="2">23sdnb</subfield>
+    </datafield>
+    <datafield tag="085" ind1=" " ind2=" ">
+      <subfield code="8">3\u</subfield>
+      <subfield code="b">152.33</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="0">(DE-588)1186646756</subfield>
+      <subfield code="0">https://d-nb.info/gnd/1186646756</subfield>
+      <subfield code="0">(DE-101)1186646756</subfield>
+      <subfield code="a">Clear, James</subfield>
+      <subfield code="d">1986-</subfield>
+      <subfield code="e">Verfasser</subfield>
+      <subfield code="4">aut</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="240" ind1="1" ind2="0">
+      <subfield code="a">Atomic habits</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">&#152;Die&#156; 1 % Methode</subfield>
+      <subfield code="b">minimale Veränderung, maximale Wirkung : mit kleinen Gewohnheiten jedes Ziel erreichen</subfield>
+      <subfield code="c">James Clear ; aus dem amerikanischen Englisch von Annika Tschöpe</subfield>
+    </datafield>
+    <datafield tag="246" ind1="3" ind2=" ">
+      <subfield code="a">&#152;Die&#156; 1 %-Methode</subfield>
+    </datafield>
+    <datafield tag="246" ind1="3" ind2=" ">
+      <subfield code="a">&#152;Die&#156; Ein-Prozent-Methode</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">1. Auflage, deutsche Erstausgabe</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">München</subfield>
+      <subfield code="b">Goldmann</subfield>
+      <subfield code="c">Mai 2020</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">365 Seiten</subfield>
+      <subfield code="b">Diagramme</subfield>
+      <subfield code="c">21 cm, 482 g</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">Text</subfield>
+      <subfield code="b">txt</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">ohne Hilfsmittel zu benutzen</subfield>
+      <subfield code="b">n</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">Band</subfield>
+      <subfield code="b">nc</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)4034864-7</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4034864-7</subfield>
+      <subfield code="0">(DE-101)040348644</subfield>
+      <subfield code="a">Lebensführung</subfield>
+      <subfield code="9">rswk-swf</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)4157301-8</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4157301-8</subfield>
+      <subfield code="0">(DE-101)041573013</subfield>
+      <subfield code="a">Gewohnheit</subfield>
+      <subfield code="9">rswk-swf</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)4128256-5</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4128256-5</subfield>
+      <subfield code="0">(DE-101)041282566</subfield>
+      <subfield code="a">Änderung</subfield>
+      <subfield code="9">rswk-swf</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="7">
+      <subfield code="0">(DE-588)4015224-8</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4015224-8</subfield>
+      <subfield code="0">(DE-101)040152243</subfield>
+      <subfield code="a">Erfolg</subfield>
+      <subfield code="9">rswk-swf</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform)Paperback / softback</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))Paperback (DE)</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktform (spezifisch))With flaps</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Selbstoptimierung</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Ziele erreichen</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Micro Habits</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Karriere</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Sport</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Abnehmen</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Motivation</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Durchhaltevermögen</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Rauchen</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Erfolg</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(VLB-WN)2933: Taschenbuch / Sachbücher/Angewandte Psychologie</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(BISAC Subject Heading)PSY000000</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">(Produktgruppe)7055: MoGo TB</subfield>
+    </datafield>
+    <datafield tag="689" ind1="0" ind2="0">
+      <subfield code="0">(DE-588)4034864-7</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4034864-7</subfield>
+      <subfield code="0">(DE-101)040348644</subfield>
+      <subfield code="D">s</subfield>
+      <subfield code="a">Lebensführung</subfield>
+    </datafield>
+    <datafield tag="689" ind1="0" ind2="1">
+      <subfield code="0">(DE-588)4157301-8</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4157301-8</subfield>
+      <subfield code="0">(DE-101)041573013</subfield>
+      <subfield code="D">s</subfield>
+      <subfield code="a">Gewohnheit</subfield>
+    </datafield>
+    <datafield tag="689" ind1="0" ind2="2">
+      <subfield code="0">(DE-588)4128256-5</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4128256-5</subfield>
+      <subfield code="0">(DE-101)041282566</subfield>
+      <subfield code="D">s</subfield>
+      <subfield code="a">Änderung</subfield>
+    </datafield>
+    <datafield tag="689" ind1="0" ind2="3">
+      <subfield code="0">(DE-588)4015224-8</subfield>
+      <subfield code="0">https://d-nb.info/gnd/4015224-8</subfield>
+      <subfield code="0">(DE-101)040152243</subfield>
+      <subfield code="D">s</subfield>
+      <subfield code="a">Erfolg</subfield>
+    </datafield>
+    <datafield tag="689" ind1="0" ind2=" ">
+      <subfield code="5">DE-101</subfield>
+      <subfield code="5">DE-101</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="0">(DE-588)140422986</subfield>
+      <subfield code="0">https://d-nb.info/gnd/140422986</subfield>
+      <subfield code="0">(DE-101)140422986</subfield>
+      <subfield code="a">Tschöpe, Annika</subfield>
+      <subfield code="e">Übersetzer</subfield>
+      <subfield code="4">trl</subfield>
+      <subfield code="2">gnd</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="z">9783844538458</subfield>
+    </datafield>
+    <datafield tag="776" ind1="0" ind2="8">
+      <subfield code="i">Erscheint auch als</subfield>
+      <subfield code="n">Online-Ausgabe</subfield>
+      <subfield code="a">Clear, James, 1986-</subfield>
+      <subfield code="t">&#152;Die&#156; 1%-Methode – Minimale Veränderung, maximale Wirkung</subfield>
+      <subfield code="d">München : Goldmann Verlag, 2020</subfield>
+      <subfield code="h">Online-Ressource, 368 Seiten, 28 Illustrationen</subfield>
+      <subfield code="w">(DE-101)1208614460</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">DE-101a</subfield>
+      <subfield code="a">DE-101b</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">X:MVB</subfield>
+      <subfield code="q">text/html</subfield>
+      <subfield code="u">https://services.dnb.de/plus/idn/1198618736/blurb/</subfield>
+      <subfield code="3">Inhaltstext</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="2">
+      <subfield code="m">B:DE-101</subfield>
+      <subfield code="q">application/pdf</subfield>
+      <subfield code="u">https://d-nb.info/1198618736/04</subfield>
+      <subfield code="3">Inhaltsverzeichnis</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">1\p</subfield>
+      <subfield code="a">dnb</subfield>
+      <subfield code="d">20210310</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb</subfield>
+    </datafield>
+    <datafield tag="883" ind1=" " ind2=" ">
+      <subfield code="8">2\p</subfield>
+      <subfield code="a">cgwrk</subfield>
+      <subfield code="d">20210314</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#cgwrk</subfield>
+    </datafield>
+    <datafield tag="883" ind1="2" ind2=" ">
+      <subfield code="8">4\p</subfield>
+      <subfield code="a">dnb</subfield>
+      <subfield code="d">20210420</subfield>
+      <subfield code="q">DE-101</subfield>
+      <subfield code="u">https://d-nb.info/provenance/plan#dnb</subfield>
+    </datafield>
+    <datafield tag="925" ind1="r" ind2=" ">
+      <subfield code="a">ra</subfield>
+    </datafield>
+    <datafield tag="926" ind1="1" ind2=" ">
+      <subfield code="a">VS</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="q">Publisher</subfield>
+      <subfield code="v">1.2</subfield>
+      <subfield code="x">Lebenshilfe, Persönlichkeitsentwicklung und praktische Tipps</subfield>
+    </datafield>
+    <datafield tag="926" ind1="2" ind2=" ">
+      <subfield code="a">VSP</subfield>
+      <subfield code="o">93</subfield>
+      <subfield code="q">Publisher</subfield>
+      <subfield code="v">1.2</subfield>
+      <subfield code="x">Ratgeber, Sachbuch: Psychologie</subfield>
+    </datafield>
+  </record></recordData><recordPosition>1</recordPosition></record></records><echoedSearchRetrieveRequest><version>1.1</version><query>NUM=9783442178582</query><xQuery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/><maximumRecords>10</maximumRecords><recordSchema>MARC21-xml</recordSchema></echoedSearchRetrieveRequest></searchRetrieveResponse>
