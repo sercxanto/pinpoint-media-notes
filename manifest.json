@@ -1,0 +1,9 @@
+{
+	"id": "pinpoint-media-notes",
+	"name": "Pinpoint Media Notes",
+	"version": "0.1.0",
+	"minAppVersion": "1.13.0",
+	"description": "Create a note with cover image from an exact identifier: a book's ISBN (German National Library catalogue) or a TMDB movie/series URL.",
+	"author": "Georg Lutz",
+	"isDesktopOnly": false
+}

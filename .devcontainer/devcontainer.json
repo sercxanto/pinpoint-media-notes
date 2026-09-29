@@ -1,0 +1,29 @@
+{
+	"name": "obsidian-plugin-dev",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+	// Runs on every container (re)start, not just the first create, so it also
+	// picks up dependency changes after a rebuild without a manual step.
+	"postStartCommand": "if [ -f package.json ]; then npm install; fi",
+	"customizations": {
+		"vscode": {
+			"extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+		}
+	}
+	// If you want to see the plugin working live in the real Obsidian app
+	// (an Electron GUI app, which does not run inside this container), the
+	// container itself can only build and test the code. Two ways to close
+	// that gap, neither of which this file sets up automatically because the
+	// vault path is machine-specific:
+	//
+	// 1. Bind-mount your real vault's plugin folder into the container and
+	//    point the build's output there, e.g. add to this file:
+	//      "mounts": [
+	//        "source=/absolute/path/to/YourVault/.obsidian/plugins/your-plugin-id,target=/workspaces/your-plugin-id-out,type=bind,consistency=cached"
+	//      ]
+	//    then configure the bundler (esbuild watch script from the Obsidian
+	//    sample plugin template) to write manifest.json/main.js/styles.css
+	//    there instead of the repo root.
+	// 2. Or skip the container for manual verification: run `npm run dev` on
+	//    the host once the plugin needs to be clicked around in Obsidian, and
+	//    keep the container for editing/building/testing only.
+}

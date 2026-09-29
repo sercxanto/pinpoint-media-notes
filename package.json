@@ -1,0 +1,47 @@
+{
+	"name": "pinpoint-media-notes",
+	"version": "0.1.0",
+	"description": "Create book notes from an ISBN (DNB catalogue) and movie/series notes from a TMDB URL, with cover image and fixed frontmatter.",
+	"private": true,
+	"type": "module",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "node esbuild.config.mjs production",
+		"typecheck": "tsc --noEmit",
+		"lint": "eslint . --max-warnings=0",
+		"lint:fix": "eslint . --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:contract": "vitest run --config vitest.contract.config.ts",
+		"check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build"
+	},
+	"keywords": [
+		"obsidian",
+		"tmdb",
+		"dnb",
+		"isbn"
+	],
+	"author": "Georg Lutz",
+	"license": "MIT",
+	"engines": {
+		"node": ">=22.12"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.39.5",
+		"@types/node": "^22.20.4",
+		"esbuild": "^0.28.2",
+		"eslint": "^9.39.5",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-obsidianmd": "^0.4.2",
+		"globals": "^17.12.0",
+		"obsidian": "^1.13.1",
+		"prettier": "^3.9.9",
+		"tslib": "^2.8.1",
+		"typescript": "~6.0.3",
+		"typescript-eslint": "^8.71.0",
+		"vitest": "^5.0.2"
+	}
+}
