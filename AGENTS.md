@@ -1,7 +1,6 @@
 # AGENTS.md
 
-Guidance for coding agents working in this repository. Read this first, then
-`docs/PLAN.md` for the current state of work.
+Guidance for coding agents working in this repository. Read this first.
 
 ## What this is
 
@@ -15,7 +14,9 @@ image and a fixed frontmatter schema:
   token).
 
 It ports two Python CLI scripts (`tmdb-import`, `book-import` from the
-`obsidian-scripts` project) to a plugin with feature parity. That Python source
+`obsidian-scripts` project) to a plugin with feature parity. The port is
+complete; its phase plan lived in `docs/PLAN.md` until it was removed
+(see git history). That Python source
 is **not** available here. The specs are:
 
 - `docs/specs/PLUGIN_PORTING_BRIEF.md`: the porting brief. Read it first.
@@ -28,13 +29,13 @@ decisions in the _Decisions_ section below instead.
 
 ## Working agreement with the maintainer
 
-- Work proceeds in the phases listed in `docs/PLAN.md`, usually one session per
-  phase. Start by reading `docs/PLAN.md` and continue with the next open phase.
-- Work autonomously within a phase. Stop only for decisions that belong to the
-  maintainer.
-- At the end of a phase: `npm run check` must pass, update `docs/PLAN.md`
-  (status, notes) and this file (new decisions, architecture changes), then
-  report and stop.
+- Tasks come from the maintainer. Work autonomously within a task. Stop only
+  for decisions that belong to the maintainer.
+- At the end of a task: `npm run check` must pass, update this file (new
+  decisions, architecture changes), `README.md` and `docs/MANUAL_TEST.md`
+  where the task affects them (see _Documentation_), then report and stop.
+- A larger undertaking may get a short plan file of its own; remove it when
+  the work is done and keep what stays relevant here.
 - **Do not commit on your own.** The maintainer reviews the uncommitted diff
   first and then asks for the commit.
 - Talk to the maintainer in German. Code, comments and docs in the repository
@@ -89,7 +90,7 @@ src/
 tests/
   __mocks__/obsidian.ts   hand-written fake of the obsidian API (aliased in vitest.config.ts)
   helpers.ts              fixtures, fake HttpGet and VaultFiles, MARC record builder
-  fixtures/               recorded API responses
+  fixtures/               API responses, see "Fixtures" below
   contract/               live-API checks, only via `npm run test:contract`
     book-shape.ts           BOOK_RECORD_SHAPE: per-field shape checks, typed against BookRecord
     tmdb-shape.ts           TMDB_ENTRY_SHAPE: the same for TmdbEntry
@@ -98,13 +99,23 @@ tests/
 Tests run under jsdom, because the book importer uses the `DOMParser` that
 Obsidian provides.
 
+The obsidian mock: `Modal.close` calls `onClose`, as Obsidian does;
+`onOpen` is not run in tests. `requestUrl` and the in-memory `Vault` serve
+the `io/` and plugin tests; importer tests use the fakes in `helpers.ts`.
+
 scripts/install-to-vault.sh  copies main.js and manifest.json into a vault
 docs/
-  PLAN.md          phases and their notes
   MANUAL_TEST.md   checklist for the manual test in Obsidian
   specs/           the original specs (reference, do not edit)
 README.md          user documentation
 ```
+
+Fixtures (`tests/fixtures/`): the SRU responses in `book/` are real (DNB
+metadata is CC0): _Die 1 % Methode_, a title search for _Die
+Känguru-Rebellion_ returning five editions, and an empty result. Blurb texts
+and the TMDB texts in `tmdb/` are the spec's example or invented, because
+blurbs are publisher copy and TMDB overviews are user contributions; only
+the response shapes are real. Do not add real copyrighted text.
 
 Principles:
 
@@ -273,7 +284,8 @@ Record decisions here with a short reason.
   without cover and the reason reported, as for DNB covers.
 - **TMDB contract tests** skip themselves without `TMDB_READ_ACCESS_TOKEN`,
   except the 401 check, which needs no token.
-
+- **Command name "Import book"** names no input format: the obsidianmd
+  sentence-case lint rule rejects "ISBN" in a command name.
 - **README discloses network use:** a table of every host contacted and
   what it receives, and that there is no telemetry; the community plugin
   guidelines require disclosing network use and needed accounts. It also
