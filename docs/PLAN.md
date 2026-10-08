@@ -15,7 +15,7 @@ maintainer), `done` (committed).
 | 2a    | Book import: input, MARC, mapping, note, import order                | done   |
 | 2b    | Book import: cover fallback, bot check, record picker, contract test | done   |
 | 3     | TMDB import                                                          | done   |
-| 4     | README complete, manual test checklist                               | open   |
+| 4     | README complete, manual test checklist                               | done   |
 
 ## Phase 0: scaffold
 
@@ -175,6 +175,27 @@ Notes:
 
 ## Phase 4: documentation
 
-- [ ] README: installation (manual and later community list), settings, usage, field mapping tables, file naming, cover caveat, pointer to the vault's conventions notes
-- [ ] Final pass over `AGENTS.md`
-- [ ] Checklist for manual testing in Obsidian
+- [x] README: installation (manual and later community list), settings, usage, field mapping tables, file naming, cover caveat, pointer to the vault's conventions notes
+- [x] Final pass over `AGENTS.md`
+- [x] Checklist for manual testing in Obsidian
+
+Notes:
+
+- README rewritten for users: requirements, installation (community list
+  placeholder, manual build with the install script), settings table with
+  how to get the TMDB token, both imports with accepted input, both golden
+  notes with field mapping tables, file naming and the no-overwrite rule,
+  covers and the bot-filter caveat, message categories, network use and
+  privacy (hosts, no telemetry, TMDB attribution), sync and mobile, non-goals.
+  The meaning of the properties is not explained; the README points to the
+  vault's conventions notes, as the specs ask.
+- `docs/MANUAL_TEST.md`: checklist for Obsidian itself (settings tab,
+  configuration errors, both imports with real ISBNs, record numbers and
+  TMDB ids, name clash, mobile), with a result table. The record picker
+  item needs an ISBN shared by two editions, which none of the fixtures
+  has; the checklist says to find one first.
+- `AGENTS.md`: `docs/` and the install script in the layout, a
+  _Documentation_ section (keep the README in step with user-visible
+  behaviour), a decision on the network disclosure and TMDB attribution,
+  and release steps under _Before publishing_.
+- No code changes.

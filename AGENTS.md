@@ -97,6 +97,13 @@ tests/
 
 Tests run under jsdom, because the book importer uses the `DOMParser` that
 Obsidian provides.
+
+scripts/install-to-vault.sh  copies main.js and manifest.json into a vault
+docs/
+  PLAN.md          phases and their notes
+  MANUAL_TEST.md   checklist for the manual test in Obsidian
+  specs/           the original specs (reference, do not edit)
+README.md          user documentation
 ```
 
 Principles:
@@ -141,6 +148,20 @@ Non-goals (rejected on purpose, do not add): search by title, updating
 existing notes, per-season series notes, importing genres from the DNB,
 recording translator/narrator/publisher/page count, prompting for
 `rating`/`shelf`.
+
+## Documentation
+
+- `README.md` is the user documentation: settings, accepted input, note
+  format with field mapping tables, file naming, covers, messages, network
+  use. A change to behaviour the user sees (a setting, an accepted input, a
+  property, a message category, a host contacted) updates it in the same
+  phase. The golden examples in the README match the spec's example notes.
+- The README does not explain what the properties mean; that belongs to the
+  vault's _Book Template Conventions_ and _Movie Template Conventions_ notes
+  (the specs say so), and the README points there.
+- `docs/MANUAL_TEST.md` covers what the test suite cannot: the plugin
+  inside Obsidian. Add an item when a change touches the settings tab, a
+  modal, notices, `io/` or platform behaviour.
 
 ## Decisions
 
@@ -253,8 +274,21 @@ Record decisions here with a short reason.
 - **TMDB contract tests** skip themselves without `TMDB_READ_ACCESS_TOKEN`,
   except the 401 check, which needs no token.
 
+- **README discloses network use:** a table of every host contacted and
+  what it receives, and that there is no telemetry; the community plugin
+  guidelines require disclosing network use and needed accounts. It also
+  carries TMDB's attribution sentence ("This product uses the TMDB API but
+  is not endorsed or certified by TMDB."), which TMDB's API terms require.
+
 ## Before publishing to the community list
 
 - Re-check the plugin name and id against
   `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugins.json`.
 - Run `npm run check`; the obsidianmd lint rules cover the review guidelines.
+- Run `docs/MANUAL_TEST.md` on desktop and, if possible, on mobile. Mobile
+  is untested so far.
+- Replace the "not in the community plugin list yet" sentence in the
+  README's installation section with the real installation path.
+- Version: `manifest.json`, `package.json` and `versions.json` in step; the
+  release tag is the bare version (no `v`), with `main.js` and
+  `manifest.json` attached.
