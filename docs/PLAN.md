@@ -19,7 +19,7 @@ maintainer), `done` (committed).
 
 | Phase | Content                                                         | Status |
 | ----- | --------------------------------------------------------------- | ------ |
-| 1     | Spec: the fallback's behaviour, open decisions settled          | open   |
+| 1     | Spec: the fallback's behaviour, open decisions settled          | done   |
 | 2     | Refactor, no behaviour change: source-neutral record, RDA codes | open   |
 | 3     | LoC client and mapping over `id.loc.gov`                        | open   |
 | 4     | Open Library: title and cover                                   | open   |
@@ -38,6 +38,18 @@ maintainer), `done` (committed).
 - Publisher series (`The pragmatic programmers`) are written to `series`.
 - The LoC fallback takes an ISBN only, no link.
 - New hosts: `id.loc.gov`, `openlibrary.org`, `covers.openlibrary.org`.
+
+Settled in phase 1 (2026-10-11), written into `docs/SPEC.md`:
+
+- Ten characters: DNB by ISBN, then LoC by ISBN, then DNB by record number.
+  Only a clean DNB miss falls back; a failed lookup (DNB or LoC) fails the
+  entry.
+- An ISBN that a record lists only as `cancinv` is a miss; the message names
+  that record. Several records that count go to the record picker.
+- Open Library covers for DNB records: no.
+- One User-Agent for all five book hosts, the DNB included:
+  `pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)`.
+- Cover size `s`/`m`/`l` maps to Open Library's `S`/`M`/`L`.
 
 ## Phase 1: spec
 
@@ -146,4 +158,17 @@ test names an internal that is renamed.
 
 ## Notes
 
-(Filled in per phase.)
+**Phase 1.** The spec describes the target; the LoC section and the
+User-Agent paragraph carry a "not yet implemented" note pointing here.
+Remove both notes in phase 5. The User-Agent change for the DNB hosts
+belongs to phase 3 (one shared header constant, e.g. in `io/http.ts`); keep
+the DNB contract test for the bot filter green with the new value, and
+update the README's network section in phase 5. The TMDB hosts keep
+Obsidian's default User-Agent (settled 2026-10-11).
+Proposals written into the spec without a separate question, open for the
+maintainer's review of the diff: no LoC fallback after a failed DNB lookup;
+at most ten LoC hits fetched; `url` falls back to the `id.loc.gov` record
+when there is no LCCN; `original_title` is the `title` value (Open Library
+title where there is one); the summary's quotes and attribution are removed
+only when it has exactly that form; an Open Library 404 is silent, other
+failures are reported.

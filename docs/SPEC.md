@@ -30,8 +30,10 @@ The plugin creates one Obsidian note per entry, with a local copy of the
 cover image and a fixed frontmatter schema, from an exact identifier:
 
 - **Books**, e-books and audiobooks from an ISBN or a DNB record number, using
-  the catalogue of the Deutsche Nationalbibliothek (DNB). Why the DNB is the
-  source is set out in [`book-source-evaluation.md`](book-source-evaluation.md).
+  the catalogue of the Deutsche Nationalbibliothek (DNB). An ISBN the DNB does
+  not have is looked up at the Library of Congress (LoC), with title and cover
+  from Open Library, for English-language editions. Why these sources are used
+  is set out in [`book-source-evaluation.md`](book-source-evaluation.md).
 - **Movies and series** from a TMDB link, using the TMDB API in a configured
   language.
 
@@ -56,6 +58,9 @@ Considered and rejected. Do not add them.
 - Asking for `rating`, `last_finished` or `shelf` during the import. They are
   filled in later, in Obsidian.
 - Deduplicating against existing notes beyond the file name check.
+- Further book catalogues after the LoC, such as the British Library for
+  British-only editions. A miss in the DNB and the LoC is reported, and the
+  note is made by hand.
 
 ## Settings
 
@@ -230,20 +235,36 @@ All HTTP goes through Obsidian's `requestUrl`, never `fetch`: it is not
 subject to CORS, and both APIs are called directly. Requests are sent one
 after the other, never in parallel, and only while an entry is imported.
 
-| Host                 | Used for                       | Sends                          |
-| -------------------- | ------------------------------ | ------------------------------ |
-| `services.dnb.de`    | catalogue lookup (SRU), blurbs | ISBN or record number          |
-| `portal.dnb.de`      | book covers                    | ISBN                           |
-| `api.themoviedb.org` | movie and series details       | TMDB id, the token             |
-| `image.tmdb.org`     | posters                        | poster path, **not** the token |
+| Host                     | Used for                               | Sends                             |
+| ------------------------ | -------------------------------------- | --------------------------------- |
+| `services.dnb.de`        | catalogue lookup (SRU), blurbs         | ISBN or record number             |
+| `portal.dnb.de`          | book covers                            | ISBN                              |
+| `id.loc.gov`             | LoC catalogue lookup, after a DNB miss | ISBN, then the LoC record numbers |
+| `openlibrary.org`        | title of an LoC record                 | ISBN                              |
+| `covers.openlibrary.org` | covers of an LoC record                | ISBN, and ISBNs of other editions |
+| `api.themoviedb.org`     | movie and series details               | TMDB id, the token                |
+| `image.tmdb.org`         | posters                                | poster path, **not** the token    |
 
-There is no telemetry and no other network access.
+The LoC and Open Library hosts are contacted only for an ISBN the DNB has no
+record for. There is no telemetry and no other network access.
 
-**User-Agent for the DNB.** Every DNB request sends
-`User-Agent: pinpoint-media-notes (Obsidian plugin)`. The cover host sits
-behind a proof-of-work bot filter (Anubis) that challenges every User-Agent
-containing `Mozilla`, which includes Obsidian's default, and lets clients that
-name themselves through. A contract test watches this rule.
+**User-Agent for the book hosts.** Every request to the five book hosts sends
+
+```
+User-Agent: pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)
+```
+
+The DNB cover host sits behind a proof-of-work bot filter (Anubis) that
+challenges every User-Agent containing `Mozilla`, which includes Obsidian's
+default, and lets clients that name themselves through. Open Library asks API
+clients to identify themselves with a name and a contact; the repository URL
+is the contact, so no e-mail address is sent. A contract test watches the DNB
+rule. The TMDB hosts get Obsidian's default User-Agent, which they
+accept.
+
+_Not yet implemented:_ the LoC and Open Library hosts and the repository URL
+in the User-Agent (today `pinpoint-media-notes (Obsidian plugin)`, DNB only);
+see `docs/PLAN.md`.
 
 ## Book import
 
@@ -285,6 +306,31 @@ records) is rejected.
   guess.
 - ISBN-10 to ISBN-13: drop the check digit, prefix `978`, compute the EAN-13
   check digit. The cover service accepts ISBN-13 only.
+
+**Fallback for an ISBN.** When the DNB answers an ISBN lookup with no record,
+the ISBN is looked up at the Library of Congress, see
+[Library of Congress fallback](#library-of-congress-fallback). Only a clean
+miss falls back: a failed DNB lookup (HTTP status, network, invalid XML, SRU
+diagnostic) fails the entry as before. Otherwise a DNB outage would quietly
+turn German editions into whatever the LoC holds, catalogued in English.
+
+The order for each input:
+
+| Input                            | Asked in this order                            |
+| -------------------------------- | ---------------------------------------------- |
+| ISBN-13                          | DNB by ISBN, LoC by ISBN                       |
+| 10 characters, valid check digit | DNB by ISBN, LoC by ISBN, DNB by record number |
+| record number, `d-nb.info` link  | DNB by record number only                      |
+
+For ten characters the LoC comes **before** the record-number reading.
+English-language ISBN-10s start with `0` or `1`, and 10-digit DNB record
+numbers start with `1` and are densely assigned, so an English ISBN-10 read
+as a record number easily names some unrelated DNB record. A real record
+number costs one LoC search without hits. A failed LoC lookup fails the entry
+and does not go on to the record-number reading, for the same reason.
+
+The fallback takes an ISBN only, no LoC link: see
+[Input: ISBN only](book-source-evaluation.md#input-isbn-only).
 
 ### Catalogue lookup
 
@@ -468,6 +514,143 @@ tags:
 
 `cover` is blank when no image was found.
 
+### Library of Congress fallback
+
+_Specified, not yet implemented; see `docs/PLAN.md`._
+
+For an ISBN the DNB has no record for (see [Input](#input)). The record comes
+from the LoC's linked-data service `id.loc.gov` in BIBFRAME, the title and the
+cover from Open Library. No key, no account. LoC data is in the public domain,
+Open Library's under CC0. The evaluation behind every rule here is the section
+[English-language editions](book-source-evaluation.md#english-language-editions-fallback-sources).
+
+The per-entry order is the one in [Processing one entry](#processing-one-entry):
+LoC search and records, Open Library title, file name and collision check,
+cover, note. There is no separate description request; the summary is part of
+the LoC record.
+
+#### Lookup
+
+```
+https://id.loc.gov/resources/instances/suggest2?q=<isbn13>&searchtype=keyword
+https://id.loc.gov/resources/instances/<id>.cbd.json      per hit
+```
+
+The search answers JSON; each `hits[].token` is an LoC record number. The
+first ten hits are fetched, one after the other. Each document is JSON-LD, a
+flat array of nodes linked by `@id`, holding the instance (the edition), its
+work, the names and the summary. Every string is read NFC-normalised and
+trimmed. The SRU server `lx2.loc.gov:210` holds the same records in MARC, but
+answers only over plain HTTP; `<id>.bibframe.json` lacks the work, the names
+and the summary.
+
+Per entry errors, for the search and for each document: HTTP status other than
+200, network failure, invalid JSON. No hit is a miss.
+
+#### Which record
+
+The search also finds an ISBN that a record lists as another format's: the
+print record of a book names the e-book ISBN with the status `cancinv`. A
+record counts only if its instance lists the queried ISBN, compared as
+ISBN-13, **without** that status.
+
+| Records that count | Result                                                                     |
+| ------------------ | -------------------------------------------------------------------------- |
+| one                | taken                                                                      |
+| several            | the record picker, as for the DNB, with the record's `url` as link         |
+| none               | a miss; if a record lists the ISBN as another format, the message names it |
+
+A miss is not resolved by taking the record that lists the ISBN as another
+format: it describes a different edition.
+
+#### Field mapping
+
+| Property         | Source                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| `type`           | work `content` and instance `carrier`, see below                                           |
+| `title`          | Open Library edition `title` if the edition exists, else instance `title` → `mainTitle`    |
+| `original_title` | the `title` property's value                                                               |
+| `authors`        | work `contribution` with role `aut` → `agent` → `rdfs:label`; de-duplicated                |
+| `url`            | `https://lccn.loc.gov/<lccn>`, the instance's `Lccn` trimmed; else the `id.loc.gov` record |
+| `isbn`           | the queried ISBN-13                                                                        |
+| `year`           | first four-digit run in the `date` of the instance's `Publication` provision activity      |
+| `series`         | the first work `relation` with relationship `series` → `associatedResource` → `title`      |
+| `series_index`   | first number in that relation's `seriesEnumeration`; a decimal comma becomes a dot         |
+| `genres`         | always `[]`                                                                                |
+| `description`    | the work `summary`, see below                                                              |
+| `cover`          | Open Library, see below                                                                    |
+
+Details:
+
+- **Title.** LoC titles are in sentence case by cataloguing rule
+  (`Building a second brain`), and the anniversary edition statement of
+  _The Pragmatic Programmer_ sits in the title. Open Library's edition title
+  is in title case where it came from a retailer feed and carries neither
+  subtitle nor edition statement, which is what the schema wants. Its
+  `subtitle`, authors, dates and format are not read: they are weaker than the
+  LoC's. The Open Library title also names the files.
+- **Original title.** English-language editions are mostly originals. A
+  translation's uniform title is not read; whether BIBFRAME carries it usably
+  was not in the evaluation's sample.
+- **Authors.** Names as catalogued, `Surname, Given name`. Editors and other
+  roles are dropped; a related work (an earlier edition) is no contribution.
+  No author gives `authors: []`.
+- **Year.** The date is EDTF (`2019`). It is the year of this edition.
+- **Series.** Publisher series (`The pragmatic programmers`) are written to
+  `series` like any other, with an empty `series_index` when there is no
+  number.
+- **Url.** `https://lccn.loc.gov/<lccn>` is the LoC's permalink. A record
+  without LCCN gets `https://id.loc.gov/resources/instances/<id>`.
+
+**Type.** From the RDA codes at the end of the content and carrier URIs:
+
+| Content (work `content`) | Carrier (instance `carrier`, first match) | `type`      |
+| ------------------------ | ----------------------------------------- | ----------- |
+| `spw` (spoken word)      | anything                                  | `audiobook` |
+| `txt` (text)             | `nc` (volume)                             | `book`      |
+| `txt` (text)             | `cr` (online resource)                    | `ebook`     |
+
+Any other combination is unsupported material, as for the DNB.
+
+**Description.** The summary is publisher copy in quotes with an attribution,
+`"…"-- Provided by publisher.` or `"…" -- Publisher description.`. When the
+text has this form, quotes and attribution are removed; any other summary is
+kept as it is. Then the rules of [Description](#description) apply: one line,
+truncated under 500 characters. Several summaries: the first. No summary
+leaves `description` empty, without a message; there is no second source.
+
+**Open Library title.**
+
+```
+https://openlibrary.org/isbn/<isbn13>.json
+```
+
+A hit is a redirect to `/books/<id>.json`, which is followed. HTTP 404 (with
+an HTML page, not JSON) means Open Library has no edition: the LoC title is
+used, without a message. Any other failure (status, network, invalid JSON, no
+`title`) is a partial result: the LoC title is used and the failure reported.
+
+#### Cover
+
+```
+https://covers.openlibrary.org/b/isbn/<isbn13>-<S|M|L>.jpg?default=false
+```
+
+The cover size setting maps `s`, `m`, `l` to `S`, `M`, `L`. Open Library's
+sizes are not the MVB's: `L` is the image as uploaded, about 380×500 in the
+evaluation.
+
+Candidates, each ISBN tried once, in this order: the queried ISBN, then each
+ISBN the instance lists with the status `cancinv`, converted to ISBN-13. The
+responses are judged by the table in [Cover](#cover) (`Content-Type` decides,
+HTTP 404 is missing, the chain stops at the first "blocked"), and an existing
+image of the target name is kept. A cover from another edition is reported as
+for the DNB.
+
+Open Library is not asked for covers of DNB records. The MVB chain with its
+sibling editions covered the evaluation's sample almost completely, and Open
+Library has few German editions.
+
 ## Movie and series import
 
 ### Input
@@ -583,11 +766,17 @@ A successful entry reports `Created "<note path>".`, followed by whatever is
 noteworthy:
 
 - how an ambiguous 10-character input was read,
-- where the cover came from, and whether it belongs to another edition,
+- for an LoC record: that the record comes from the Library of Congress, so
+  the user knows why title or description are English, and where the title
+  comes from (Open Library or the LoC), or why Open Library failed,
+- where the cover came from (MVB or Open Library), and whether it belongs to
+  another edition,
 - that an existing image was kept,
 - why there is no description, cover or poster,
 - which fields came from TMDB's default language, or that the fallback failed.
 
-Error messages name the input or the setting concerned. Anything that is
+Error messages name the input or the setting concerned. A book found in
+neither catalogue names both, so the miss does not look like a gap in the DNB
+alone. Anything that is
 neither a configuration nor a per-entry error is shown as
 `Unexpected error: …`.
