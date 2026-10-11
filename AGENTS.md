@@ -22,6 +22,7 @@ image and a fixed frontmatter schema:
 | `docs/book-source-evaluation.md` | why the book importer uses the DNB, measurements behind the cover fallback.      |
 | `README.md`                      | user documentation, derived from the spec.                                       |
 | `docs/MANUAL_TEST.md`            | checklist for the manual test in Obsidian.                                       |
+| `docs/PLAN.md`                   | the current multi-session plan (LoC fallback). Removed when the work is done.    |
 | this file                        | how to work here: commands, architecture, implementation decisions.              |
 
 ## Working agreement with the maintainer
@@ -102,6 +103,7 @@ The obsidian mock: `Modal.close` calls `onClose`, as Obsidian does;
 the `io/` and plugin tests; importer tests use the fakes in `helpers.ts`.
 
 scripts/install-to-vault.sh  copies main.js and manifest.json into a vault
+scripts/install-schema-to-vault.sh  copies docs/schema/ into a vault; --diff previews
 docs/
   SPEC.md                    behaviour, the authority
   book-source-evaluation.md  why the DNB

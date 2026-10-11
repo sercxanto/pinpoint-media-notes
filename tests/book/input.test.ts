@@ -16,6 +16,10 @@ describe("parseBookInput", () => {
 		["ISBN 978-3-442-17858-2", { kind: "isbn", isbn: "9783442178582" }],
 		["ISBN-13: 9783442178582", { kind: "isbn", isbn: "9783442178582" }],
 		["9791032305690", { kind: "isbn", isbn: "9791032305690" }],
+		["\u200E978-3442178582", { kind: "isbn", isbn: "9783442178582" }],
+		["ISBN-13 \u200F : \u200E 978-3442178582", { kind: "isbn", isbn: "9783442178582" }],
+		["978\u200B3442178582\u2060", { kind: "isbn", isbn: "9783442178582" }],
+		["\uFEFF978\u00A03442178582", { kind: "isbn", isbn: "9783442178582" }],
 	])("reads %j as ISBN-13", (input, expected) => {
 		expect(parseBookInput(input)).toEqual(expected);
 	});
@@ -32,6 +36,7 @@ describe("parseBookInput", () => {
 		["https://d-nb.info/1198618736", { kind: "idn", idn: "1198618736" }],
 		["http://d-nb.info/139261385X/about/html", { kind: "idn", idn: "139261385X" }],
 		["d-nb.info/1198618736?x=1#top", { kind: "idn", idn: "1198618736" }],
+		["\u200Ehttps://d-nb.info/1198618736", { kind: "idn", idn: "1198618736" }],
 		["954788106", { kind: "idn", idn: "954788106" }],
 		["94478106X", { kind: "idn", idn: "94478106X" }],
 		["12345678", { kind: "idn", idn: "12345678" }],
@@ -42,6 +47,7 @@ describe("parseBookInput", () => {
 	it.each([
 		["", /Enter an ISBN/],
 		["   ", /Enter an ISBN/],
+		["\u200E", /Enter an ISBN/],
 		["9783442178583", /wrong check digit/],
 		["9773442178582", /does not start with 978 or 979/],
 		["3442178585", /wrong check digit, as an ISBN-10 and as a DNB record number/],
