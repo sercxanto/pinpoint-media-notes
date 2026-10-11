@@ -119,7 +119,8 @@ one of:
 | DNB record number      | `1198618736`                              |
 | Link to the DNB record | `https://d-nb.info/1198618736`            |
 
-Spaces, hyphens and a leading `ISBN`, `ISBN-10:` or `ISBN-13:` are ignored.
+Spaces, hyphens, a leading `ISBN`, `ISBN-10:` or `ISBN-13:`, and invisible
+characters copied along from web pages (such as Amazon's) are ignored.
 An ISBN with a wrong check digit is rejected as a typo before anything is
 looked up.
 

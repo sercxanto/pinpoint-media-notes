@@ -249,7 +249,8 @@ name themselves through. A contract test watches this rule.
 
 ### Input
 
-After trimming:
+After removing invisible format characters (Unicode category Cf) and
+trimming:
 
 | Input                                              | Read as                                                  |
 | -------------------------------------------------- | -------------------------------------------------------- |
@@ -259,7 +260,14 @@ After trimming:
 | 8 to 10 characters, digits with optional final `X` | record number                                            |
 
 Before the ISBN rules apply, a leading `ISBN`, `ISBN-10` or `ISBN-13` (with
-optional `:`), spaces and hyphens are removed, and letters are upper-cased.
+optional `:`, spaces allowed before it), spaces and hyphens are removed, and
+letters are upper-cased.
+
+Format characters are removed because copying from a web page brings them
+along unseen: Amazon puts a left-to-right mark (U+200E) before the ISBN, and
+a right-to-left and a left-to-right mark around the colon of its
+`ISBN-13 : 978-…` line. Kept, they make a correct ISBN look
+like a typo.
 Links are matched before hyphens are removed. `d-nb.info/gnd/…` (authority
 records) is rejected.
 

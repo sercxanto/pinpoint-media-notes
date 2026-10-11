@@ -12,10 +12,15 @@ export type BookQuery =
 
 const DNB_LINK = /^(?:https?:\/\/)?d-nb\.info\/([^/?#\s]+)(?:[/?#]\S*)?$/i;
 const IDN = /^\d{7,9}[\dX]$/;
+/**
+ * Invisible format characters (Unicode category Cf). Copying from a web page
+ * brings them along: Amazon puts a left-to-right mark before the ISBN.
+ */
+const FORMAT_CHARS = /\p{Cf}/gu;
 
 /** Parses an ISBN-13, ISBN-10, DNB record number (IDN) or `d-nb.info` link. */
 export function parseBookInput(raw: string): BookQuery {
-	const input = raw.trim();
+	const input = raw.replace(FORMAT_CHARS, "").trim();
 	if (input === "") throw new EntryError("Enter an ISBN or a DNB record number.");
 
 	// Before stripping hyphens, which would break the host name.
@@ -27,7 +32,7 @@ export function parseBookInput(raw: string): BookQuery {
 	}
 
 	const compact = input
-		.replace(/^ISBN(?:-1[03])?:?/i, "")
+		.replace(/^ISBN(?:-1[03])?\s*:?/i, "")
 		.replace(/[\s-]/g, "")
 		.toUpperCase();
 
