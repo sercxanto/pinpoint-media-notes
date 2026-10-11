@@ -4,7 +4,7 @@ import prettier from "eslint-config-prettier";
 import globals from "globals";
 
 export default defineConfig([
-	globalIgnores(["node_modules/", "main.js", "docs/specs/", "coverage/"]),
+	globalIgnores(["node_modules/", "main.js", "coverage/"]),
 	...obsidianmd.configs.recommended,
 	{
 		languageOptions: {

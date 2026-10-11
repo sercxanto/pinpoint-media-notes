@@ -275,12 +275,13 @@ query string.
   `unsorted`: together they mark a note as not yet reviewed. You fill them in
   later; the plugin does not ask for them.
 - `template` links to a note named _Book Template_ or _Movie Template_; the
-  plugin does not create those notes.
+  plugin does not create those notes. Both templates are in
+  [`docs/schema/`](docs/schema/).
 - What the properties mean, what the `shelf` values stand for and why a book
-  note describes an edition rather than a work are conventions of the vault
-  the plugin was written for, documented there in the notes _Book Template
-  Conventions_ and _Movie Template Conventions_. The plugin only writes the
-  schema.
+  note describes an edition rather than a work are documented in the
+  conventions notes in [`docs/schema/`](docs/schema/). They are Obsidian
+  notes, written to be copied into a vault as they are. The plugin only writes
+  the schema.
 - `year` and `series_index` are written as numbers, so Bases and Dataview
   can compare them; `isbn` is always quoted, so it stays text.
 - `description` is always one line.
@@ -412,7 +413,8 @@ npm run dev            # watch build
 npm run test:contract  # live checks against DNB and TMDB (TMDB needs TMDB_READ_ACCESS_TOKEN)
 ```
 
-See [`AGENTS.md`](AGENTS.md) for architecture and conventions,
+See [`docs/SPEC.md`](docs/SPEC.md) for the full behaviour,
+[`AGENTS.md`](AGENTS.md) for architecture and working conventions,
 [`docs/MANUAL_TEST.md`](docs/MANUAL_TEST.md) for the manual test in Obsidian.
 
 ## License

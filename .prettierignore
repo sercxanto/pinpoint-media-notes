@@ -1,5 +1,5 @@
 node_modules/
 main.js
 package-lock.json
-docs/specs/
+docs/schema/
 tests/fixtures/
