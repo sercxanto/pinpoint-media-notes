@@ -102,6 +102,7 @@ The obsidian mock: `Modal.close` calls `onClose`, as Obsidian does;
 the `io/` and plugin tests; importer tests use the fakes in `helpers.ts`.
 
 scripts/install-to-vault.sh  copies main.js and manifest.json into a vault
+scripts/install-schema-to-vault.sh  copies docs/schema/ into a vault; --diff previews
 docs/
   SPEC.md                    behaviour, the authority
   book-source-evaluation.md  why the DNB

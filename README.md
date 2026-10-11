@@ -79,6 +79,25 @@ Media Notes_, then enable it.
 After a new build, run the script again, then turn the plugin off and on or
 run **Reload app without saving**.
 
+### Schema notes
+
+The templates and conventions notes in [`docs/schema/`](docs/schema/) can be
+copied into the vault the same way:
+
+```sh
+scripts/install-schema-to-vault.sh --diff <path to vault>
+scripts/install-schema-to-vault.sh <path to vault>
+```
+
+Templates go to `Obsidian/Templates`, conventions notes to
+`Obsidian/Conventions`; `--templates <dir>` and `--conventions <dir>` choose
+other folders, relative to the vault. The script lists each note as `new`,
+`changed` or `unchanged` and writes only those that are not unchanged; other
+notes in those folders are left alone. A note changed in the vault is
+overwritten, so run it with `--diff` first: that writes nothing and shows a
+unified diff per changed note, `-` for the vault's version and `+` for the
+repository's.
+
 ## Settings
 
 All folders are relative to the vault root: `Books` or `Media/Books`, not an
