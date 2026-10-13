@@ -1,4 +1,4 @@
-import type { BookRecord } from "../../src/book/record";
+import type { DnbRecord } from "../../src/book/dnb-record";
 
 const isString = (value: unknown): value is string => typeof value === "string";
 const nonEmpty = (value: unknown) => isString(value) && value !== "";
@@ -11,10 +11,12 @@ const idn = (value: string) => /^\d{7,9}[\dX]$/.test(value);
 
 /**
  * The shape each mapped field must have on a live record. Typed against
- * {@link BookRecord}, so a new field needs an entry; the offline
+ * {@link DnbRecord}, so a new field needs an entry; the offline
  * field-coverage test checks the keys as well.
  */
-export const BOOK_RECORD_SHAPE = {
+export const DNB_RECORD_SHAPE = {
+	catalogue: (value) => value === "dnb",
+	url: (value) => isString(value) && value.startsWith("https://d-nb.info/"),
 	idn: (value) => isString(value) && idn(value),
 	title: nonEmpty,
 	originalTitle: nonEmpty,
@@ -28,11 +30,11 @@ export const BOOK_RECORD_SHAPE = {
 	blurbUrl: orNull((value) => isString(value) && value.startsWith("https://services.dnb.de/")),
 	otherEditionIsbns: stringList(isbn13),
 	otherEditionIdns: stringList(idn),
-} as const satisfies Record<keyof BookRecord, (value: unknown) => boolean>;
+} as const satisfies Record<keyof DnbRecord, (value: unknown) => boolean>;
 
 /** Names of the fields whose value does not have the expected shape. */
-export function shapeMismatches(book: BookRecord): string[] {
-	return (Object.keys(BOOK_RECORD_SHAPE) as (keyof BookRecord)[]).filter(
-		(key) => !BOOK_RECORD_SHAPE[key](book[key]),
+export function shapeMismatches(book: DnbRecord): string[] {
+	return (Object.keys(DNB_RECORD_SHAPE) as (keyof DnbRecord)[]).filter(
+		(key) => !DNB_RECORD_SHAPE[key](book[key]),
 	);
 }

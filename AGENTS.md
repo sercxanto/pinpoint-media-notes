@@ -72,7 +72,8 @@ src/
   book/          book importer
     input.ts       ISBN/IDN/link parsing, check digits
     marc.ts        SRU response → MARC records (DOMParser), NFC and marker stripping on read
-    record.ts      MARC → BookRecord, BOOK_RECORD_SOURCES (field-coverage table), recordIsbn
+    record.ts      BookRecord (source-neutral), rdaBookType (RDA codes → type), describeRecord
+    dnb-record.ts  MARC → DnbRecord, DNB_RECORD_SOURCES (field-coverage table), recordIsbn
     blurb.ts       blurb HTML → text, truncation
     note.ts        file stem with type suffix, note builder
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
@@ -91,7 +92,7 @@ tests/
   helpers.ts              fixtures, fake HttpGet and VaultFiles, MARC record builder
   fixtures/               API responses, see "Fixtures" below
   contract/               live-API checks, only via `npm run test:contract`
-    book-shape.ts           BOOK_RECORD_SHAPE: per-field shape checks, typed against BookRecord
+    dnb-shape.ts            DNB_RECORD_SHAPE: per-field shape checks, typed against DnbRecord
     tmdb-shape.ts           TMDB_ENTRY_SHAPE: the same for TmdbEntry
     node-http.ts            HttpGet over fetch, because requestUrl exists only in Obsidian
 
@@ -151,7 +152,7 @@ Principles:
 
 - Every importer has a golden note-format test, comparing a complete note
   string against the spec's example note, and a field-coverage test: the
-  source tables (`BOOK_RECORD_SOURCES`, `TMDB_ENTRY_SOURCES`) are typed
+  source tables (`DNB_RECORD_SOURCES`, `TMDB_ENTRY_SOURCES`) are typed
   against the record types, and every entry is checked against the fixtures
   and the contract shapes. A new field cannot be added without a test.
 - Contract tests check the live APIs for shape, never for content, and stay
@@ -191,6 +192,12 @@ go into the spec.
   field is a `render` item, because the declarative `text` control cannot be
   masked.
 - **License:** MIT.
+- **Book records per catalogue:** `BookRecord` holds what the note, the
+  record picker and messages read, whatever the catalogue (`catalogue`,
+  `url`, `otherEditionIsbns`, …). Each catalogue extends it with what only
+  its own path reads (`DnbRecord`: `idn`, `blurbUrl`, `otherEditionIdns`),
+  and has its own source table and contract shape. The type is mapped from
+  RDA codes in one place (`rdaBookType`), so both catalogues share it.
 - **XML and HTML parsing** use the `DOMParser` built into Obsidian, no
   library. Tests run under jsdom.
 - **Contract tests use `fetch`** through `tests/contract/node-http.ts`; the

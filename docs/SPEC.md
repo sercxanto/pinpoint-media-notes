@@ -367,7 +367,7 @@ skips the entry.
 
 | Property         | Source                                                                        |
 | ---------------- | ----------------------------------------------------------------------------- |
-| `type`           | `336 $a` and `338 $a`, see [Type](#type)                                      |
+| `type`           | `336 $b` and `338 $b`, see [Type](#type)                                      |
 | `title`          | `245 $a`; the subtitle in `$b` is not used                                    |
 | `original_title` | `240 $a` (uniform title, the original of a translation), else `title`         |
 | `authors`        | `100 $a`, then `700 $a`, only fields whose `$4` contains `aut`; de-duplicated |
@@ -398,14 +398,22 @@ Details:
 
 ### Type
 
-| `336 $a` contains   | `338 $a` (first match) | `type`      |
-| ------------------- | ---------------------- | ----------- |
-| `gesprochenes Wort` | anything               | `audiobook` |
-| `Text`              | `Band`                 | `book`      |
-| `Text`              | `Online-Ressource`     | `ebook`     |
+From the RDA codes in `$b`, the same codes the
+[LoC fallback](#library-of-congress-fallback) reads:
+
+| Content (`336 $b` contains) | Carrier (`338 $b`, first match) | `type`      |
+| --------------------------- | ------------------------------- | ----------- |
+| `spw` (spoken word)         | anything                        | `audiobook` |
+| `txt` (text)                | `nc` (volume)                   | `book`      |
+| `txt` (text)                | `cr` (online resource)          | `ebook`     |
+
+A `336` or `338` field without `$b` is read from the German term in `$a`
+instead: `gesprochenes Wort` as `spw`, `Text` as `txt`, `Band` as `nc`,
+`Online-Ressource` as `cr`. Every record in the fixtures carries both.
 
 Any other combination (sheet music, maps, film, …) is unsupported material
-and the entry is skipped, naming the catalogued content and carrier type.
+and the entry is skipped, naming the catalogued content and carrier type
+(the terms in `$a`).
 
 ### Description
 

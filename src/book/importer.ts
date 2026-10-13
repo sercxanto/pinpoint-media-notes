@@ -7,7 +7,7 @@ import { COVER_EXTENSIONS, fetchBlurb, fetchCover, searchCatalogue } from "./dnb
 import { parseBookInput, type BookQuery } from "./input";
 import type { MarcRecord } from "./marc";
 import { bookNote, bookStem } from "./note";
-import { readBookRecord, recordIsbn, type BookRecord } from "./record";
+import { dnbRecordUrl, readDnbRecord, recordIsbn, type DnbRecord } from "./dnb-record";
 
 export interface BookImportConfig {
 	notesDir: string;
@@ -32,7 +32,7 @@ export interface BookImportDeps {
 	 * Called when a lookup returns several records: resolves to the chosen
 	 * one, or null to skip the entry.
 	 */
-	chooseRecord(records: BookRecord[]): Promise<BookRecord | null>;
+	chooseRecord(records: DnbRecord[]): Promise<DnbRecord | null>;
 }
 
 export interface BookImportResult {
@@ -56,7 +56,7 @@ export async function importBook(input: string, deps: BookImportDeps): Promise<B
 	const lookup = await lookUp(http, query);
 	if (lookup.note) report.push(lookup.note);
 
-	const books = lookup.records.map(readBookRecord);
+	const books = lookup.records.map(readDnbRecord);
 	const book = books.length === 1 ? books[0] : await deps.chooseRecord(books);
 	if (!book) throw new EntryError(`Skipped ${input.trim()}: no record chosen.`);
 	if (book.type === null) {
@@ -145,7 +145,7 @@ interface CoverOutcome {
  */
 async function provideCover(
 	deps: BookImportDeps,
-	book: BookRecord,
+	book: DnbRecord,
 	stem: string,
 ): Promise<CoverOutcome> {
 	const { files, config } = deps;
@@ -186,7 +186,7 @@ type FoundCover =
  * server serves no covers at all (bot check, errors), because asking for
  * other ISBNs would meet the same answer.
  */
-async function findCover(deps: BookImportDeps, book: BookRecord): Promise<FoundCover> {
+async function findCover(deps: BookImportDeps, book: DnbRecord): Promise<FoundCover> {
 	const { http, config } = deps;
 	const tried: { isbn: string; reason: string }[] = [];
 	const unresolved: string[] = [];
@@ -198,7 +198,7 @@ async function findCover(deps: BookImportDeps, book: BookRecord): Promise<FoundC
 		tried.push({ isbn: source.isbn, reason: cover.reason });
 	}
 
-	const lookups = unresolved.map((idn) => `, https://d-nb.info/${idn} could not be looked up`);
+	const lookups = unresolved.map((idn) => `, ${dnbRecordUrl(idn)} could not be looked up`);
 	if (tried.length === 0) {
 		const reason =
 			book.otherEditionIsbns.length + book.otherEditionIdns.length === 0
@@ -223,7 +223,7 @@ async function findCover(deps: BookImportDeps, book: BookRecord): Promise<FoundC
  */
 async function* coverCandidates(
 	http: HttpGet,
-	book: BookRecord,
+	book: DnbRecord,
 	unresolved: string[],
 ): AsyncGenerator<CoverSource> {
 	const seen = new Set<string>();
@@ -259,6 +259,6 @@ function coverMessage(source: CoverSource): string {
 		case "isbn":
 			return `Cover from ISBN ${source.isbn}, another edition; its artwork may differ.`;
 		case "record":
-			return `Cover from ISBN ${source.isbn}, another edition (https://d-nb.info/${source.idn}); its artwork may differ.`;
+			return `Cover from ISBN ${source.isbn}, another edition (${dnbRecordUrl(source.idn)}); its artwork may differ.`;
 	}
 }

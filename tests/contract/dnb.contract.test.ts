@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { coverUrl, fetchBlurb, fetchCover, searchCatalogue } from "../../src/book/dnb";
 import { importBook } from "../../src/book/importer";
-import { readBookRecord, recordIsbn, type BookRecord } from "../../src/book/record";
+import { readDnbRecord, recordIsbn, type DnbRecord } from "../../src/book/dnb-record";
 import { fakeFiles } from "../helpers";
-import { shapeMismatches } from "./book-shape";
+import { shapeMismatches } from "./dnb-shape";
 import { nodeHttp } from "./node-http";
 
 // Live checks against the DNB. They assert the shape of what comes back and
@@ -18,10 +18,10 @@ const KAENGURU_CD = "1379107830";
 /** Valid check digit, not a real book: the cover service answers 404. */
 const NO_SUCH_ISBN = "9780000000002";
 
-async function lookUpOne(index: "NUM" | "IDN", value: string): Promise<BookRecord> {
+async function lookUpOne(index: "NUM" | "IDN", value: string): Promise<DnbRecord> {
 	const records = await searchCatalogue(nodeHttp, index, value);
 	expect(records).toHaveLength(1);
-	return readBookRecord(records[0]!);
+	return readDnbRecord(records[0]!);
 }
 
 describe("DNB catalogue (SRU)", () => {

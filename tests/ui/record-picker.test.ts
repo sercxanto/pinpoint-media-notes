@@ -1,11 +1,11 @@
 import { App } from "obsidian";
 import { describe, expect, it } from "vitest";
 import { parseSruResponse } from "../../src/book/marc";
-import { readBookRecord } from "../../src/book/record";
+import { readDnbRecord } from "../../src/book/dnb-record";
 import { RecordPickerModal } from "../../src/ui/record-picker";
 import { fixture } from "../helpers";
 
-const records = parseSruResponse(fixture("book/sru-kaenguru-rebellion.xml")).map(readBookRecord);
+const records = parseSruResponse(fixture("book/sru-kaenguru-rebellion.xml")).map(readDnbRecord);
 
 describe("RecordPickerModal", () => {
 	it("resolves to the chosen record and closes", async () => {

@@ -20,7 +20,7 @@ maintainer), `done` (committed).
 | Phase | Content                                                         | Status |
 | ----- | --------------------------------------------------------------- | ------ |
 | 1     | Spec: the fallback's behaviour, open decisions settled          | done   |
-| 2     | Refactor, no behaviour change: source-neutral record, RDA codes | open   |
+| 2     | Refactor, no behaviour change: source-neutral record, RDA codes | done   |
 | 3     | LoC client and mapping over `id.loc.gov`                        | open   |
 | 4     | Open Library: title and cover                                   | open   |
 | 5     | Wiring into the importer; README, manual test                   | open   |
@@ -124,7 +124,7 @@ test names an internal that is renamed.
     hits both; the `cancinv` rule picks the e-book record.
   - a search response with no hits (e.g. `9781399615310`).
 - **Contract test** for the shape of both responses, typed like
-  `tests/contract/book-shape.ts`, opt-in as the others.
+  `tests/contract/dnb-shape.ts`, opt-in as the others.
 - Not covered by the sample, so test what the fixtures cannot: a series
   number (`seriesEnumeration`), an audiobook (`spw`), a translation's
   original title. Look for a real LoC record of each before inventing one.
@@ -172,3 +172,26 @@ when there is no LCCN; `original_title` is the `title` value (Open Library
 title where there is one); the summary's quotes and attribution are removed
 only when it has exactly that form; an Open Library 404 is silent, other
 failures are reported.
+
+**Phase 2.** `src/book/record.ts` is now source-neutral: `BookRecord` with
+`catalogue` (`"dnb" | "loc"`), `url` and `otherEditionIsbns`;
+`rdaBookType(contents, carriers)` maps RDA codes to the type, ready for the
+LoC's codes from the content and carrier URIs; `describeRecord` links
+`book.url`. The MARC mapping moved to `src/book/dnb-record.ts` (`DnbRecord`,
+`readDnbRecord`, `DNB_RECORD_SOURCES`, `dnbRecordUrl`); the contract shape is
+`tests/contract/dnb-shape.ts` (`DNB_RECORD_SHAPE`). Phase 3 adds the LoC
+counterparts next to them (`LocRecord extends BookRecord`, its own source
+table and shape). `BookImportDeps.chooseRecord` is typed on `DnbRecord`;
+phase 5 widens it to `DnbRecord | LocRecord` and branches on `catalogue`.
+`RecordPickerModal` is generic over the record type already.
+`$a` stays as a fallback for a `336`/`338` field without `$b` (German terms
+mapped to codes), which keeps the behaviour identical for such records; all
+DNB fixtures carry both. The maintainer settled to keep the fallback
+(2026-10-11). Checked live on 2026-10-13, after a DNB SRU outage: the DNB
+contract tests pass (10 of 10). In 243 records from nine title searches
+(1960 to 2026), every `336` and `338` field carries both `$a` and `$b`; no
+field has `$a` alone, so the fallback is a safeguard, not a path seen in
+practice. Five records had neither `336` nor `338`: 2026 translations
+abroad (_Momo_ in Ukrainian, Greek, Spanish, Turkish; _Buddenbrooks_ in
+Georgian), encoding level `8` (prepublication). They count as unsupported
+material, before and after this phase.

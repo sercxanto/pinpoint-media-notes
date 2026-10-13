@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { coverUrl, sruUrl } from "../../src/book/dnb";
 import { bookImportConfig, importBook, type BookImportConfig } from "../../src/book/importer";
-import type { BookRecord } from "../../src/book/record";
+import type { DnbRecord } from "../../src/book/dnb-record";
 import { ConfigError, EntryError } from "../../src/core/errors";
 import { DEFAULT_SETTINGS } from "../../src/settings";
 import {
@@ -31,7 +31,7 @@ const blurb: FakeResponse = {
 };
 const cover: FakeResponse = { contentType: "image/jpeg", body: JPEG };
 
-function noChoiceExpected(_records: BookRecord[]): Promise<BookRecord | null> {
+function noChoiceExpected(_records: DnbRecord[]): Promise<DnbRecord | null> {
 	return Promise.reject(new Error("unexpected record choice"));
 }
 
@@ -428,7 +428,7 @@ describe("importBook", () => {
 		};
 
 		it("lets the user choose and imports the chosen record", async () => {
-			const choose = vi.fn((records: BookRecord[]) => Promise.resolve(records[0] ?? null));
+			const choose = vi.fn((records: DnbRecord[]) => Promise.resolve(records[0] ?? null));
 			const { files, run } = setup(routes, [], choose);
 			const result = await run(ISBN);
 			expect(choose.mock.calls[0]?.[0].map((book) => book.idn)).toEqual([

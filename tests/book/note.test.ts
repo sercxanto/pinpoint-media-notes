@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { parseSruResponse } from "../../src/book/marc";
 import { bookNote, bookStem } from "../../src/book/note";
-import { readBookRecord, type BookRecord } from "../../src/book/record";
+import { readDnbRecord } from "../../src/book/dnb-record";
+import type { BookRecord } from "../../src/book/record";
 import { fixture } from "../helpers";
 
 const methode = (): BookRecord =>
-	readBookRecord(parseSruResponse(fixture("book/sru-1-prozent-methode.xml"))[0]!);
+	readDnbRecord(parseSruResponse(fixture("book/sru-1-prozent-methode.xml"))[0]!);
 
 // The spec's example note, character for character. A change here is a
 // change of the vault's note format.
