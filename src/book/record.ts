@@ -1,13 +1,13 @@
-import { EntryError } from "../core/errors";
-import { isValidIsbn10, isbn10To13 } from "./input";
-import { fields, firstSubfield, subfield, subfields, type MarcRecord } from "./marc";
-
 export type BookType = "book" | "ebook" | "audiobook";
 
-/** What the importer reads from one catalogue record. */
+/** The catalogue a record comes from, for messages. */
+export type BookCatalogue = "dnb" | "loc";
+
+/** What the importer reads from one catalogue record, whichever the catalogue. */
 export interface BookRecord {
-	/** DNB record number, from `001`. */
-	idn: string;
+	catalogue: BookCatalogue;
+	/** The record's own page; the note's `url` and the record picker's link. */
+	url: string;
 	title: string;
 	originalTitle: string;
 	/** `Surname, Given name`, authors only (no translators, narrators, …). */
@@ -21,177 +21,22 @@ export interface BookRecord {
 	type: BookType | null;
 	/** Content and carrier type as catalogued, for messages. */
 	media: string;
-	/** The DNB's own blurb page, if the record links one. */
-	blurbUrl: string | null;
-	/** ISBN-13s of other editions of the work, from `776 $z`; cover fallback. */
+	/** ISBN-13s of other editions of the work; cover fallback. */
 	otherEditionIsbns: string[];
-	/** DNB record numbers of other editions, from `776 $w`; cover fallback. */
-	otherEditionIdns: string[];
 }
 
 /**
- * Where each field comes from. Typed against {@link BookRecord}, so a new
- * field needs an entry here, and the field-coverage test checks every entry
- * against the fixtures.
+ * The type from RDA content codes (`txt`, `spw`, …) and carrier codes (`nc`,
+ * `cr`, …), which both catalogues use. Carriers are matched in order.
  */
-export const BOOK_RECORD_SOURCES = {
-	idn: "001",
-	title: "245 $a",
-	originalTitle: "240 $a, else title",
-	authors: "100 $a, 700 $a, where $4 is aut",
-	isbn: "020 $a (ISBN-13)",
-	year: "264 $c, else 260 $c",
-	series: "490 $a, else 830 $a",
-	seriesIndex: "490 $v, else 830 $v",
-	type: "336 $a + 338 $a",
-	media: "336 $a + 338 $a",
-	blurbUrl: "856 $u where $3 is Inhaltstext, DNB host only",
-	otherEditionIsbns: "776 $z",
-	otherEditionIdns: "776 $w of the form (DE-101)<idn>",
-} as const satisfies Record<keyof BookRecord, string>;
-
-/** Maps one MARC record. Throws an EntryError if it lacks an IDN or a title. */
-export function readBookRecord(marc: MarcRecord): BookRecord {
-	const idn = marc.control["001"] ?? "";
-	if (idn === "") throw new EntryError("A catalogue record has no record number.");
-	const title = firstSubfield(marc, "245", "a");
-	if (title === null) throw new EntryError(`Catalogue record ${idn} has no title.`);
-
-	const contents = fields(marc, "336").flatMap((field) => subfields(field, "a"));
-	const carriers = fields(marc, "338").flatMap((field) => subfields(field, "a"));
-
-	return {
-		idn,
-		title,
-		originalTitle: firstSubfield(marc, "240", "a") ?? title,
-		authors: readAuthors(marc),
-		isbn: recordIsbn(marc),
-		year: readYear(marc),
-		series: firstSubfield(marc, "490", "a") ?? firstSubfield(marc, "830", "a"),
-		seriesIndex: readSeriesIndex(marc),
-		type: bookType(contents, carriers),
-		media: `${contents.join(", ") || "no content type"} / ${carriers.join(", ") || "no carrier type"}`,
-		blurbUrl: readBlurbUrl(marc),
-		otherEditionIsbns: readOtherEditionIsbns(marc),
-		otherEditionIdns: readOtherEditionIdns(marc, idn),
-	};
-}
-
-function readAuthors(marc: MarcRecord): string[] {
-	const names = [...fields(marc, "100"), ...fields(marc, "700")]
-		.filter((field) => subfields(field, "4").includes("aut"))
-		.map((field) => subfield(field, "a"))
-		.filter((name) => name !== null);
-	return [...new Set(names)];
-}
-
-/**
- * The record's ISBN-13 from `020 $a`. Also used on records linked in `776 $w`,
- * which are only read for their ISBN.
- */
-export function recordIsbn(marc: MarcRecord): string | null {
-	return firstIsbn13(fields(marc, "020").flatMap((field) => subfields(field, "a")));
-}
-
-/** The first ISBN-13 among the values, else the first valid ISBN-10 converted. */
-function firstIsbn13(raw: string[]): string | null {
-	const values = raw.map((value) => value.replace(/[\s-]/g, "").toUpperCase());
-	for (const value of values) {
-		const isbn13 = /(?:^|\D)(97[89]\d{10})(?!\d)/.exec(value)?.[1];
-		if (isbn13) return isbn13;
-	}
-	// Older records carry an ISBN-10 only; the cover service needs ISBN-13.
-	for (const value of values) {
-		const isbn10 = /(?:^|\D)(\d{9}[\dX])(?![\dX])/.exec(value)?.[1];
-		if (isbn10 && isValidIsbn10(isbn10)) return isbn10To13(isbn10);
-	}
-	return null;
-}
-
-/** One ISBN-13 per `776 $z`, in record order, without duplicates. */
-function readOtherEditionIsbns(marc: MarcRecord): string[] {
-	const isbns = fields(marc, "776")
-		.flatMap((field) => subfields(field, "z"))
-		.map((value) => firstIsbn13([value]))
-		.filter((isbn) => isbn !== null);
-	return [...new Set(isbns)];
-}
-
-/**
- * `776 $w` links carry the holding library's prefix; only `(DE-101)`, the
- * DNB's own, is a record number the catalogue can look up. A link back to
- * the record itself is dropped.
- */
-function readOtherEditionIdns(marc: MarcRecord, idn: string): string[] {
-	const idns = fields(marc, "776")
-		.flatMap((field) => subfields(field, "w"))
-		.map((value) => /^\(DE-101\)\s*(\d{7,9}[\dX])$/i.exec(value)?.[1]?.toUpperCase())
-		.filter((linked): linked is string => linked !== undefined && linked !== idn);
-	return [...new Set(idns)];
-}
-
-/** The first four-digit run, publication statement (264 ind2 1) preferred over copyright dates. */
-function readYear(marc: MarcRecord): number | null {
-	const statements = fields(marc, "264");
-	const ordered = [
-		...statements.filter((field) => field.ind2 === "1"),
-		...statements.filter((field) => field.ind2 !== "1"),
-		...fields(marc, "260"),
-	];
-	for (const field of ordered) {
-		for (const value of subfields(field, "c")) {
-			const year = /\d{4}/.exec(value)?.[0];
-			if (year) return Number(year);
-		}
-	}
-	return null;
-}
-
-/** "Band 5" → 5. A volume without a number gives null. */
-function readSeriesIndex(marc: MarcRecord): number | null {
-	for (const tag of ["490", "830"]) {
-		for (const field of fields(marc, tag)) {
-			for (const value of subfields(field, "v")) {
-				const number = /\d+(?:[.,]\d+)?/.exec(value)?.[0];
-				if (number) return Number(number.replace(",", "."));
-			}
-		}
-	}
-	return null;
-}
-
-function bookType(contents: string[], carriers: string[]): BookType | null {
-	if (contents.includes("gesprochenes Wort")) return "audiobook";
-	if (!contents.includes("Text")) return null;
+export function rdaBookType(contents: string[], carriers: string[]): BookType | null {
+	if (contents.includes("spw")) return "audiobook";
+	if (!contents.includes("txt")) return null;
 	for (const carrier of carriers) {
-		if (carrier === "Band") return "book";
-		if (carrier === "Online-Ressource") return "ebook";
+		if (carrier === "nc") return "book";
+		if (carrier === "cr") return "ebook";
 	}
 	return null;
-}
-
-/**
- * Publishers register their homepage under the same `Inhaltstext` label, and
- * the neighbouring `Inhaltsverzeichnis` is a scanned PDF; only the DNB's own
- * blurb service is used.
- */
-function readBlurbUrl(marc: MarcRecord): string | null {
-	for (const field of fields(marc, "856")) {
-		if (!subfields(field, "3").includes("Inhaltstext")) continue;
-		for (const url of subfields(field, "u")) {
-			if (isDnbBlurbUrl(url)) return url;
-		}
-	}
-	return null;
-}
-
-export function isDnbBlurbUrl(url: string): boolean {
-	try {
-		const parsed = new URL(url);
-		return /^https?:$/.test(parsed.protocol) && parsed.hostname === "services.dnb.de";
-	} catch {
-		return false;
-	}
 }
 
 /**
@@ -203,6 +48,6 @@ export function describeRecord(book: BookRecord): { name: string; details: strin
 	const isbn = book.isbn === null ? "no ISBN" : `ISBN ${book.isbn}`;
 	return {
 		name: `${book.title} (${year})`,
-		details: `${book.type ?? book.media}, ${isbn}, https://d-nb.info/${book.idn}`,
+		details: `${book.type ?? book.media}, ${isbn}, ${book.url}`,
 	};
 }

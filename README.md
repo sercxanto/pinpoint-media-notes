@@ -4,7 +4,9 @@ An Obsidian plugin that creates a note with a cover image from an exact
 identifier, instead of a title search:
 
 - a book's **ISBN**: printed book, e-book or audiobook, from the catalogue of
-  the Deutsche Nationalbibliothek (DNB, the German National Library),
+  the Deutsche Nationalbibliothek (DNB, the German National Library); an
+  ISBN the DNB does not know is looked up at the Library of Congress (LoC),
+  with title and cover from Open Library,
 - a **TMDB link**: movie or series, in the language you configure.
 
 Each note gets a fixed frontmatter schema and its own local copy of the cover
@@ -145,11 +147,24 @@ looked up.
 
 A 10-character input can be an ISBN-10 or a DNB record number; both use the
 same check digit, so the plugin cannot tell them apart. It looks the input up
-as an ISBN first and, if the catalogue has nothing, as a record number, and
-the message says which one it used. A `d-nb.info` link avoids the guess.
+as an ISBN first (DNB, then Library of Congress) and, if neither has it, as a
+DNB record number, and the message says which one it used. A `d-nb.info`
+link avoids the guess.
 
 The record number is the number at the end of the record's permanent link on
 [portal.dnb.de](https://portal.dnb.de) (_Link zu diesem Datensatz_).
+
+**Not in the DNB:** an ISBN the DNB has no record for is looked up at the
+Library of Congress, which holds most English-language editions published in
+the US. The message says so (`Not in the DNB; record from the Library of
+Congress.`), because title and description of such a record are English.
+Only an ISBN falls back: a record number or a `d-nb.info` link is looked up
+at the DNB alone, and if the DNB lookup fails (server error, no network) the
+entry fails instead of falling back. Editions published only in the UK and
+very new releases are often in neither catalogue; the message then names
+both. An LoC record that lists the ISBN only as another format's (the print
+record naming the e-book's ISBN) describes a different edition; it is not
+imported, and the message names it.
 
 **Several records:** some publishers use one ISBN for the print and the
 e-book edition. Then a list opens with title, year, type, ISBN and catalogue
@@ -245,6 +260,24 @@ tags:
 | `genres`         | always `[]`, for you to fill in; the catalogue's subject headings do not map to genres                                 |
 | `description`    | the DNB's blurb (`Inhaltstext`), as plain text, whole sentences up to 500 characters; empty if there is none           |
 | `cover`          | see [Covers and posters](#covers-and-posters)                                                                          |
+
+A record from the **Library of Congress** is read from its linked-data
+service `id.loc.gov`, and gets the same properties:
+
+| Property         | Source (BIBFRAME record at `id.loc.gov`, Open Library)                                                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`           | content and carrier type, the same RDA codes as the DNB's                                                                                |
+| `title`          | the Open Library edition's title, without subtitle; else the LoC title, which is in sentence case (`Building a second brain`)            |
+| `original_title` | the original title of a translation, as the LoC catalogues it (initial article dropped: `Étranger`); else the title                      |
+| `authors`        | contributors with the role author, `Surname, Given name` without life dates; `[]` if there is none                                       |
+| `url`            | `https://lccn.loc.gov/<LCCN>`, the LoC's permanent link; `https://id.loc.gov/resources/instances/<id>` for a record without LCCN         |
+| `isbn`           | the ISBN-13 you entered                                                                                                                  |
+| `year`           | the year of publication                                                                                                                  |
+| `series`         | the series title, publisher series included (`The pragmatic programmers`)                                                                |
+| `series_index`   | the number in the series statement: "bk. 1" → `1`                                                                                        |
+| `genres`         | always `[]`                                                                                                                              |
+| `description`    | the record's summary, without the quotes and the `-- Provided by publisher.` attribution, whole sentences up to 500 characters; or empty |
+| `cover`          | from Open Library, see [Book covers](#book-covers)                                                                                       |
 
 ### Movie or series
 
@@ -351,7 +384,13 @@ The message names the ISBN the cover came from, and says so when it belongs
 to another edition: an audiobook or an illustrated edition may have
 different artwork, which you may want to replace by hand.
 
-**Caveat:** the cover server sits behind a bot filter. The plugin identifies
+For a record from the Library of Congress, covers come from Open Library
+instead, in the configured size: first for the ISBN you entered, then for the
+ISBNs of the other formats the record lists (the print edition of an
+e-book, for example). The message names Open Library as the source. Open
+Library keeps many covers at `archive.org` and redirects there.
+
+**Caveat:** the DNB's cover server sits behind a bot filter. The plugin identifies
 itself, which the filter currently lets through. If the filter starts
 challenging it, every book is imported without cover and the message reads
 "the cover server answered with text/html instead of an image, probably its
@@ -368,8 +407,9 @@ The file extension is that of TMDB's file.
 
 Every import ends with a notice of about ten seconds: the note created, and
 anything noteworthy, such as where the cover came from, a missing blurb,
-fields taken from TMDB's default language, or which reading of a
-10-character input was used.
+fields taken from TMDB's default language, which reading of a 10-character
+input was used, or that a book came from the Library of Congress and where
+its title came from.
 
 | Kind           | Examples                                                                   | What happens                                                      |
 | -------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
@@ -382,19 +422,27 @@ fields taken from TMDB's default language, or which reading of a
 The plugin sends requests only when you import an entry, and only to these
 services:
 
-| Host                 | For                                           |
-| -------------------- | --------------------------------------------- |
-| `services.dnb.de`    | catalogue lookup and blurbs (DNB, no account) |
-| `portal.dnb.de`      | book covers (DNB)                             |
-| `api.themoviedb.org` | movie and series details, with your token     |
-| `image.tmdb.org`     | posters, without your token                   |
+| Host                              | For                                                     | Receives                          |
+| --------------------------------- | ------------------------------------------------------- | --------------------------------- |
+| `services.dnb.de`                 | catalogue lookup and blurbs (DNB, no account)           | ISBN or record number             |
+| `portal.dnb.de`                   | book covers (DNB)                                       | ISBN                              |
+| `id.loc.gov`                      | catalogue lookup at the Library of Congress, no account | ISBN, then the LoC record numbers |
+| `openlibrary.org`                 | title of an LoC record (no account)                     | ISBN                              |
+| `covers.openlibrary.org`          | covers of an LoC record                                 | ISBN, and ISBNs of other formats  |
+| `archive.org`, `*.us.archive.org` | covers of an LoC record, redirected from Open Library   | Open Library's cover file name    |
+| `api.themoviedb.org`              | movie and series details, with your token               | TMDB id, your token               |
+| `image.tmdb.org`                  | posters, without your token                             | poster path                       |
 
-The DNB receives the ISBN or record number you enter, TMDB the id of the
-movie or series. There is no telemetry and no other network access. DNB
-requests carry the User-Agent `pinpoint-media-notes (Obsidian plugin)`.
+The Library of Congress, Open Library and `archive.org` are contacted only
+for an ISBN the DNB has no record for. There is no telemetry and no other
+network access. Requests to the book hosts (DNB, LoC, Open Library) carry the
+User-Agent
+`pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)`.
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
-Catalogue data of the Deutsche Nationalbibliothek is available under CC0.
+Catalogue data of the Deutsche Nationalbibliothek is available under CC0,
+that of the Library of Congress is in the public domain, and Open Library's
+under CC0.
 
 ## Synced vaults and mobile
 

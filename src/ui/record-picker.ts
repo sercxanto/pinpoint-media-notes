@@ -5,25 +5,25 @@ import { describeRecord, type BookRecord } from "../book/record";
  * Lists the records a lookup returned and lets the user choose one. Closing
  * the modal without a choice skips the entry; nothing is guessed.
  */
-export class RecordPickerModal extends Modal {
-	private chosen: BookRecord | null = null;
-	private resolve: ((book: BookRecord | null) => void) | undefined;
+export class RecordPickerModal<T extends BookRecord> extends Modal {
+	private chosen: T | null = null;
+	private resolve: ((book: T | null) => void) | undefined;
 
 	constructor(
 		app: App,
-		private readonly records: BookRecord[],
+		private readonly records: T[],
 	) {
 		super(app);
 	}
 
 	/** Opens the modal; resolves to the chosen record, or null when closed without a choice. */
-	pick(): Promise<BookRecord | null> {
-		const choice = new Promise<BookRecord | null>((resolve) => (this.resolve = resolve));
+	pick(): Promise<T | null> {
+		const choice = new Promise<T | null>((resolve) => (this.resolve = resolve));
 		this.open();
 		return choice;
 	}
 
-	choose(book: BookRecord): void {
+	choose(book: T): void {
 		this.chosen ??= book;
 		this.close();
 	}

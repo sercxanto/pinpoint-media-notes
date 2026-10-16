@@ -30,7 +30,7 @@ export function bookNote(
 		["title", book.title],
 		["original_title", book.originalTitle],
 		["authors", book.authors],
-		["url", `https://d-nb.info/${book.idn}`],
+		["url", book.url],
 		["isbn", book.isbn],
 		["year", book.year],
 		["series", book.series],

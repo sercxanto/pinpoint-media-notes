@@ -3,11 +3,15 @@ import { requireVaultFolder } from "../core/paths";
 import type { HttpGet } from "../io/http";
 import type { VaultFiles } from "../io/vault";
 import type { CoverSize, PinpointSettings } from "../settings";
-import { COVER_EXTENSIONS, fetchBlurb, fetchCover, searchCatalogue } from "./dnb";
+import { COVER_EXTENSIONS, type CoverResult } from "./cover";
+import { fetchBlurb, fetchCover, searchCatalogue } from "./dnb";
+import { dnbRecordUrl, readDnbRecord, recordIsbn, type DnbRecord } from "./dnb-record";
 import { parseBookInput, type BookQuery } from "./input";
-import type { MarcRecord } from "./marc";
+import { fetchLocRecord, searchLoc } from "./loc";
+import { matchLocRecords, type LocRecord } from "./loc-record";
 import { bookNote, bookStem } from "./note";
-import { readBookRecord, recordIsbn, type BookRecord } from "./record";
+import { fetchOpenLibraryCover, fetchOpenLibraryTitle } from "./openlibrary";
+import type { BookRecord } from "./record";
 
 export interface BookImportConfig {
 	notesDir: string;
@@ -32,7 +36,7 @@ export interface BookImportDeps {
 	 * Called when a lookup returns several records: resolves to the chosen
 	 * one, or null to skip the entry.
 	 */
-	chooseRecord(records: BookRecord[]): Promise<BookRecord | null>;
+	chooseRecord<T extends BookRecord>(records: T[]): Promise<T | null>;
 }
 
 export interface BookImportResult {
@@ -44,9 +48,11 @@ export interface BookImportResult {
 }
 
 /**
- * Imports one entry, in the fixed order: parse, look up, name and check for
- * a collision, fetch the blurb, get the cover (or reuse an existing file),
- * write the note last. Per-entry problems throw an EntryError.
+ * Imports one entry, in the fixed order: parse, look up (DNB, then the LoC
+ * for an ISBN the DNB has no record for), the Open Library title of an LoC
+ * record, name and check for a collision, fetch the blurb, get the cover (or
+ * reuse an existing file), write the note last. Per-entry problems throw an
+ * EntryError.
  */
 export async function importBook(input: string, deps: BookImportDeps): Promise<BookImportResult> {
 	const { http, files, config } = deps;
@@ -56,15 +62,22 @@ export async function importBook(input: string, deps: BookImportDeps): Promise<B
 	const lookup = await lookUp(http, query);
 	if (lookup.note) report.push(lookup.note);
 
-	const books = lookup.records.map(readBookRecord);
-	const book = books.length === 1 ? books[0] : await deps.chooseRecord(books);
-	if (!book) throw new EntryError(`Skipped ${input.trim()}: no record chosen.`);
-	if (book.type === null) {
+	const chosen =
+		lookup.records.length === 1 ? lookup.records[0] : await chooseRecord(deps, lookup);
+	if (!chosen) throw new EntryError(`Skipped ${input.trim()}: no record chosen.`);
+	if (chosen.type === null) {
 		throw new EntryError(
-			`Skipped "${book.title}": unsupported material (${book.media}). Only books, e-books and audiobooks are imported.`,
+			`Skipped "${chosen.title}": unsupported material (${chosen.media}). Only books, e-books and audiobooks are imported.`,
 		);
 	}
-	const type = book.type;
+	const type = chosen.type;
+
+	let book: DnbRecord | LocRecord = chosen;
+	if (book.catalogue === "loc") {
+		const titled = await withOpenLibraryTitle(http, book);
+		book = titled.book;
+		report.push(titled.message);
+	}
 
 	const stem = bookStem(book, type);
 	const notePath = `${config.notesDir}/${stem}.md`;
@@ -73,7 +86,9 @@ export async function importBook(input: string, deps: BookImportDeps): Promise<B
 	}
 
 	let description = "";
-	if (book.blurbUrl !== null) {
+	if (book.catalogue === "loc") {
+		description = book.description ?? "";
+	} else if (book.blurbUrl !== null) {
 		const blurb = await fetchBlurb(http, book.blurbUrl);
 		if (blurb.ok) description = blurb.text;
 		else report.push(`No description: ${blurb.reason}.`);
@@ -97,40 +112,125 @@ export async function importBook(input: string, deps: BookImportDeps): Promise<B
 	};
 }
 
-interface Lookup {
-	records: MarcRecord[];
-	/** How an ambiguous input was read, for the report. */
+type Lookup = (
+	{ catalogue: "dnb"; records: DnbRecord[] } | { catalogue: "loc"; records: LocRecord[] }
+) & {
+	/** How the input was read and where the record comes from, for the report. */
 	note?: string;
+};
+
+/** The picker is typed per catalogue, so the chosen record keeps its own fields. */
+function chooseRecord(deps: BookImportDeps, lookup: Lookup): Promise<DnbRecord | LocRecord | null> {
+	return lookup.catalogue === "dnb"
+		? deps.chooseRecord(lookup.records)
+		: deps.chooseRecord(lookup.records);
 }
 
+const FROM_LOC = "Not in the DNB; record from the Library of Congress";
+
+/**
+ * DNB by ISBN, LoC by ISBN, and for ten characters DNB by record number
+ * last. Only a DNB miss goes on to the next step; a failed lookup throws.
+ */
 async function lookUp(http: HttpGet, query: BookQuery): Promise<Lookup> {
 	switch (query.kind) {
 		case "isbn": {
-			const records = await searchCatalogue(http, "NUM", query.isbn);
-			if (records.length === 0)
-				throw new EntryError(`No catalogue record for ISBN ${query.isbn}.`);
-			return { records };
+			const dnb = await searchCatalogue(http, "NUM", query.isbn);
+			if (dnb.length > 0) return { catalogue: "dnb", records: dnb.map(readDnbRecord) };
+			const loc = await lookUpLoc(http, query.isbn);
+			if (loc.matches.length > 0) {
+				return { catalogue: "loc", records: loc.matches, note: `${FROM_LOC}.` };
+			}
+			throw new EntryError(
+				`No catalogue record for ISBN ${query.isbn}, neither at the DNB nor at the Library of Congress.` +
+					otherFormatNote(loc.otherFormat),
+			);
 		}
 		case "idn": {
 			const records = await searchCatalogue(http, "IDN", query.idn);
 			if (records.length === 0) {
 				throw new EntryError(`No catalogue record with record number ${query.idn}.`);
 			}
-			return { records };
+			return { catalogue: "dnb", records: records.map(readDnbRecord) };
 		}
 		case "isbn-or-idn": {
+			const asIsbn = `Read ${query.idn} as ISBN ${query.isbn}.`;
 			const byIsbn = await searchCatalogue(http, "NUM", query.isbn);
 			if (byIsbn.length > 0) {
-				return { records: byIsbn, note: `Read ${query.idn} as ISBN ${query.isbn}.` };
+				return { catalogue: "dnb", records: byIsbn.map(readDnbRecord), note: asIsbn };
+			}
+			const loc = await lookUpLoc(http, query.isbn);
+			if (loc.matches.length > 0) {
+				return { catalogue: "loc", records: loc.matches, note: `${asIsbn} ${FROM_LOC}.` };
 			}
 			const byIdn = await searchCatalogue(http, "IDN", query.idn);
 			if (byIdn.length > 0) {
-				return { records: byIdn, note: `Read ${query.idn} as a DNB record number.` };
+				return {
+					catalogue: "dnb",
+					records: byIdn.map(readDnbRecord),
+					note: `Read ${query.idn} as a DNB record number.`,
+				};
 			}
 			throw new EntryError(
-				`No catalogue record for ${query.idn}, neither as ISBN ${query.isbn} nor as a DNB record number.`,
+				`No catalogue record for ${query.idn}, neither as ISBN ${query.isbn} (DNB, Library of Congress) nor as a DNB record number.` +
+					otherFormatNote(loc.otherFormat),
 			);
 		}
+	}
+}
+
+/** Every search hit fetched, then matched against the ISBN (the `cancinv` rule). */
+async function lookUpLoc(
+	http: HttpGet,
+	isbn13: string,
+): Promise<{ matches: LocRecord[]; otherFormat: LocRecord[] }> {
+	const records: LocRecord[] = [];
+	for (const id of await searchLoc(http, isbn13)) {
+		records.push(await fetchLocRecord(http, id));
+	}
+	return matchLocRecords(records, isbn13);
+}
+
+/** Names the LoC records that list the ISBN only as another format's. */
+function otherFormatNote(records: LocRecord[]): string {
+	if (records.length === 0) return "";
+	const urls = records.map((record) => record.url).join(", ");
+	return records.length === 1
+		? ` The LoC record ${urls} lists it only as another format's ISBN; it describes a different edition.`
+		: ` The LoC records ${urls} list it only as another format's ISBN; they describe different editions.`;
+}
+
+/**
+ * The Open Library edition's title replaces the LoC title, and the original
+ * title too where that is the LoC title (no translation). A miss keeps the
+ * LoC title; a failure keeps it and is reported.
+ */
+async function withOpenLibraryTitle(
+	http: HttpGet,
+	book: LocRecord,
+): Promise<{ book: LocRecord; message: string }> {
+	const result =
+		book.isbn === null
+			? ({ kind: "none" } as const)
+			: await fetchOpenLibraryTitle(http, book.isbn);
+	switch (result.kind) {
+		case "title":
+			return {
+				book: {
+					...book,
+					title: result.title,
+					originalTitle:
+						book.originalTitle === book.title ? result.title : book.originalTitle,
+				},
+				message: "Title from Open Library.",
+			};
+		case "none":
+			return { book, message: "Title from the Library of Congress." };
+		case "failed":
+			return {
+				book,
+				message: `Title from the Library of Congress: ${result.reason}.`,
+			};
 	}
 }
 
@@ -145,7 +245,7 @@ interface CoverOutcome {
  */
 async function provideCover(
 	deps: BookImportDeps,
-	book: BookRecord,
+	book: DnbRecord | LocRecord,
 	stem: string,
 ): Promise<CoverOutcome> {
 	const { files, config } = deps;
@@ -167,7 +267,7 @@ async function provideCover(
 		const reason = error instanceof Error ? error.message : String(error);
 		throw new EntryError(`Could not save the cover "${path}": ${reason}`);
 	}
-	return { path, message: coverMessage(found.source) };
+	return { path, message: coverMessage(book.catalogue, found.source) };
 }
 
 /** Where a candidate ISBN came from. */
@@ -181,27 +281,44 @@ type FoundCover =
 	| { ok: false; reason: string };
 
 /**
- * Tries the edition's own ISBN, then each `776 $z`, then the ISBN of each
- * record linked in `776 $w`, until one is an image. Stops early when the
- * server serves no covers at all (bot check, errors), because asking for
- * other ISBNs would meet the same answer.
+ * Tries the candidates in order until one is an image: for a DNB record from
+ * the MVB, for an LoC record from Open Library. Stops early when the server
+ * serves no covers at all (bot check, errors), because asking for other
+ * ISBNs would meet the same answer.
  */
-async function findCover(deps: BookImportDeps, book: BookRecord): Promise<FoundCover> {
+async function findCover(deps: BookImportDeps, book: DnbRecord | LocRecord): Promise<FoundCover> {
 	const { http, config } = deps;
 	const tried: { isbn: string; reason: string }[] = [];
 	const unresolved: string[] = [];
 
-	for await (const source of coverCandidates(http, book, unresolved)) {
-		const cover = await fetchCover(http, source.isbn, config.coverSize);
+	const [candidates, fetch]: [
+		AsyncIterable<CoverSource> | Iterable<CoverSource>,
+		(isbn13: string) => Promise<CoverResult>,
+	] =
+		book.catalogue === "dnb"
+			? [
+					dnbCoverCandidates(http, book, unresolved),
+					(isbn13) => fetchCover(http, isbn13, config.coverSize),
+				]
+			: [
+					isbnCandidates(book),
+					(isbn13) => fetchOpenLibraryCover(http, isbn13, config.coverSize),
+				];
+
+	for await (const source of candidates) {
+		const cover = await fetch(source.isbn);
 		if (cover.ok) return { ...cover, source };
 		if (cover.failure === "blocked") return cover;
 		tried.push({ isbn: source.isbn, reason: cover.reason });
 	}
 
-	const lookups = unresolved.map((idn) => `, https://d-nb.info/${idn} could not be looked up`);
+	const lookups = unresolved.map((idn) => `, ${dnbRecordUrl(idn)} could not be looked up`);
 	if (tried.length === 0) {
+		const links =
+			book.otherEditionIsbns.length +
+			(book.catalogue === "dnb" ? book.otherEditionIdns.length : 0);
 		const reason =
-			book.otherEditionIsbns.length + book.otherEditionIdns.length === 0
+			links === 0
 				? "the record has no ISBN"
 				: "neither the record nor its other editions have an ISBN";
 		return { ok: false, reason: reason + lookups.join("") };
@@ -217,26 +334,34 @@ async function findCover(deps: BookImportDeps, book: BookRecord): Promise<FoundC
 }
 
 /**
- * Candidate ISBNs in fallback order, each once. Linked records are looked up
- * only when the earlier candidates are used up; a failed lookup is recorded
- * in `unresolved` and skipped.
+ * The record's own ISBN, then the other editions' it lists, each once: the
+ * whole chain for an LoC record (its `cancinv` ISBNs), the start of it for a
+ * DNB record (`776 $z`).
  */
-async function* coverCandidates(
+function* isbnCandidates(book: BookRecord, seen = new Set<string>()): Generator<CoverSource> {
+	if (book.isbn !== null && !seen.has(book.isbn)) {
+		seen.add(book.isbn);
+		yield { kind: "own", isbn: book.isbn };
+	}
+	for (const isbn of book.otherEditionIsbns) {
+		if (seen.has(isbn)) continue;
+		seen.add(isbn);
+		yield { kind: "isbn", isbn };
+	}
+}
+
+/**
+ * The DNB chain: {@link isbnCandidates}, then the ISBN of each record linked
+ * in `776 $w`. Linked records are looked up only when the earlier candidates
+ * are used up; a failed lookup is recorded in `unresolved` and skipped.
+ */
+async function* dnbCoverCandidates(
 	http: HttpGet,
-	book: BookRecord,
+	book: DnbRecord,
 	unresolved: string[],
 ): AsyncGenerator<CoverSource> {
 	const seen = new Set<string>();
-	const fresh = (isbn: string | null): isbn is string => {
-		if (isbn === null || seen.has(isbn)) return false;
-		seen.add(isbn);
-		return true;
-	};
-
-	if (fresh(book.isbn)) yield { kind: "own", isbn: book.isbn };
-	for (const isbn of book.otherEditionIsbns) {
-		if (fresh(isbn)) yield { kind: "isbn", isbn };
-	}
+	yield* isbnCandidates(book, seen);
 	for (const idn of book.otherEditionIdns) {
 		let isbn: string | null;
 		try {
@@ -247,18 +372,24 @@ async function* coverCandidates(
 			unresolved.push(idn);
 			continue;
 		}
-		if (fresh(isbn)) yield { kind: "record", isbn, idn };
+		if (isbn === null || seen.has(isbn)) continue;
+		seen.add(isbn);
+		yield { kind: "record", isbn, idn };
 	}
 }
 
-/** Names the source, and flags a cover taken from another edition. */
-function coverMessage(source: CoverSource): string {
+/**
+ * Names the source, and flags a cover taken from another edition. Open
+ * Library is named; the MVB, the DNB's cover source, is the default.
+ */
+function coverMessage(catalogue: BookRecord["catalogue"], source: CoverSource): string {
+	const from = catalogue === "loc" ? `Cover from Open Library, ISBN` : `Cover from ISBN`;
 	switch (source.kind) {
 		case "own":
-			return `Cover from ISBN ${source.isbn}.`;
+			return `${from} ${source.isbn}.`;
 		case "isbn":
-			return `Cover from ISBN ${source.isbn}, another edition; its artwork may differ.`;
+			return `${from} ${source.isbn}, another edition; its artwork may differ.`;
 		case "record":
-			return `Cover from ISBN ${source.isbn}, another edition (https://d-nb.info/${source.idn}); its artwork may differ.`;
+			return `${from} ${source.isbn}, another edition (${dnbRecordUrl(source.idn)}); its artwork may differ.`;
 	}
 }

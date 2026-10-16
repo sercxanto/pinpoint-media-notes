@@ -1,20 +1,12 @@
 import { EntryError } from "../core/errors";
-import type { HttpGet, HttpResponse } from "../io/http";
+import { BOOK_HOST_HEADERS, type HttpGet, type HttpResponse } from "../io/http";
 import type { CoverSize } from "../settings";
 import { blurbText, truncateBlurb } from "./blurb";
+import { downloadCover, type CoverResult } from "./cover";
 import { parseSruResponse, type MarcRecord } from "./marc";
 
 const SRU_ENDPOINT = "https://services.dnb.de/sru/dnb";
 const COVER_ENDPOINT = "https://portal.dnb.de/opac/mvb/cover";
-
-/**
- * Sent with every DNB request. The cover host's bot filter challenges any
- * browser-like User-Agent (containing `Mozilla`) with an HTML page, and
- * Obsidian's own is one. A client that names itself is let through.
- */
-export const DNB_HEADERS: Record<string, string> = {
-	"User-Agent": "pinpoint-media-notes (Obsidian plugin)",
-};
 
 /** `NUM` searches ISBNs (and other numbers), `IDN` the record number. */
 export type SruIndex = "NUM" | "IDN";
@@ -36,7 +28,7 @@ export function coverUrl(isbn13: string, size: CoverSize): string {
 
 async function get(http: HttpGet, url: string, what: string): Promise<HttpResponse> {
 	try {
-		return await http(url, DNB_HEADERS);
+		return await http(url, BOOK_HOST_HEADERS);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		throw new EntryError(`Could not reach the ${what}: ${reason}`);
@@ -62,7 +54,7 @@ export type BlurbResult = { ok: true; text: string } | { ok: false; reason: stri
 export async function fetchBlurb(http: HttpGet, url: string): Promise<BlurbResult> {
 	let response: HttpResponse;
 	try {
-		response = await http(url, DNB_HEADERS);
+		response = await http(url, BOOK_HOST_HEADERS);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		return { ok: false, reason: `the blurb could not be fetched (${reason})` };
@@ -73,85 +65,7 @@ export async function fetchBlurb(http: HttpGet, url: string): Promise<BlurbResul
 	return { ok: true, text: truncateBlurb(blurbText(response.text())) };
 }
 
-/**
- * `missing`: the server has no usable cover for this ISBN, another edition's
- * may do. `blocked`: the server did not serve covers at all (bot check,
- * error, unreachable); asking again for another ISBN would get the same.
- */
-export type CoverResult =
-	| { ok: true; data: ArrayBuffer; extension: string }
-	| { ok: false; failure: "missing" | "blocked"; reason: string };
-
-/**
- * Downloads one cover. A bot filter answers challenged requests with HTTP 200
- * and an HTML page, so only an `image/*` Content-Type counts as a cover,
- * whatever the status.
- */
-export async function fetchCover(
-	http: HttpGet,
-	isbn13: string,
-	size: CoverSize,
-): Promise<CoverResult> {
-	let response: HttpResponse;
-	try {
-		response = await http(coverUrl(isbn13, size), DNB_HEADERS);
-	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
-		return {
-			ok: false,
-			failure: "blocked",
-			reason: `the cover server could not be reached (${reason})`,
-		};
-	}
-	const contentType =
-		(response.header("Content-Type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
-	if (contentType.startsWith("image/")) {
-		const extension = IMAGE_TYPES[contentType];
-		if (extension === undefined) {
-			return {
-				ok: false,
-				failure: "missing",
-				reason: `the cover server sent an unsupported image type, ${contentType}`,
-			};
-		}
-		return { ok: true, data: response.arrayBuffer(), extension };
-	}
-	if (response.status === 404) {
-		return {
-			ok: false,
-			failure: "missing",
-			reason: `the cover server has no cover for ISBN ${isbn13}`,
-		};
-	}
-	if (response.status === 200 && contentType === "text/html") {
-		return {
-			ok: false,
-			failure: "blocked",
-			reason: "the cover server answered with text/html instead of an image, probably its bot check",
-		};
-	}
-	return {
-		ok: false,
-		failure: "blocked",
-		reason: `the cover server answered with HTTP ${response.status} and ${contentType || "no content type"} instead of an image`,
-	};
+/** Downloads one MVB cover, judged by {@link downloadCover}. */
+export function fetchCover(http: HttpGet, isbn13: string, size: CoverSize): Promise<CoverResult> {
+	return downloadCover(http, coverUrl(isbn13, size), isbn13);
 }
-
-/** Image types accepted as covers, by Content-Type, with their file extension. */
-const IMAGE_TYPES: Partial<Record<string, string>> = {
-	"image/jpeg": "jpg",
-	"image/pjpeg": "jpg",
-	"image/png": "png",
-	"image/gif": "gif",
-	"image/webp": "webp",
-	"image/avif": "avif",
-};
-
-/**
- * Extensions an existing cover may have. The extension comes from the
- * response, so an existing file is looked for under each of them before any
- * download.
- */
-export const COVER_EXTENSIONS = [...new Set(Object.values(IMAGE_TYPES))].filter(
-	(extension) => extension !== undefined,
-);
