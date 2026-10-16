@@ -25,7 +25,7 @@ export const LOC_RECORD_SOURCES = {
 	url: "https://lccn.loc.gov/<lccn> from instance Lccn, else the id.loc.gov instance",
 	id: "the search hit's token",
 	title: "instance title → mainTitle",
-	originalTitle: "title",
+	originalTitle: "work expressionOf → hub marcKey $t (130: $a), $n, $p, if it has $l; else title",
 	authors: "work contribution with role aut → agent → marcKey $a, else rdfs:label",
 	isbn: "the queried ISBN once matched, else the first of isbns",
 	isbns: "instance identifiedBy → Isbn without status, as ISBN-13",
@@ -72,7 +72,7 @@ export function readLocRecord(graph: JsonLdGraph, id: string): LocRecord {
 		url: readUrl(graph, instance, id),
 		id,
 		title,
-		originalTitle: title,
+		originalTitle: (work === undefined ? null : readOriginalTitle(graph, work)) ?? title,
 		authors: work === undefined ? [] : readAuthors(graph, work),
 		isbn: isbns.listed[0] ?? null,
 		isbns: isbns.listed,
@@ -191,6 +191,31 @@ function agentName(agent: JsonLdNode): string | null {
 		if (name) return name;
 	}
 	return agent.values(RDFS_LABEL)[0] ?? null;
+}
+
+/**
+ * A translation's original title, from the hub the work is an expression of
+ * (`1001 $aKehlmann, Daniel,$d1975-$tVermessung der Welt.$lEnglish`). Only a
+ * heading with a language (`$l`) names a translation; an original may have a
+ * hub too, without one. The title is `$t` with its parts (`$n`, `$p`), or
+ * `$a` of a uniform title without author (`130`, _Beowulf_), in the form the
+ * LoC catalogues it: initial articles dropped, non-Latin scripts romanised.
+ */
+function readOriginalTitle(graph: JsonLdGraph, work: JsonLdNode): string | null {
+	for (const hub of graph.links(work, `${BF}expressionOf`)) {
+		for (const key of hub.values(`${BFLC}marcKey`)) {
+			const subfields = [...key.matchAll(/\$([a-z0-9])([^$]*)/g)].map(
+				([, code, value]) => [code, value?.trim().replace(/[\s.,]+$/, "")] as const,
+			);
+			if (!subfields.some(([code]) => code === "l")) continue;
+			const title = key.startsWith("130") ? ["a", "n", "p"] : ["t", "n", "p"];
+			const parts = subfields
+				.filter(([code, value]) => title.includes(code ?? "") && value)
+				.map(([, value]) => value);
+			if (parts.length > 0) return parts.join(". ");
+		}
+	}
+	return null;
 }
 
 /** The first four-digit run in the date of a publication; EDTF, so usually just the year. */

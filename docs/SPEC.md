@@ -235,20 +235,21 @@ All HTTP goes through Obsidian's `requestUrl`, never `fetch`: it is not
 subject to CORS, and both APIs are called directly. Requests are sent one
 after the other, never in parallel, and only while an entry is imported.
 
-| Host                     | Used for                               | Sends                             |
-| ------------------------ | -------------------------------------- | --------------------------------- |
-| `services.dnb.de`        | catalogue lookup (SRU), blurbs         | ISBN or record number             |
-| `portal.dnb.de`          | book covers                            | ISBN                              |
-| `id.loc.gov`             | LoC catalogue lookup, after a DNB miss | ISBN, then the LoC record numbers |
-| `openlibrary.org`        | title of an LoC record                 | ISBN                              |
-| `covers.openlibrary.org` | covers of an LoC record                | ISBN, and ISBNs of other editions |
-| `api.themoviedb.org`     | movie and series details               | TMDB id, the token                |
-| `image.tmdb.org`         | posters                                | poster path, **not** the token    |
+| Host                              | Used for                                                          | Sends                             |
+| --------------------------------- | ----------------------------------------------------------------- | --------------------------------- |
+| `services.dnb.de`                 | catalogue lookup (SRU), blurbs                                    | ISBN or record number             |
+| `portal.dnb.de`                   | book covers                                                       | ISBN                              |
+| `id.loc.gov`                      | LoC catalogue lookup, after a DNB miss                            | ISBN, then the LoC record numbers |
+| `openlibrary.org`                 | title of an LoC record                                            | ISBN                              |
+| `covers.openlibrary.org`          | covers of an LoC record                                           | ISBN, and ISBNs of other editions |
+| `archive.org`, `*.us.archive.org` | covers of an LoC record, redirected from `covers.openlibrary.org` | Open Library's cover file name    |
+| `api.themoviedb.org`              | movie and series details                                          | TMDB id, the token                |
+| `image.tmdb.org`                  | posters                                                           | poster path, **not** the token    |
 
-The LoC and Open Library hosts are contacted only for an ISBN the DNB has no
+The LoC, Open Library and `archive.org` hosts are contacted only for an ISBN the DNB has no
 record for. There is no telemetry and no other network access.
 
-**User-Agent for the book hosts.** Every request to the five book hosts sends
+**User-Agent for the book hosts.** Every request to the book hosts sends
 
 ```
 User-Agent: pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)
@@ -523,8 +524,9 @@ tags:
 
 ### Library of Congress fallback
 
-_Specified, not yet implemented: the LoC lookup and mapping exist, Open
-Library and the wiring into the import do not; see `docs/PLAN.md`._
+_Specified, not yet implemented: the LoC lookup and mapping and the Open
+Library title and cover requests exist, the wiring into the import does not;
+see `docs/PLAN.md`._
 
 For an ISBN the DNB has no record for (see [Input](#input)). The record comes
 from the LoC's linked-data service `id.loc.gov` in BIBFRAME, the title and the
@@ -577,7 +579,7 @@ format: it describes a different edition.
 | ---------------- | ----------------------------------------------------------------------------------------- |
 | `type`           | work `content` and instance `carrier`, see below                                          |
 | `title`          | Open Library edition `title` if the edition exists, else instance `title` → `mainTitle`   |
-| `original_title` | the `title` property's value                                                              |
+| `original_title` | a translation's original title from the work's `expressionOf` hub, else the `title` value |
 | `authors`        | work `contribution` with role `aut` → `agent` → `$a` of its `bflc:marcKey`; de-duplicated |
 | `url`            | `https://lccn.loc.gov/<lccn>`, the instance's `Lccn`, spaces removed; else `id.loc.gov`   |
 | `isbn`           | the queried ISBN-13                                                                       |
@@ -597,9 +599,19 @@ Details:
   subtitle nor edition statement, which is what the schema wants. Its
   `subtitle`, authors, dates and format are not read: they are weaker than the
   LoC's. The Open Library title also names the files.
-- **Original title.** English-language editions are mostly originals. A
-  translation's uniform title is not read. BIBFRAME has it on a hub the work
-  links with `expressionOf` (`Measuring the world` → `Vermessung der Welt`).
+- **Original title.** BIBFRAME links a translation's work with
+  `expressionOf` to a hub whose `bflc:marcKey` is the MARC uniform title
+  heading: `1001 $aKehlmann, Daniel,$d1975-$tVermessung der Welt.$lEnglish`.
+  Only a heading with a language (`$l`) names a translation; an original may
+  have a hub too (_More annotated Alice_ → `Alice's adventures in
+Wonderland`), without one, and keeps its own title. The original title is
+  `$t` with its parts `$n` and `$p`, joined by `. `, trailing punctuation
+  removed; a uniform title without author (`130`, `$aBeowulf.$lEnglish.`)
+  gives `$a`. The first hub with such a heading counts. The value is in the
+  form the LoC catalogues it, as `240 $a` is for the DNB: initial articles
+  dropped (`Étranger`, `Alquimista`), non-Latin scripts romanised (`San ti`),
+  qualifiers kept (`Amica geniale (Novel)`). Checked on 2026-10-16 against
+  nine translations and seven originals.
 - **Authors.** Names as catalogued, `Surname, Given name`. The agent's
   `rdfs:label` appends life dates (`Kehlmann, Daniel, 1975-`), so the name is
   `$a` of the MARC heading in its `bflc:marcKey`
@@ -661,6 +673,11 @@ responses are judged by the table in [Cover](#cover) (`Content-Type` decides,
 HTTP 404 is missing, the chain stops at the first "blocked"), and an existing
 image of the target name is kept. A cover from another edition is reported as
 for the DNB.
+
+A hit is often a redirect to `archive.org`, where Open Library keeps older
+covers, and from there to one of its servers (`ia600404.us.archive.org`);
+both are followed. The redirect names Open Library's cover file
+(`0010450993-L.jpg`), not the ISBN.
 
 Open Library is not asked for covers of DNB records. The MVB chain with its
 sibling editions covered the evaluation's sample almost completely, and Open

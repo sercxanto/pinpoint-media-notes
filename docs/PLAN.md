@@ -22,7 +22,7 @@ maintainer), `done` (committed).
 | 1     | Spec: the fallback's behaviour, open decisions settled          | done   |
 | 2     | Refactor, no behaviour change: source-neutral record, RDA codes | done   |
 | 3     | LoC client and mapping over `id.loc.gov`                        | done   |
-| 4     | Open Library: title and cover                                   | open   |
+| 4     | Open Library: title and cover                                   | done   |
 | 5     | Wiring into the importer; README, manual test                   | open   |
 
 ## Settled (2026-10-11)
@@ -232,4 +232,52 @@ as `original_title` when the hub carries a language (`$l` in its marcKey,
 `original_title` stays the title. Before implementing, check more records:
 several translations, and originals that have an `expressionOf` hub, so an
 original never gets a foreign "original title". Do it in phase 4 or 5,
-with the spec, a fixture-based test and the source table updated.
+with the spec, a fixture-based test and the source table updated. Done in
+phase 4, see there.
+
+**Phase 4.** `src/book/openlibrary.ts`: `fetchOpenLibraryTitle` (`title`,
+`none` for a 404, `failed` with a reason for anything else; never throws)
+and `fetchOpenLibraryCover`. The cover judgment moved from `dnb.ts` into
+`src/book/cover.ts` (`downloadCover`, `CoverResult`, `COVER_EXTENSIONS`),
+shared by both cover hosts; the DNB messages are unchanged. Fixtures in
+`tests/fixtures/openlibrary/` (two editions, `description` and `notes`
+dropped); live checks in `openlibrary.contract.test.ts` (4 of 4 green on
+2026-10-16, LoC 6 of 6, DNB 10 of 10).
+
+Found live, written into the spec: an Open Library cover hit is often a 302
+to `archive.org` and on to `ia*.us.archive.org` (older covers, e.g. _The
+Pragmatic Programmer_ in every size), so the network table gains
+`archive.org`. The redirect carries Open Library's cover file name, not the
+ISBN. The edition lookup redirects to an absolute
+`https://openlibrary.org/books/<id>.json`.
+
+Original title of a translation, implemented: `$t` (`130`: `$a`) with `$n`
+and `$p` of the first `expressionOf` hub whose marcKey has `$l`. Checked on
+2026-10-16: nine translations (Larsson, Murakami, Ferrante, Liu, Harari,
+Camus, Coelho, Dostoyevsky, Homer) all carry such a hub; seven originals
+without hub, two originals with a hub but no `$l` (_More annotated Alice_,
+Dickinson's poems). New fixtures: _More annotated Alice_ (`4363537`) and
+_Beowulf_ (`14914009`, a `130` hub). The value is
+the LoC uniform title, so initial articles are dropped (`Étranger`, not
+`L'Étranger`; `Alquimista`), non-Latin scripts romanised (`San ti`,
+`Ḳitsur toldot ha-enoshut`), and qualifiers kept (`Amica geniale (Novel)`).
+That matches how `240 $a` is taken for the DNB, but the LoC drops articles
+where the DNB keeps them. The maintainer settled to keep it as catalogued
+(2026-10-16).
+
+For phase 5:
+
+- `title` and `originalTitle` from Open Library: set `originalTitle` to the
+  Open Library title only when it equals the LoC title, i.e. the record is
+  no translation (an equal original title, `1Q84`, is harmless either way).
+- The cover chain for LoC records (queried ISBN, then `otherEditionIsbns`,
+  stop at the first `blocked`) over `fetchOpenLibraryCover`; the DNB's
+  `findCover` in `importer.ts` could take the candidate list and the fetch
+  function instead of being duplicated.
+- `requestUrl` following redirects is not verifiable here (the contract
+  tests use `fetch`, which follows them). If it does not, the title lookup
+  reports `HTTP 302` and the cover chain stops as `blocked`, so nothing
+  wrong is written. `docs/MANUAL_TEST.md` needs an item for it:
+  `9781492082798` (not in the DNB) takes its title from Open Library, and
+  with cover size `l` its cover from `archive.org` (checked 2026-10-16).
+- README network table: `archive.org`, `*.us.archive.org`.

@@ -78,8 +78,10 @@ src/
     loc-record.ts  JSON-LD → LocRecord, LOC_RECORD_SOURCES, matchLocRecords (the cancinv rule)
     blurb.ts       blurb HTML → text, truncation
     note.ts        file stem with type suffix, note builder
+    cover.ts       downloadCover: one cover request, judged by Content-Type; COVER_EXTENSIONS
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
     loc.ts         id.loc.gov search and record requests (over HttpGet); not wired yet
+    openlibrary.ts Open Library title and cover requests (over HttpGet); not wired yet
     importer.ts    importBook: the per-entry order, cover fallback chain; bookImportConfig
   tmdb/          TMDB importer
     input.ts       link parsing (movie/tv + id), canonicalUrl
@@ -123,6 +125,8 @@ Känguru-Rebellion_ returning five editions, and an empty result. The
 `id.loc.gov` search responses and record documents in `loc/` are real too
 (LoC data is public domain), except every summary and table of contents,
 replaced by invented text of the same form (quotes and attribution kept).
+The Open Library edition records in `openlibrary/` are real (CC0), with
+`description` and `notes` removed; they are the bodies behind the redirect.
 Blurb texts
 and the TMDB texts in `tmdb/` are the spec's examples or invented, because
 blurbs are publisher copy and TMDB overviews are user contributions; only

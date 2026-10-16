@@ -16,6 +16,8 @@ const BRAIN = { ebook: "9781982167400", ebookId: "22339234", printId: "22338086"
 const LEVIATHAN = { isbn: "9780316129084", id: "16523661" };
 /** The Daily Show (the audiobook): spoken word on CD. */
 const DAILY_SHOW = { isbn: "9781478936558", id: "19805382" };
+/** Measuring the world: a translation from German. */
+const KEHLMANN = { isbn: "9780375424465", id: "14268223" };
 /** Think Like a Street Photographer, Laurence King: a British edition, not catalogued. */
 const NOT_CATALOGUED = "9781399615310";
 
@@ -55,6 +57,13 @@ describe("LoC catalogue (id.loc.gov)", () => {
 		const book = await fetchLocRecord(nodeHttp, DAILY_SHOW.id);
 		expect(shapeMismatches(book)).toEqual([]);
 		expect(book.type).toBe("audiobook");
+	});
+
+	it("reads a translation's original title", async () => {
+		expect(await searchLoc(nodeHttp, KEHLMANN.isbn)).toEqual([KEHLMANN.id]);
+		const book = await fetchLocRecord(nodeHttp, KEHLMANN.id);
+		expect(shapeMismatches(book)).toEqual([]);
+		expect(book.originalTitle).not.toBe(book.title);
 	});
 
 	it("returns no hit for an ISBN it does not have", async () => {

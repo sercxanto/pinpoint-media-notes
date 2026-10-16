@@ -28,6 +28,8 @@ const BRAIN_PRINT = "22338086";
 const LEVIATHAN = "16523661";
 const KEHLMANN = "14268223";
 const DAILY_SHOW = "19805382";
+const ANNOTATED_ALICE = "4363537";
+const BEOWULF = "14914009";
 const ALL = [
 	GOOGLE,
 	STANIER,
@@ -37,6 +39,8 @@ const ALL = [
 	LEVIATHAN,
 	KEHLMANN,
 	DAILY_SHOW,
+	ANNOTATED_ALICE,
+	BEOWULF,
 ];
 
 const BRAIN_DESCRIPTION =
@@ -147,12 +151,23 @@ describe("readLocRecord on real catalogue records", () => {
 		expect(real(LEVIATHAN)).toMatchObject({ series: "The expanse", seriesIndex: 1 });
 	});
 
-	it("drops life dates from names; a translation keeps its own title as original title", () => {
+	it("drops life dates from names; reads a translation's original title", () => {
 		expect(real(KEHLMANN)).toMatchObject({
 			title: "Measuring the world",
-			originalTitle: "Measuring the world",
+			originalTitle: "Vermessung der Welt",
 			authors: ["Kehlmann, Daniel"],
 		});
+	});
+
+	it("keeps the title as original title for an original that has a hub", () => {
+		expect(real(ANNOTATED_ALICE)).toMatchObject({
+			title: "More annotated Alice",
+			originalTitle: "More annotated Alice",
+		});
+	});
+
+	it("reads the original title of a uniform title without author", () => {
+		expect(real(BEOWULF)).toMatchObject({ title: "Beowulf", originalTitle: "Beowulf" });
 	});
 
 	it("recognises an audiobook, without the writer of the foreword", () => {
@@ -341,6 +356,24 @@ describe("readLocRecord field rules", () => {
 			],
 		);
 		expect(book.authors).toEqual(["King, Martin Luther", "Straub, Peter"]);
+	});
+
+	it("reads the original title from the first hub heading with a language", () => {
+		const hubs = (...keys: string[]) =>
+			readDocument(
+				{},
+				{ [`${BF}expressionOf`]: keys.map((_, index) => ({ "@id": `_:h${index}` })) },
+				keys.map((key, index) => ({ "@id": `_:h${index}`, [MARC_KEY]: value(key) })),
+			).originalTitle;
+		expect(hubs("1001 $aAuthor, An.$tPoems")).toBe("Title");
+		expect(hubs("1001 $aAuthor, An.$tPoems", "1001 $aAuthor, An.$tOriginal.$lEnglish.")).toBe(
+			"Original",
+		);
+		expect(hubs("1001 $aTolkien, J. R. R.$tLord of the rings.$pTwo towers.$lSpanish")).toBe(
+			"Lord of the rings. Two towers",
+		);
+		expect(hubs("1300 $aBible.$lEnglish.$sNew International")).toBe("Bible");
+		expect(hubs("1001 $aAuthor, An.$lEnglish")).toBe("Title");
 	});
 
 	it("takes the year from the publication only", () => {
