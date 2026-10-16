@@ -67,16 +67,19 @@ src/
     frontmatter.ts yamlScalar, buildFrontmatter, buildNote
     paths.ts       vault-relative folder check for settings and imports
   io/
-    http.ts        httpGet: the only caller of requestUrl (HttpGet type for fakes)
+    http.ts        httpGet: the only caller of requestUrl (HttpGet type for fakes); BOOK_HOST_HEADERS
     vault.ts       VaultFiles interface and its implementation over app.vault
   book/          book importer
     input.ts       ISBN/IDN/link parsing, check digits
     marc.ts        SRU response → MARC records (DOMParser), NFC and marker stripping on read
     record.ts      BookRecord (source-neutral), rdaBookType (RDA codes → type), describeRecord
     dnb-record.ts  MARC → DnbRecord, DNB_RECORD_SOURCES (field-coverage table), recordIsbn
+    jsonld.ts      JsonLdGraph: flat JSON-LD nodes linked by @id, NFC and trimming on read
+    loc-record.ts  JSON-LD → LocRecord, LOC_RECORD_SOURCES, matchLocRecords (the cancinv rule)
     blurb.ts       blurb HTML → text, truncation
     note.ts        file stem with type suffix, note builder
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
+    loc.ts         id.loc.gov search and record requests (over HttpGet); not wired yet
     importer.ts    importBook: the per-entry order, cover fallback chain; bookImportConfig
   tmdb/          TMDB importer
     input.ts       link parsing (movie/tv + id), canonicalUrl
@@ -93,6 +96,7 @@ tests/
   fixtures/               API responses, see "Fixtures" below
   contract/               live-API checks, only via `npm run test:contract`
     dnb-shape.ts            DNB_RECORD_SHAPE: per-field shape checks, typed against DnbRecord
+    loc-shape.ts            LOC_RECORD_SHAPE: the same for LocRecord
     tmdb-shape.ts           TMDB_ENTRY_SHAPE: the same for TmdbEntry
     node-http.ts            HttpGet over fetch, because requestUrl exists only in Obsidian
 
@@ -115,7 +119,11 @@ README.md                    user documentation
 
 Fixtures (`tests/fixtures/`): the SRU responses in `book/` are real (DNB
 metadata is CC0): _Die 1 % Methode_, a title search for _Die
-Känguru-Rebellion_ returning five editions, and an empty result. Blurb texts
+Känguru-Rebellion_ returning five editions, and an empty result. The
+`id.loc.gov` search responses and record documents in `loc/` are real too
+(LoC data is public domain), except every summary and table of contents,
+replaced by invented text of the same form (quotes and attribution kept).
+Blurb texts
 and the TMDB texts in `tmdb/` are the spec's examples or invented, because
 blurbs are publisher copy and TMDB overviews are user contributions; only
 the response shapes are real. Do not add real copyrighted text.
@@ -152,7 +160,8 @@ Principles:
 
 - Every importer has a golden note-format test, comparing a complete note
   string against the spec's example note, and a field-coverage test: the
-  source tables (`DNB_RECORD_SOURCES`, `TMDB_ENTRY_SOURCES`) are typed
+  source tables (`DNB_RECORD_SOURCES`, `LOC_RECORD_SOURCES`,
+  `TMDB_ENTRY_SOURCES`) are typed
   against the record types, and every entry is checked against the fixtures
   and the contract shapes. A new field cannot be added without a test.
 - Contract tests check the live APIs for shape, never for content, and stay
@@ -198,6 +207,12 @@ go into the spec.
   its own path reads (`DnbRecord`: `idn`, `blurbUrl`, `otherEditionIdns`),
   and has its own source table and contract shape. The type is mapped from
   RDA codes in one place (`rdaBookType`), so both catalogues share it.
+- **One User-Agent for the book hosts** (`BOOK_HOST_HEADERS` in
+  `io/http.ts`), with the repository URL as contact; the TMDB hosts keep
+  Obsidian's default.
+- **JSON-LD without a library:** `id.loc.gov` serves expanded flat JSON-LD,
+  so following `@id` links over a map of nodes is all the reading needs.
+  Nodes are matched on full IRIs, not compacted names.
 - **XML and HTML parsing** use the `DOMParser` built into Obsidian, no
   library. Tests run under jsdom.
 - **Contract tests use `fetch`** through `tests/contract/node-http.ts`; the

@@ -391,7 +391,8 @@ services:
 
 The DNB receives the ISBN or record number you enter, TMDB the id of the
 movie or series. There is no telemetry and no other network access. DNB
-requests carry the User-Agent `pinpoint-media-notes (Obsidian plugin)`.
+requests carry the User-Agent
+`pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)`.
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
 Catalogue data of the Deutsche Nationalbibliothek is available under CC0.

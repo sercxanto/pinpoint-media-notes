@@ -21,7 +21,7 @@ maintainer), `done` (committed).
 | ----- | --------------------------------------------------------------- | ------ |
 | 1     | Spec: the fallback's behaviour, open decisions settled          | done   |
 | 2     | Refactor, no behaviour change: source-neutral record, RDA codes | done   |
-| 3     | LoC client and mapping over `id.loc.gov`                        | open   |
+| 3     | LoC client and mapping over `id.loc.gov`                        | done   |
 | 4     | Open Library: title and cover                                   | open   |
 | 5     | Wiring into the importer; README, manual test                   | open   |
 
@@ -195,3 +195,41 @@ practice. Five records had neither `336` nor `338`: 2026 translations
 abroad (_Momo_ in Ukrainian, Greek, Spanish, Turkish; _Buddenbrooks_ in
 Georgian), encoding level `8` (prepublication). They count as unsupported
 material, before and after this phase.
+
+**Phase 3.** `src/book/loc.ts` (`searchLoc`, `fetchLocRecord`, URLs,
+`LOC_MAX_RECORDS`), `src/book/jsonld.ts` (`JsonLdGraph`) and
+`src/book/loc-record.ts` (`LocRecord`, `readLocRecord`,
+`LOC_RECORD_SOURCES`, `matchLocRecords`, `summaryText`); contract shape
+`tests/contract/loc-shape.ts`, live checks in `loc.contract.test.ts` (5 of
+5 green on 2026-10-13, the DNB suite 10 of 10 with the new User-Agent).
+`BOOK_HOST_HEADERS` in `io/http.ts` replaces `DNB_HEADERS`; the README's
+User-Agent sentence is updated, the rest of its network section is phase 5.
+
+For phase 5: `LocRecord` carries `isbns` (listed without status) and a
+finished `description` (attribution removed, truncated), so the importer
+writes it as is. `matchLocRecords(records, isbn)` returns `matches` (with
+`isbn` set to the queried one) and `otherFormat` (records listing it only
+as `cancinv`); `otherFormat` is filled even when there is a match, the
+message reads it only when `matches` is empty. `originalTitle` is the LoC
+title; the importer sets it, with `title`, to the Open Library title. The
+search is a prefix search (`q` comes back as `<isbn>*`), harmless for 13
+digits. Record numbers are not always numeric (`in00024321128`).
+
+Found in the fixtures, written into the spec: an agent's `rdfs:label`
+carries life dates (`Kehlmann, Daniel, 1975-`), so names come from `$a` of
+the agent's `bflc:marcKey`, label as fallback; LCCNs lose all spaces, not
+just leading ones (`a 34001394`). Both accepted by the maintainer
+(2026-10-16). Fixtures: the five evaluation records plus _Leviathan wakes_
+(series number), _Measuring the world_ (translation, life dates) and _The
+Daily Show (the audiobook)_ (`spw`); summaries and the one table of
+contents replaced by invented text.
+
+**Settled (2026-10-16): original title of a translation.** A translation's
+original title is on the work's `expressionOf` hub (`Vermessung der Welt`
+for _Measuring the world_). The maintainer accepted the proposal: read it
+as `original_title` when the hub carries a language (`$l` in its marcKey,
+`English` in the label), i.e. the record is a translation; otherwise
+`original_title` stays the title. Before implementing, check more records:
+several translations, and originals that have an `expressionOf` hub, so an
+original never gets a foreign "original title". Do it in phase 4 or 5,
+with the spec, a fixture-based test and the source table updated.

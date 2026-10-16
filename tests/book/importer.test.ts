@@ -83,7 +83,9 @@ describe("importBook", () => {
 		await run(ISBN);
 		expect(http.calls).toHaveLength(3);
 		for (const sent of http.headers) {
-			expect(sent?.["User-Agent"]).toBe("pinpoint-media-notes (Obsidian plugin)");
+			expect(sent?.["User-Agent"]).toBe(
+				"pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)",
+			);
 		}
 	});
 

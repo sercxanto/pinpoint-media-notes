@@ -80,7 +80,7 @@ describe("DNB blurb and cover services", () => {
 		expect(cover.ok ? "image" : cover.reason).toBe("image");
 	});
 
-	// Documents why DNB_HEADERS exists: if this starts failing, the filter
+	// Documents why BOOK_HOST_HEADERS exists: if this starts failing, the filter
 	// changed and the User-Agent may no longer be needed (or enough).
 	it("challenges a browser-like User-Agent with an HTML page", async () => {
 		const response = await nodeHttp(coverUrl(METHODE.isbn, "l"), {

@@ -262,9 +262,8 @@ is the contact, so no e-mail address is sent. A contract test watches the DNB
 rule. The TMDB hosts get Obsidian's default User-Agent, which they
 accept.
 
-_Not yet implemented:_ the LoC and Open Library hosts and the repository URL
-in the User-Agent (today `pinpoint-media-notes (Obsidian plugin)`, DNB only);
-see `docs/PLAN.md`.
+_Not yet implemented:_ requests to the LoC and Open Library hosts; see
+`docs/PLAN.md`.
 
 ## Book import
 
@@ -524,7 +523,8 @@ tags:
 
 ### Library of Congress fallback
 
-_Specified, not yet implemented; see `docs/PLAN.md`._
+_Specified, not yet implemented: the LoC lookup and mapping exist, Open
+Library and the wiring into the import do not; see `docs/PLAN.md`._
 
 For an ISBN the DNB has no record for (see [Input](#input)). The record comes
 from the LoC's linked-data service `id.loc.gov` in BIBFRAME, the title and the
@@ -573,20 +573,20 @@ format: it describes a different edition.
 
 #### Field mapping
 
-| Property         | Source                                                                                     |
-| ---------------- | ------------------------------------------------------------------------------------------ |
-| `type`           | work `content` and instance `carrier`, see below                                           |
-| `title`          | Open Library edition `title` if the edition exists, else instance `title` → `mainTitle`    |
-| `original_title` | the `title` property's value                                                               |
-| `authors`        | work `contribution` with role `aut` → `agent` → `rdfs:label`; de-duplicated                |
-| `url`            | `https://lccn.loc.gov/<lccn>`, the instance's `Lccn` trimmed; else the `id.loc.gov` record |
-| `isbn`           | the queried ISBN-13                                                                        |
-| `year`           | first four-digit run in the `date` of the instance's `Publication` provision activity      |
-| `series`         | the first work `relation` with relationship `series` → `associatedResource` → `title`      |
-| `series_index`   | first number in that relation's `seriesEnumeration`; a decimal comma becomes a dot         |
-| `genres`         | always `[]`                                                                                |
-| `description`    | the work `summary`, see below                                                              |
-| `cover`          | Open Library, see below                                                                    |
+| Property         | Source                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| `type`           | work `content` and instance `carrier`, see below                                          |
+| `title`          | Open Library edition `title` if the edition exists, else instance `title` → `mainTitle`   |
+| `original_title` | the `title` property's value                                                              |
+| `authors`        | work `contribution` with role `aut` → `agent` → `$a` of its `bflc:marcKey`; de-duplicated |
+| `url`            | `https://lccn.loc.gov/<lccn>`, the instance's `Lccn`, spaces removed; else `id.loc.gov`   |
+| `isbn`           | the queried ISBN-13                                                                       |
+| `year`           | first four-digit run in the `date` of the instance's `Publication` provision activity     |
+| `series`         | the first work `relation` of relationship `series` whose resource has a `title`           |
+| `series_index`   | first number in that relation's `seriesEnumeration`; a decimal comma becomes a dot        |
+| `genres`         | always `[]`                                                                               |
+| `description`    | the work `summary`, see below                                                             |
+| `cover`          | Open Library, see below                                                                   |
 
 Details:
 
@@ -598,17 +598,24 @@ Details:
   `subtitle`, authors, dates and format are not read: they are weaker than the
   LoC's. The Open Library title also names the files.
 - **Original title.** English-language editions are mostly originals. A
-  translation's uniform title is not read; whether BIBFRAME carries it usably
-  was not in the evaluation's sample.
-- **Authors.** Names as catalogued, `Surname, Given name`. Editors and other
-  roles are dropped; a related work (an earlier edition) is no contribution.
-  No author gives `authors: []`.
+  translation's uniform title is not read. BIBFRAME has it on a hub the work
+  links with `expressionOf` (`Measuring the world` → `Vermessung der Welt`).
+- **Authors.** Names as catalogued, `Surname, Given name`. The agent's
+  `rdfs:label` appends life dates (`Kehlmann, Daniel, 1975-`), so the name is
+  `$a` of the MARC heading in its `bflc:marcKey`
+  (`1001 $aKehlmann, Daniel,$d1975-`), trailing comma removed, which is what
+  the DNB mapping reads too; an agent without one gets its label. Editors and other roles are
+  dropped; a related work (an earlier edition) is no contribution. No author
+  gives `authors: []`.
 - **Year.** The date is EDTF (`2019`). It is the year of this edition.
-- **Series.** Publisher series (`The pragmatic programmers`) are written to
-  `series` like any other, with an empty `series_index` when there is no
-  number.
-- **Url.** `https://lccn.loc.gov/<lccn>` is the LoC's permalink. A record
-  without LCCN gets `https://id.loc.gov/resources/instances/<id>`.
+- **Series.** The resource's `title` → `mainTitle`. A series usually comes
+  twice, as transcribed (first) and as the controlled heading. Publisher
+  series (`The pragmatic programmers`) are written to `series` like any
+  other, with an empty `series_index` when there is no number.
+- **Url.** `https://lccn.loc.gov/<lccn>` is the LoC's permalink. The first
+  `Lccn` without a status counts; its value carries leading spaces, an older
+  one a prefix and a space (`a 34001394`), and all spaces are removed. A
+  record without LCCN gets `https://id.loc.gov/resources/instances/<id>`.
 
 **Type.** From the RDA codes at the end of the content and carrier URIs:
 

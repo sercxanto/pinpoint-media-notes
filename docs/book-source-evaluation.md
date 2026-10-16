@@ -361,6 +361,17 @@ Not seen in the sample: a series number (`seriesEnumeration`), an audiobook,
 and `original_title` for a translation; a record in BIBFRAME carries the
 uniform title as a work title, untested.
 
+Checked when the mapping was built (2026-10-13), on three more records:
+_Leviathan wakes_ (`16523661`) has `seriesEnumeration` `bk. 1` on both
+series relations; _The Daily Show (the audiobook)_ (`19805382`, audio CD)
+has content `spw` and carrier `sd`; Kehlmann's _Measuring the world_
+(`14268223`) links a hub `Vermessung der Welt. English` with
+`expressionOf`, whose title is the original's. The same record shows that
+an agent's `rdfs:label` carries life dates (`Kehlmann, Daniel, 1975-`) when
+the heading has them; `$a` in the agent's `bflc:marcKey` does not. Some
+audiobooks list their ISBN only as an `Ean`, not an `Isbn`
+(`20424874`), and the search does not find them by it.
+
 ### Open Library
 
 As a record source it is weaker than the LoC on every field the LoC has:

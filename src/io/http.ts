@@ -14,6 +14,18 @@ export interface HttpResponse {
 export type HttpGet = (url: string, headers?: Record<string, string>) => Promise<HttpResponse>;
 
 /**
+ * Sent with every request to a book host (DNB, LoC, Open Library). The DNB
+ * cover host's bot filter challenges any browser-like User-Agent (containing
+ * `Mozilla`) with an HTML page, and Obsidian's own is one; a client that
+ * names itself is let through. Open Library asks API clients for a name and
+ * a contact; the repository URL is the contact.
+ */
+export const BOOK_HOST_HEADERS: Record<string, string> = {
+	"User-Agent":
+		"pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)",
+};
+
+/**
  * GET without throwing on HTTP error statuses; callers decide what a status
  * means. Network failures still reject. Headers (the TMDB token among them)
  * are passed through and never appear in errors raised here.
