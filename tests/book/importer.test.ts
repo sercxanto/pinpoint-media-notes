@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { coverUrl, sruUrl } from "../../src/book/dnb";
-import { bookImportConfig, importBook, type BookImportConfig } from "../../src/book/importer";
-import type { DnbRecord } from "../../src/book/dnb-record";
+import {
+	bookImportConfig,
+	importBook,
+	type BookImportConfig,
+	type BookImportDeps,
+} from "../../src/book/importer";
+import { locDocumentUrl, locSearchUrl } from "../../src/book/loc";
+import { openLibraryCoverUrl, openLibraryEditionUrl } from "../../src/book/openlibrary";
+import type { BookRecord } from "../../src/book/record";
 import { ConfigError, EntryError } from "../../src/core/errors";
 import { DEFAULT_SETTINGS } from "../../src/settings";
 import {
@@ -31,14 +38,24 @@ const blurb: FakeResponse = {
 };
 const cover: FakeResponse = { contentType: "image/jpeg", body: JPEG };
 
-function noChoiceExpected(_records: DnbRecord[]): Promise<DnbRecord | null> {
+function noChoiceExpected<T extends BookRecord>(_records: T[]): Promise<T | null> {
 	return Promise.reject(new Error("unexpected record choice"));
+}
+
+/** Chooses the record at `index` and keeps every list offered. */
+function choosing(index: number) {
+	const offered: BookRecord[][] = [];
+	const choose = <T extends BookRecord>(records: T[]): Promise<T | null> => {
+		offered.push(records);
+		return Promise.resolve(records[index] ?? null);
+	};
+	return { choose, offered };
 }
 
 function setup(
 	routes: Record<string, FakeResponse | Error>,
 	existing: string[] = [],
-	chooseRecord = vi.fn(noChoiceExpected),
+	chooseRecord: BookImportDeps["chooseRecord"] = noChoiceExpected,
 ) {
 	const log: string[] = [];
 	const http = fakeHttp(routes, log);
@@ -205,17 +222,19 @@ describe("importBook", () => {
 		expect(result.message).toContain(`Read 3442178584 as ISBN ${ISBN}.`);
 	});
 
-	it("retries an ambiguous input as a record number", async () => {
+	it("retries an ambiguous input as a record number, after the LoC", async () => {
 		const asIsbn = "9781198618734";
 		const { log, run } = setup({
 			[sruUrl("NUM", asIsbn)]: none,
+			[locSearchUrl(asIsbn)]: { body: '{"hits": []}' },
 			[sruUrl("IDN", IDN)]: found,
 			[BLURB]: blurb,
 			[coverUrl(ISBN, "l")]: cover,
 		});
 		const result = await run(IDN);
-		expect(log.slice(0, 2)).toEqual([
+		expect(log.slice(0, 3)).toEqual([
 			`GET ${sruUrl("NUM", asIsbn)}`,
+			`GET ${locSearchUrl(asIsbn)}`,
 			`GET ${sruUrl("IDN", IDN)}`,
 		]);
 		expect(result.message).toContain(`Read ${IDN} as a DNB record number.`);
@@ -228,7 +247,11 @@ describe("importBook", () => {
 	});
 
 	it.each([
-		[ISBN, { [sruUrl("NUM", ISBN)]: none }, `No catalogue record for ISBN ${ISBN}.`],
+		[
+			ISBN,
+			{ [sruUrl("NUM", ISBN)]: none, [locSearchUrl(ISBN)]: { body: '{"hits": []}' } },
+			`No catalogue record for ISBN ${ISBN}, neither at the DNB nor at the Library of Congress.`,
+		],
 		[
 			"12345678",
 			{ [sruUrl("IDN", "12345678")]: none },
@@ -236,8 +259,12 @@ describe("importBook", () => {
 		],
 		[
 			IDN,
-			{ [sruUrl("NUM", "9781198618734")]: none, [sruUrl("IDN", IDN)]: none },
-			`No catalogue record for ${IDN}, neither as ISBN 9781198618734 nor as a DNB record number.`,
+			{
+				[sruUrl("NUM", "9781198618734")]: none,
+				[locSearchUrl("9781198618734")]: { body: '{"hits": []}' },
+				[sruUrl("IDN", IDN)]: none,
+			},
+			`No catalogue record for ${IDN}, neither as ISBN 9781198618734 (DNB, Library of Congress) nor as a DNB record number.`,
 		],
 		[
 			ISBN,
@@ -430,15 +457,15 @@ describe("importBook", () => {
 		};
 
 		it("lets the user choose and imports the chosen record", async () => {
-			const choose = vi.fn((records: DnbRecord[]) => Promise.resolve(records[0] ?? null));
+			const { choose, offered } = choosing(0);
 			const { files, run } = setup(routes, [], choose);
 			const result = await run(ISBN);
-			expect(choose.mock.calls[0]?.[0].map((book) => book.idn)).toEqual([
-				"1379107830",
-				"1379188067",
-				"139261385X",
-				"1392644321",
-				"1395073848",
+			expect(offered[0]?.map((book) => book.url)).toEqual([
+				"https://d-nb.info/1379107830",
+				"https://d-nb.info/1379188067",
+				"https://d-nb.info/139261385X",
+				"https://d-nb.info/1392644321",
+				"https://d-nb.info/1395073848",
 			]);
 			expect(result.notePath).toBe("Books/Die Känguru-Rebellion (2026) - Hörbuch.md");
 			expect(files.files.get("assets/Die Känguru-Rebellion (2026) - Hörbuch.jpg")).toBe(JPEG);
@@ -453,6 +480,269 @@ describe("importBook", () => {
 			await expect(run(ISBN)).rejects.toThrow("no record chosen");
 			expect(files.files.size).toBe(0);
 		});
+	});
+});
+
+describe("importBook: Library of Congress fallback", () => {
+	const GOOGLE = "9781492082798";
+	const GOOGLE_NOTE = "Books/Software Engineering at Google (2020).md";
+	const GOOGLE_IMAGE = "assets/Software Engineering at Google (2020).jpg";
+	const BRAIN = "9781982167400";
+	const BRAIN_PRINT = ["9781982167387", "9781982167394"];
+	const KEHLMANN = "9780375424465";
+
+	const document = (id: string): FakeResponse => ({
+		body: fixture(`loc/instance-${id}.cbd.json`),
+	});
+	const search = (...ids: string[]): FakeResponse => ({
+		body: JSON.stringify({ hits: ids.map((token) => ({ token })) }),
+	});
+
+	const googleRoutes = {
+		[sruUrl("NUM", GOOGLE)]: none,
+		[locSearchUrl(GOOGLE)]: { body: fixture("loc/search-9781492082798.json") },
+		[locDocumentUrl("22483650")]: document("22483650"),
+		[openLibraryEditionUrl(GOOGLE)]: {
+			body: fixture("openlibrary/edition-9781492082798.json"),
+		},
+		[openLibraryCoverUrl(GOOGLE, "l")]: cover,
+	};
+
+	it("looks up the LoC after a DNB miss, takes the Open Library title, writes the note last", async () => {
+		const { log, files, run } = setup(googleRoutes);
+		const result = await run(GOOGLE);
+
+		expect(log).toEqual([
+			`GET ${sruUrl("NUM", GOOGLE)}`,
+			`GET ${locSearchUrl(GOOGLE)}`,
+			`GET ${locDocumentUrl("22483650")}`,
+			`GET ${openLibraryEditionUrl(GOOGLE)}`,
+			`GET ${openLibraryCoverUrl(GOOGLE, "l")}`,
+			`image ${GOOGLE_IMAGE}`,
+			`note ${GOOGLE_NOTE}`,
+		]);
+		expect(result).toEqual({
+			notePath: GOOGLE_NOTE,
+			coverPath: GOOGLE_IMAGE,
+			message: `Created "${GOOGLE_NOTE}". Not in the DNB; record from the Library of Congress. Title from Open Library. Cover from Open Library, ISBN ${GOOGLE}.`,
+		});
+		expect(files.files.get(GOOGLE_NOTE)).toBe(`---
+template: "[[Book Template]]"
+type: book
+title: Software Engineering at Google
+original_title: Software Engineering at Google
+authors:
+  - Winters, Titus
+  - Manshreck, Tom
+  - Wright, Hyrum
+url: https://lccn.loc.gov/2021443590
+isbn: "${GOOGLE}"
+year: 2020
+series:
+series_index:
+genres: []
+description:
+cover: "[[${GOOGLE_IMAGE}]]"
+rating:
+last_finished:
+shelf: unsorted
+tags:
+  - books
+---
+
+## Notes
+`);
+	});
+
+	it("names itself to the LoC and Open Library", async () => {
+		const { http, run } = setup(googleRoutes);
+		await run(GOOGLE);
+		expect(http.calls).toHaveLength(5);
+		for (const sent of http.headers) {
+			expect(sent?.["User-Agent"]).toBe(
+				"pinpoint-media-notes (Obsidian plugin; +https://github.com/sercxanto/pinpoint-media-notes)",
+			);
+		}
+	});
+
+	it("keeps the LoC title, silently, when Open Library has no edition", async () => {
+		const { files, run } = setup({
+			...googleRoutes,
+			[openLibraryEditionUrl(GOOGLE)]: { status: 404, contentType: "text/html" },
+		});
+		const result = await run(GOOGLE);
+		expect(result.notePath).toBe("Books/Software engineering at Google (2020).md");
+		expect(result.message).toContain(
+			"Not in the DNB; record from the Library of Congress. Title from the Library of Congress. Cover",
+		);
+		expect(files.files.get(result.notePath)).toContain(
+			"\ntitle: Software engineering at Google\noriginal_title: Software engineering at Google\n",
+		);
+	});
+
+	it("reports a failed Open Library lookup and keeps the LoC title", async () => {
+		const { run } = setup({
+			...googleRoutes,
+			[openLibraryEditionUrl(GOOGLE)]: { status: 503 },
+		});
+		const result = await run(GOOGLE);
+		expect(result.notePath).toBe("Books/Software engineering at Google (2020).md");
+		expect(result.message).toContain(
+			"Title from the Library of Congress: Open Library answered with HTTP 503.",
+		);
+	});
+
+	it("keeps a translation's original title", async () => {
+		const { files, run } = setup({
+			[sruUrl("NUM", KEHLMANN)]: none,
+			[locSearchUrl(KEHLMANN)]: search("14268223"),
+			[locDocumentUrl("14268223")]: document("14268223"),
+			[openLibraryEditionUrl(KEHLMANN)]: { body: '{"title": "Measuring the World"}' },
+		});
+		const result = await run(KEHLMANN);
+		const note = files.files.get(result.notePath) as string;
+		expect(note).toContain(
+			"\ntitle: Measuring the World\noriginal_title: Vermessung der Welt\nauthors:\n  - Kehlmann, Daniel\n",
+		);
+	});
+
+	it("checks for a collision after the title lookup and before the cover", async () => {
+		const { log, run } = setup(googleRoutes, [GOOGLE_NOTE]);
+		await expect(run(GOOGLE)).rejects.toThrow(`Skipped: "${GOOGLE_NOTE}" already exists.`);
+		expect(log.at(-1)).toBe(`GET ${openLibraryEditionUrl(GOOGLE)}`);
+	});
+
+	it("takes the record that lists the ISBN, its summary, and a cover of another format", async () => {
+		const missing: FakeResponse = { status: 404, contentType: "text/html" };
+		const { log, files, run } = setup({
+			[sruUrl("NUM", BRAIN)]: none,
+			[locSearchUrl(BRAIN)]: { body: fixture("loc/search-9781982167400.json") },
+			[locDocumentUrl("22338086")]: document("22338086"),
+			[locDocumentUrl("22339234")]: document("22339234"),
+			[openLibraryCoverUrl(BRAIN, "l")]: missing,
+			[openLibraryCoverUrl(BRAIN_PRINT[0]!, "l")]: missing,
+			[openLibraryCoverUrl(BRAIN_PRINT[1]!, "l")]: cover,
+		});
+		const result = await run(BRAIN);
+		expect(result.notePath).toBe("Books/Building a second brain (2022) - E-Book.md");
+		expect(log.filter((entry) => entry.includes("covers."))).toEqual(
+			[BRAIN, ...BRAIN_PRINT].map((isbn) => `GET ${openLibraryCoverUrl(isbn, "l")}`),
+		);
+		expect(result.message).toContain(
+			`Cover from Open Library, ISBN ${BRAIN_PRINT[1]}, another edition; its artwork may differ.`,
+		);
+		expect(files.files.get(result.notePath)).toContain(
+			"\ndescription: Invented stand-in for publisher copy. A method for keeping notes so that ideas come back when they are needed\n",
+		);
+	});
+
+	it("names every ISBN tried when Open Library has no cover", async () => {
+		const { run } = setup({
+			[sruUrl("NUM", BRAIN)]: none,
+			[locSearchUrl(BRAIN)]: search("22339234"),
+			[locDocumentUrl("22339234")]: document("22339234"),
+		});
+		expect((await run(BRAIN)).message).toContain(
+			`No cover: the cover server has no usable cover for ISBN ${BRAIN}, ${BRAIN_PRINT.join(", ")}.`,
+		);
+	});
+
+	it("stops the cover chain at the first blocked answer", async () => {
+		const { http, run } = setup({
+			[sruUrl("NUM", BRAIN)]: none,
+			[locSearchUrl(BRAIN)]: search("22339234"),
+			[locDocumentUrl("22339234")]: document("22339234"),
+			[openLibraryCoverUrl(BRAIN, "l")]: { status: 500, contentType: "text/plain" },
+		});
+		await run(BRAIN);
+		expect(http.calls.filter((url) => url.includes("covers."))).toHaveLength(1);
+	});
+
+	it("is a miss when the only record lists the ISBN as another format's, and names it", async () => {
+		const { files, run } = setup({
+			[sruUrl("NUM", BRAIN)]: none,
+			[locSearchUrl(BRAIN)]: search("22338086"),
+			[locDocumentUrl("22338086")]: document("22338086"),
+		});
+		await expect(run(BRAIN)).rejects.toThrow(
+			`No catalogue record for ISBN ${BRAIN}, neither at the DNB nor at the Library of Congress. The LoC record https://lccn.loc.gov/2021057378 lists it only as another format's ISBN; it describes a different edition.`,
+		);
+		expect(files.files.size).toBe(0);
+	});
+
+	it("lets the user choose among several records that count", async () => {
+		const twin = fixture("loc/instance-22483650.cbd.json").replaceAll("22483650", "22483651");
+		const { choose, offered } = choosing(1);
+		const { run } = setup(
+			{
+				...googleRoutes,
+				[locSearchUrl(GOOGLE)]: search("22483650", "22483651"),
+				[locDocumentUrl("22483651")]: { body: twin },
+			},
+			[],
+			choose,
+		);
+		const result = await run(GOOGLE);
+		expect(offered[0]?.map((book) => book.url)).toEqual([
+			"https://lccn.loc.gov/2021443590",
+			"https://lccn.loc.gov/2021443590",
+		]);
+		expect(result.notePath).toBe(GOOGLE_NOTE);
+	});
+
+	it("skips unsupported material before asking Open Library", async () => {
+		const { http, run } = setup({
+			[sruUrl("NUM", GOOGLE)]: none,
+			[locSearchUrl(GOOGLE)]: search("22483650"),
+			[locDocumentUrl("22483650")]: {
+				body: fixture("loc/instance-22483650.cbd.json").replaceAll(
+					"/contentTypes/txt",
+					"/contentTypes/ntm",
+				),
+			},
+		});
+		await expect(run(GOOGLE)).rejects.toThrow('Skipped "Software engineering at Google"');
+		expect(http.calls).not.toContain(openLibraryEditionUrl(GOOGLE));
+	});
+
+	it("reads ten characters as ISBN at the LoC before the record number", async () => {
+		const { http, run } = setup(googleRoutes);
+		const result = await run("1492082791");
+		expect(http.calls).not.toContain(sruUrl("IDN", "1492082791"));
+		expect(result.message).toContain(
+			`Read 1492082791 as ISBN ${GOOGLE}. Not in the DNB; record from the Library of Congress.`,
+		);
+	});
+
+	it("does not fall back when the DNB lookup fails", async () => {
+		const { http, run } = setup({ ...googleRoutes, [sruUrl("NUM", GOOGLE)]: { status: 500 } });
+		await expect(run(GOOGLE)).rejects.toThrow("The DNB catalogue answered with HTTP 500.");
+		expect(http.calls).toHaveLength(1);
+	});
+
+	it.each<[string, Record<string, FakeResponse | Error>, string]>([
+		["a failed search", { [locSearchUrl(GOOGLE)]: { status: 500 } }, "HTTP 500"],
+		["an unreachable host", { [locSearchUrl(GOOGLE)]: new Error("offline") }, "offline"],
+		["a failed record", { [locDocumentUrl("22483650")]: { status: 404 } }, "HTTP 404"],
+	])("fails the entry on %s, also for ten characters", async (_, routes, message) => {
+		for (const input of [GOOGLE, "1492082791"]) {
+			const { http, files, run } = setup({ ...googleRoutes, ...routes });
+			await expect(run(input)).rejects.toThrow(message);
+			expect(http.calls).not.toContain(sruUrl("IDN", "1492082791"));
+			expect(files.files.size).toBe(0);
+		}
+	});
+
+	it("names both catalogues and the other-format record for ten characters found nowhere", async () => {
+		const { run } = setup({
+			[sruUrl("NUM", BRAIN)]: none,
+			[locSearchUrl(BRAIN)]: search("22338086"),
+			[locDocumentUrl("22338086")]: document("22338086"),
+			[sruUrl("IDN", "1982167408")]: none,
+		});
+		await expect(run("1982167408")).rejects.toThrow(
+			`No catalogue record for 1982167408, neither as ISBN ${BRAIN} (DNB, Library of Congress) nor as a DNB record number. The LoC record https://lccn.loc.gov/2021057378 lists it`,
+		);
 	});
 });
 

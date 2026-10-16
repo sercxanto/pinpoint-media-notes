@@ -9,7 +9,9 @@ plugin, written in TypeScript. It creates one note per entry, with a cover
 image and a fixed frontmatter schema:
 
 - **book import**: from an ISBN or DNB record number, using the Deutsche
-  Nationalbibliothek (DNB) catalogue (SRU/MARC21, no key needed).
+  Nationalbibliothek (DNB) catalogue (SRU/MARC21, no key needed); an ISBN the
+  DNB does not know falls back to the Library of Congress (`id.loc.gov`,
+  BIBFRAME JSON-LD), with title and cover from Open Library.
 - **TMDB import**: from a TMDB movie or series URL, using the TMDB API (bearer
   token).
 
@@ -22,7 +24,6 @@ image and a fixed frontmatter schema:
 | `docs/book-source-evaluation.md` | why the book importer uses the DNB, measurements behind the cover fallback.      |
 | `README.md`                      | user documentation, derived from the spec.                                       |
 | `docs/MANUAL_TEST.md`            | checklist for the manual test in Obsidian.                                       |
-| `docs/PLAN.md`                   | the current multi-session plan (LoC fallback). Removed when the work is done.    |
 | this file                        | how to work here: commands, architecture, implementation decisions.              |
 
 ## Working agreement with the maintainer
@@ -80,9 +81,9 @@ src/
     note.ts        file stem with type suffix, note builder
     cover.ts       downloadCover: one cover request, judged by Content-Type; COVER_EXTENSIONS
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
-    loc.ts         id.loc.gov search and record requests (over HttpGet); not wired yet
-    openlibrary.ts Open Library title and cover requests (over HttpGet); not wired yet
-    importer.ts    importBook: the per-entry order, cover fallback chain; bookImportConfig
+    loc.ts         id.loc.gov search and record requests (over HttpGet)
+    openlibrary.ts Open Library title and cover requests (over HttpGet)
+    importer.ts    importBook: the per-entry order, DNB → LoC lookup, cover chains; bookImportConfig
   tmdb/          TMDB importer
     input.ts       link parsing (movie/tv + id), canonicalUrl
     api.ts         URLs, bearer headers, getJson (401 → ConfigError, NFC on read), fetchPoster, redact
@@ -230,6 +231,23 @@ go into the spec.
   carries TMDB's attribution sentence ("This product uses the TMDB API but
   is not endorsed or certified by TMDB."), which TMDB's API terms require.
 - **`docs/schema/` is excluded from Prettier**, see _Behaviour and schema_.
+- **One cover chain for both catalogues:** `findCover` in `importer.ts`
+  takes the candidates (`isbnCandidates`: own ISBN, then the listed other
+  editions; the DNB adds the linked `776 $w` records) and the cover host
+  (MVB or Open Library). `downloadCover` in `cover.ts` judges every host's
+  response the same way.
+- **`chooseRecord` is generic** over `BookRecord`, so the record picker
+  returns the catalogue's own record type and the importer branches on
+  `catalogue` without casts.
+- **Redirects are not testable here.** Open Library answers hits with
+  redirects (to `/books/<id>.json`, and to `archive.org` for covers);
+  whether `requestUrl` follows them is only seen in Obsidian, so
+  `docs/MANUAL_TEST.md` checks it. Should it not, the title lookup reports
+  `HTTP 302` and the cover chain stops as blocked, so nothing wrong is
+  written.
+- **LoC original titles are kept as catalogued** (initial articles dropped,
+  romanised), like `240 $a` for the DNB; settled with the maintainer
+  (2026-10-16).
 
 ## Before publishing to the community list
 

@@ -80,7 +80,9 @@ exist yet.
       narrator).
 - [ ] `9783442178583` (wrong check digit): "wrong check digit" at once,
       nothing new in the vault.
-- [ ] `9780000000002` (valid, not in the catalogue): "No catalogue record".
+- [ ] `9780000000002` (valid, in no catalogue): "No catalogue record for
+      ISBN 9780000000002, neither at the DNB nor at the Library of
+      Congress."
 - [ ] `https://d-nb.info/gnd/118540238` (authority record): rejected.
 - [ ] Enter while an import runs: the field is disabled; a second Enter
       starts no second import.
@@ -89,6 +91,31 @@ exist yet.
       on a row imports that record; closing the picker skips the entry with
       "no record chosen". (Find such an ISBN in the catalogue first; if none
       is at hand, note the item as not run.)
+
+## Book import: Library of Congress fallback
+
+Checked on 2026-10-16: none of these ISBNs is in the DNB.
+
+- [ ] `9781492082798` (_Software engineering at Google_), cover size `l`:
+      creates `Books/Software Engineering at Google (2020).md` (title case,
+      from Open Library) and its image. The notice says "Not in the DNB;
+      record from the Library of Congress. Title from Open Library. Cover
+      from Open Library, ISBN 9781492082798." This checks that `requestUrl`
+      follows Open Library's redirects: to `/books/…json` for the title, and
+      on to `archive.org` for the cover. If it does not, the notice says
+      "Title from the Library of Congress: Open Library answered with HTTP
+      302" and "No cover: … HTTP 302 …"; report that.
+- [ ] The note: `url` is `https://lccn.loc.gov/2021443590` and opens the LoC
+      record; three authors; `description` empty.
+- [ ] `9781982167400` (_Building a second brain_, e-book): file name ends in
+      ` - E-Book.md`; `description` filled, without quotes or "Provided by
+      publisher"; the notice says "Cover from Open Library, ISBN
+      9781982167387, another edition; its artwork may differ."
+- [ ] `9781399615310` (in neither catalogue): "No catalogue record for ISBN
+      9781399615310, neither at the DNB nor at the Library of Congress."
+      Nothing new in the vault.
+- [ ] `1492082791` (ISBN-10 of _Software engineering at Google_, after
+      deleting the note): the notice starts "Read 1492082791 as ISBN 9781492082798. Not in the DNB; record from the Library of Congress."
 
 ## Movie and series import
 
@@ -123,6 +150,8 @@ On iOS and Android, if available, after syncing the plugin:
 
 - [ ] The plugin loads; both commands are in the command palette.
 - [ ] One book and one movie import with cover; the cover shows in the note.
+- [ ] `9781492082798` imports with title and cover from Open Library (the
+      redirects are followed on mobile too).
 - [ ] The import window is usable with the on-screen keyboard; Enter
       submits.
 - [ ] The record picker is usable on a narrow screen.

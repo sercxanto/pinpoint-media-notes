@@ -263,9 +263,6 @@ is the contact, so no e-mail address is sent. A contract test watches the DNB
 rule. The TMDB hosts get Obsidian's default User-Agent, which they
 accept.
 
-_Not yet implemented:_ requests to the LoC and Open Library hosts; see
-`docs/PLAN.md`.
-
 ## Book import
 
 ### Input
@@ -524,10 +521,6 @@ tags:
 
 ### Library of Congress fallback
 
-_Specified, not yet implemented: the LoC lookup and mapping and the Open
-Library title and cover requests exist, the wiring into the import does not;
-see `docs/PLAN.md`._
-
 For an ISBN the DNB has no record for (see [Input](#input)). The record comes
 from the LoC's linked-data service `id.loc.gov` in BIBFRAME, the title and the
 cover from Open Library. No key, no account. LoC data is in the public domain,
@@ -535,8 +528,9 @@ Open Library's under CC0. The evaluation behind every rule here is the section
 [English-language editions](book-source-evaluation.md#english-language-editions-fallback-sources).
 
 The per-entry order is the one in [Processing one entry](#processing-one-entry):
-LoC search and records, Open Library title, file name and collision check,
-cover, note. There is no separate description request; the summary is part of
+LoC search and records, the record picker and the type check, Open Library
+title, file name and collision check, cover, note. Unsupported material is
+skipped before Open Library is asked. There is no separate description request; the summary is part of
 the LoC record.
 
 #### Lookup
@@ -679,6 +673,9 @@ covers, and from there to one of its servers (`ia600404.us.archive.org`);
 both are followed. The redirect names Open Library's cover file
 (`0010450993-L.jpg`), not the ISBN.
 
+The message names Open Library (`Cover from Open Library, ISBN …`); a DNB
+record's cover message names only the ISBN, the MVB being the default.
+
 Open Library is not asked for covers of DNB records. The MVB chain with its
 sibling editions covered the evaluation's sample almost completely, and Open
 Library has few German editions.
@@ -799,8 +796,11 @@ noteworthy:
 
 - how an ambiguous 10-character input was read,
 - for an LoC record: that the record comes from the Library of Congress, so
-  the user knows why title or description are English, and where the title
-  comes from (Open Library or the LoC), or why Open Library failed,
+  the user knows why title or description are English
+  (`Not in the DNB; record from the Library of Congress.`), and where the
+  title comes from (`Title from Open Library.`,
+  `Title from the Library of Congress.`), or why Open Library failed
+  (`Title from the Library of Congress: <reason>.`),
 - where the cover came from (MVB or Open Library), and whether it belongs to
   another edition,
 - that an existing image was kept,
@@ -809,6 +809,8 @@ noteworthy:
 
 Error messages name the input or the setting concerned. A book found in
 neither catalogue names both, so the miss does not look like a gap in the DNB
-alone. Anything that is
+alone (`No catalogue record for ISBN <isbn>, neither at the DNB nor at the
+Library of Congress.`), and adds any LoC record that lists the ISBN only as
+another format's. Anything that is
 neither a configuration nor a per-entry error is shown as
 `Unexpected error: …`.
