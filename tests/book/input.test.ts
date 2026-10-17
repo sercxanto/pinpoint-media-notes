@@ -5,6 +5,7 @@ import {
 	isValidIsbn10,
 	isbn10To13,
 	parseBookInput,
+	toIsbn13,
 	type BookQuery,
 } from "../../src/book/input";
 
@@ -78,5 +79,18 @@ describe("check digits", () => {
 	it("converts ISBN-10 to ISBN-13", () => {
 		expect(isbn10To13("3442178584")).toBe("9783442178582");
 		expect(isbn10To13("080442957X")).toBe("9780804429573");
+	});
+});
+
+describe("toIsbn13", () => {
+	it.each<[string, string | null]>([
+		["978-3-442-17858-2", "9783442178582"],
+		["3-442-17858-4", "9783442178582"],
+		["080442957x", "9780804429573"],
+		["3442178585", null],
+		["9783442178582 (Gb.)", null],
+		["", null],
+	])("%j → %j", (raw, isbn) => {
+		expect(toIsbn13(raw)).toBe(isbn);
 	});
 });

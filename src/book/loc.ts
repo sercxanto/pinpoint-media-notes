@@ -1,4 +1,4 @@
-import { EntryError } from "../core/errors";
+import { EntryError, reasonOf } from "../core/errors";
 import { BOOK_HOST_HEADERS, type HttpGet, type HttpResponse } from "../io/http";
 import { JsonLdGraph } from "./jsonld";
 import { readLocRecord, type LocRecord } from "./loc-record";
@@ -22,7 +22,7 @@ async function get(http: HttpGet, url: string): Promise<HttpResponse> {
 	try {
 		response = await http(url, BOOK_HOST_HEADERS);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not reach the LoC catalogue: ${reason}`);
 	}
 	if (response.status !== 200) {

@@ -1,6 +1,7 @@
-import { ConfigError, EntryError } from "../core/errors";
+import { ConfigError, EntryError, reasonOf } from "../core/errors";
 import { nfc } from "../core/text";
-import type { HttpGet, HttpResponse } from "../io/http";
+import { mediaType, type HttpGet, type HttpResponse } from "../io/http";
+import { SETTING_NAMES } from "../settings";
 import type { TmdbRef } from "./input";
 
 const API_BASE = "https://api.themoviedb.org/3";
@@ -51,12 +52,12 @@ export async function getJson(
 	try {
 		response = await http(url, tmdbHeaders(token));
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not reach TMDB for ${what}: ${redact(reason, token)}`);
 	}
 	if (response.status === 401) {
 		throw new ConfigError(
-			'TMDB rejected the access token (HTTP 401). Check the setting "TMDB read access token": it needs the long API read access token, not the API key.',
+			`TMDB rejected the access token (HTTP 401). Check the setting "${SETTING_NAMES.tmdbToken}": it needs the long API read access token, not the API key.`,
 		);
 	}
 	if (response.status === 404) throw new EntryError(`TMDB has no ${what}.`);
@@ -98,11 +99,10 @@ export async function fetchPoster(
 	try {
 		response = await http(posterUrl(size, posterPath));
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		return { ok: false, reason: `the image server could not be reached (${reason})` };
 	}
-	const contentType =
-		(response.header("Content-Type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+	const contentType = mediaType(response);
 	if (response.status !== 200) {
 		return { ok: false, reason: `the image server answered with HTTP ${response.status}` };
 	}

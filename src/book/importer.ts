@@ -1,8 +1,8 @@
-import { EntryError } from "../core/errors";
+import { EntryError, reasonOf } from "../core/errors";
 import { requireVaultFolder } from "../core/paths";
 import type { HttpGet } from "../io/http";
 import type { VaultFiles } from "../io/vault";
-import type { CoverSize, PinpointSettings } from "../settings";
+import { SETTING_NAMES, type CoverSize, type PinpointSettings } from "../settings";
 import { COVER_EXTENSIONS, type CoverResult } from "./cover";
 import { fetchBlurb, fetchCover, searchCatalogue } from "./dnb";
 import { dnbRecordUrl, readDnbRecord, recordIsbn, type DnbRecord } from "./dnb-record";
@@ -22,8 +22,8 @@ export interface BookImportConfig {
 /** Checks the settings before any work; throws a ConfigError naming the setting. */
 export function bookImportConfig(settings: PinpointSettings): BookImportConfig {
 	return {
-		notesDir: requireVaultFolder("Book notes folder", settings.bookNotesDir),
-		assetsDir: requireVaultFolder("Image folder", settings.assetsDir),
+		notesDir: requireVaultFolder(SETTING_NAMES.bookNotesDir, settings.bookNotesDir),
+		assetsDir: requireVaultFolder(SETTING_NAMES.assetsDir, settings.assetsDir),
 		coverSize: settings.coverSize,
 	};
 }
@@ -101,7 +101,7 @@ export async function importBook(input: string, deps: BookImportDeps): Promise<B
 		await files.ensureFolder(config.notesDir);
 		await files.createNote(notePath, bookNote(book, type, description, cover.path));
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not create "${notePath}": ${reason}`);
 	}
 
@@ -264,7 +264,7 @@ async function provideCover(
 		await files.ensureFolder(config.assetsDir);
 		await files.createBinary(path, found.data);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not save the cover "${path}": ${reason}`);
 	}
 	return { path, message: coverMessage(book.catalogue, found.source) };

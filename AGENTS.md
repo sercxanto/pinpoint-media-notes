@@ -61,19 +61,19 @@ through the test suite; manual testing in Obsidian is the maintainer's job.
 ```
 src/
   main.ts        plugin class: settings load/save, commands
-  settings.ts    settings model, defaults, settings tab (declarative API, Obsidian 1.13+)
+  settings.ts    settings model, defaults, SETTING_NAMES (quoted in messages), settings tab (declarative API, Obsidian 1.13+)
   core/          pure logic, no `obsidian` import
-    errors.ts      ConfigError (stop the import), EntryError (report, continue)
+    errors.ts      ConfigError (stop the import), EntryError (report, continue), reasonOf
     text.ts        nfc, sanitizeFileName, noteStem
     frontmatter.ts yamlScalar, buildFrontmatter, buildNote
     paths.ts       vault-relative folder check for settings and imports
   io/
-    http.ts        httpGet: the only caller of requestUrl (HttpGet type for fakes); BOOK_HOST_HEADERS
+    http.ts        httpGet: the only caller of requestUrl (HttpGet type for fakes); BOOK_HOST_HEADERS, mediaType
     vault.ts       VaultFiles interface and its implementation over app.vault
   book/          book importer
-    input.ts       ISBN/IDN/link parsing, check digits
+    input.ts       ISBN/IDN/link parsing, check digits, toIsbn13
     marc.ts        SRU response → MARC records (DOMParser), NFC and marker stripping on read
-    record.ts      BookRecord (source-neutral), rdaBookType (RDA codes → type), describeRecord
+    record.ts      BookRecord (source-neutral), rdaBookType (RDA codes → type), seriesNumber, describeRecord
     dnb-record.ts  MARC → DnbRecord, DNB_RECORD_SOURCES (field-coverage table), recordIsbn
     jsonld.ts      JsonLdGraph: flat JSON-LD nodes linked by @id, NFC and trimming on read
     loc-record.ts  JSON-LD → LocRecord, LOC_RECORD_SOURCES, matchLocRecords (the cancinv rule)

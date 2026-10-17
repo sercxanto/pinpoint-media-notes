@@ -1,4 +1,5 @@
-import { BOOK_HOST_HEADERS, type HttpGet, type HttpResponse } from "../io/http";
+import { reasonOf } from "../core/errors";
+import { BOOK_HOST_HEADERS, mediaType, type HttpGet, type HttpResponse } from "../io/http";
 
 // Cover downloads, judged the same way for every cover host (MVB through the
 // DNB portal, Open Library).
@@ -26,15 +27,14 @@ export async function downloadCover(
 	try {
 		response = await http(url, BOOK_HOST_HEADERS);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		return {
 			ok: false,
 			failure: "blocked",
 			reason: `the cover server could not be reached (${reason})`,
 		};
 	}
-	const contentType =
-		(response.header("Content-Type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+	const contentType = mediaType(response);
 	if (contentType.startsWith("image/")) {
 		const extension = IMAGE_TYPES[contentType];
 		if (extension === undefined) {

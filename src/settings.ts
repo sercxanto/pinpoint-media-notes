@@ -31,9 +31,22 @@ export const DEFAULT_SETTINGS: PinpointSettings = {
 	posterSize: "w500",
 };
 
+/**
+ * The names the settings tab shows; messages about a setting quote them, so
+ * the user finds it.
+ */
+export const SETTING_NAMES = {
+	assetsDir: "Image folder",
+	bookNotesDir: "Book notes folder",
+	coverSize: "Cover size",
+	tmdbNotesDir: "Movie and series notes folder",
+	tmdbToken: "TMDB read access token",
+	tmdbLanguage: "Language",
+	posterSize: "Poster size",
+} as const satisfies Record<keyof PinpointSettings, string>;
+
 const POSTER_SIZES = ["w92", "w154", "w185", "w342", "w500", "w780", "original"];
 
-const TOKEN_NAME = "TMDB read access token";
 const TOKEN_DESC =
 	"The long API read access token from your TMDB account settings, not the short API key. Stored in the plugin's data.json, like all settings.";
 
@@ -49,12 +62,12 @@ export class PinpointSettingTab extends PluginSettingTab {
 				heading: "Images",
 				items: [
 					{
-						name: "Image folder",
+						name: SETTING_NAMES.assetsDir,
 						desc: "Vault-relative folder for covers and posters.",
 						control: {
 							type: "folder",
 							key: "assetsDir",
-							defaultValue: "assets",
+							defaultValue: DEFAULT_SETTINGS.assetsDir,
 							validate: validateFolderInput,
 						},
 					},
@@ -65,7 +78,7 @@ export class PinpointSettingTab extends PluginSettingTab {
 				heading: "Books",
 				items: [
 					{
-						name: "Book notes folder",
+						name: SETTING_NAMES.bookNotesDir,
 						desc: "Vault-relative folder for book, e-book and audiobook notes.",
 						control: {
 							type: "folder",
@@ -74,11 +87,11 @@ export class PinpointSettingTab extends PluginSettingTab {
 						},
 					},
 					{
-						name: "Cover size",
+						name: SETTING_NAMES.coverSize,
 						control: {
 							type: "dropdown",
 							key: "coverSize",
-							defaultValue: "l",
+							defaultValue: DEFAULT_SETTINGS.coverSize,
 							options: {
 								s: "Small (90×122)",
 								m: "Medium (200×272)",
@@ -93,7 +106,7 @@ export class PinpointSettingTab extends PluginSettingTab {
 				heading: "Movies and series",
 				items: [
 					{
-						name: "Movie and series notes folder",
+						name: SETTING_NAMES.tmdbNotesDir,
 						desc: "Vault-relative folder for movie and series notes.",
 						control: {
 							type: "folder",
@@ -102,21 +115,25 @@ export class PinpointSettingTab extends PluginSettingTab {
 						},
 					},
 					{
-						name: TOKEN_NAME,
+						name: SETTING_NAMES.tmdbToken,
 						desc: TOKEN_DESC,
 						render: (setting) => this.renderTokenField(setting),
 					},
 					{
-						name: "Language",
+						name: SETTING_NAMES.tmdbLanguage,
 						desc: "TMDB locale for titles, descriptions and posters, e.g. de-DE.",
-						control: { type: "text", key: "tmdbLanguage", defaultValue: "en-US" },
+						control: {
+							type: "text",
+							key: "tmdbLanguage",
+							defaultValue: DEFAULT_SETTINGS.tmdbLanguage,
+						},
 					},
 					{
-						name: "Poster size",
+						name: SETTING_NAMES.posterSize,
 						control: {
 							type: "dropdown",
 							key: "posterSize",
-							defaultValue: "w500",
+							defaultValue: DEFAULT_SETTINGS.posterSize,
 							options: Object.fromEntries(POSTER_SIZES.map((size) => [size, size])),
 						},
 					},
@@ -130,7 +147,7 @@ export class PinpointSettingTab extends PluginSettingTab {
 	 * clear, so this row is rendered by hand, over the same value accessors.
 	 */
 	renderTokenField(setting: Setting): void {
-		setting.setName(TOKEN_NAME).setDesc(TOKEN_DESC);
+		setting.setName(SETTING_NAMES.tmdbToken).setDesc(TOKEN_DESC);
 		setting.addText((text) => {
 			text.inputEl.type = "password";
 			text.inputEl.autocomplete = "off";

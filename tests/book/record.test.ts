@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeRecord, rdaBookType, type BookRecord } from "../../src/book/record";
+import { describeRecord, rdaBookType, seriesNumber, type BookRecord } from "../../src/book/record";
 
 const BOOK: BookRecord = {
 	catalogue: "dnb",
@@ -61,5 +61,18 @@ describe("describeRecord", () => {
 			name: "Karte (no year)",
 			details: "no content type / no carrier type, no ISBN, https://lccn.loc.gov/2019000001",
 		});
+	});
+});
+
+describe("seriesNumber", () => {
+	it.each<[string[], number | null]>([
+		[["Band 5"], 5],
+		[["bk. 1"], 1],
+		[["Band 2,5"], 2.5],
+		[["Sonderband", "Band 3"], 3],
+		[["Sonderband"], null],
+		[[], null],
+	])("%j → %j", (values, index) => {
+		expect(seriesNumber(values)).toBe(index);
 	});
 });

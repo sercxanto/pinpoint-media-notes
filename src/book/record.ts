@@ -40,6 +40,18 @@ export function rdaBookType(contents: string[], carriers: string[]): BookType | 
 }
 
 /**
+ * The first number among the volume designations ("Band 5" → 5, "bk. 1" →
+ * 1), a decimal comma read as a dot. None gives null.
+ */
+export function seriesNumber(values: string[]): number | null {
+	for (const value of values) {
+		const number = /\d+(?:[.,]\d+)?/.exec(value)?.[0];
+		if (number) return Number(number.replace(",", "."));
+	}
+	return null;
+}
+
+/**
  * A record for the user to choose from: title and year, then what tells
  * editions apart (type, ISBN, link to the catalogue record).
  */
