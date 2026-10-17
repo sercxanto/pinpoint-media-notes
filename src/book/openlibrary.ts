@@ -1,3 +1,4 @@
+import { reasonOf } from "../core/errors";
 import { nfc } from "../core/text";
 import { BOOK_HOST_HEADERS, type HttpGet, type HttpResponse } from "../io/http";
 import type { CoverSize } from "../settings";
@@ -35,7 +36,7 @@ export async function fetchOpenLibraryTitle(
 	try {
 		response = await http(openLibraryEditionUrl(isbn13), BOOK_HOST_HEADERS);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		return { kind: "failed", reason: `Open Library could not be reached (${reason})` };
 	}
 	if (response.status === 404) return { kind: "none" };

@@ -1,4 +1,4 @@
-import { EntryError } from "../core/errors";
+import { EntryError, reasonOf } from "../core/errors";
 import { BOOK_HOST_HEADERS, type HttpGet, type HttpResponse } from "../io/http";
 import type { CoverSize } from "../settings";
 import { blurbText, truncateBlurb } from "./blurb";
@@ -30,7 +30,7 @@ async function get(http: HttpGet, url: string, what: string): Promise<HttpRespon
 	try {
 		return await http(url, BOOK_HOST_HEADERS);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not reach the ${what}: ${reason}`);
 	}
 }
@@ -56,7 +56,7 @@ export async function fetchBlurb(http: HttpGet, url: string): Promise<BlurbResul
 	try {
 		response = await http(url, BOOK_HOST_HEADERS);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		return { ok: false, reason: `the blurb could not be fetched (${reason})` };
 	}
 	if (response.status !== 200) {

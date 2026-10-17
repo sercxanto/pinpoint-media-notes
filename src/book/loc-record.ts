@@ -1,8 +1,8 @@
 import { EntryError } from "../core/errors";
 import { truncateBlurb } from "./blurb";
-import { isValidIsbn10, isbn10To13 } from "./input";
+import { toIsbn13 } from "./input";
 import type { JsonLdGraph, JsonLdNode } from "./jsonld";
-import { rdaBookType, type BookRecord } from "./record";
+import { rdaBookType, seriesNumber, type BookRecord } from "./record";
 
 /** An LoC record: the common fields, plus what only the LoC path reads. */
 export interface LocRecord extends BookRecord {
@@ -139,7 +139,7 @@ function readIsbns(
 	const otherFormats = new Set<string>();
 	for (const identifier of graph.links(instance, `${BF}identifiedBy`)) {
 		if (!identifier.hasType(`${BF}Isbn`)) continue;
-		const isbn = isbn13Of(identifier.values(RDF_VALUE)[0] ?? "");
+		const isbn = toIsbn13(identifier.values(RDF_VALUE)[0] ?? "");
 		if (isbn === null) continue;
 		const cancinv = identifier
 			.objects(`${BF}status`)
@@ -154,13 +154,6 @@ function readIsbns(
 
 function hasStatus(node: JsonLdNode): boolean {
 	return node.objects(`${BF}status`).length > 0;
-}
-
-function isbn13Of(raw: string): string | null {
-	const value = raw.replace(/[\s-]/g, "").toUpperCase();
-	if (/^97[89]\d{10}$/.test(value)) return value;
-	if (isValidIsbn10(value)) return isbn10To13(value);
-	return null;
 }
 
 /** Contributions whose role is `aut`; editors, translators and others are dropped. */
@@ -251,15 +244,6 @@ function readSeries(
 				};
 			}
 		}
-	}
-	return null;
-}
-
-/** "bk. 1" → 1. A decimal comma becomes a dot. */
-function seriesNumber(values: string[]): number | null {
-	for (const value of values) {
-		const number = /\d+(?:[.,]\d+)?/.exec(value)?.[0];
-		if (number) return Number(number.replace(",", "."));
 	}
 	return null;
 }

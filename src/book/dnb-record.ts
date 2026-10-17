@@ -1,5 +1,5 @@
 import { EntryError } from "../core/errors";
-import { isValidIsbn10, isbn10To13 } from "./input";
+import { compactIsbn, toIsbn13 } from "./input";
 import {
 	fields,
 	firstSubfield,
@@ -8,7 +8,7 @@ import {
 	type MarcDataField,
 	type MarcRecord,
 } from "./marc";
-import { rdaBookType, type BookRecord } from "./record";
+import { rdaBookType, seriesNumber, type BookRecord } from "./record";
 
 /** A DNB record: the common fields, plus what only the DNB path reads. */
 export interface DnbRecord extends BookRecord {
@@ -101,7 +101,7 @@ export function recordIsbn(marc: MarcRecord): string | null {
 
 /** The first ISBN-13 among the values, else the first valid ISBN-10 converted. */
 function firstIsbn13(raw: string[]): string | null {
-	const values = raw.map((value) => value.replace(/[\s-]/g, "").toUpperCase());
+	const values = raw.map(compactIsbn);
 	for (const value of values) {
 		const isbn13 = /(?:^|\D)(97[89]\d{10})(?!\d)/.exec(value)?.[1];
 		if (isbn13) return isbn13;
@@ -109,7 +109,8 @@ function firstIsbn13(raw: string[]): string | null {
 	// Older records carry an ISBN-10 only; the cover service needs ISBN-13.
 	for (const value of values) {
 		const isbn10 = /(?:^|\D)(\d{9}[\dX])(?![\dX])/.exec(value)?.[1];
-		if (isbn10 && isValidIsbn10(isbn10)) return isbn10To13(isbn10);
+		const isbn13 = isbn10 === undefined ? null : toIsbn13(isbn10);
+		if (isbn13 !== null) return isbn13;
 	}
 	return null;
 }
@@ -153,15 +154,11 @@ function readYear(marc: MarcRecord): number | null {
 	return null;
 }
 
-/** "Band 5" → 5. A volume without a number gives null. */
+/** The first volume number in `490 $v`, else in `830 $v`. */
 function readSeriesIndex(marc: MarcRecord): number | null {
 	for (const tag of ["490", "830"]) {
-		for (const field of fields(marc, tag)) {
-			for (const value of subfields(field, "v")) {
-				const number = /\d+(?:[.,]\d+)?/.exec(value)?.[0];
-				if (number) return Number(number.replace(",", "."));
-			}
-		}
+		const index = seriesNumber(fields(marc, tag).flatMap((field) => subfields(field, "v")));
+		if (index !== null) return index;
 	}
 	return null;
 }

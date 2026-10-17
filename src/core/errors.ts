@@ -15,9 +15,13 @@ export class EntryError extends Error {
 	override name = "EntryError";
 }
 
+/** What went wrong, for a message that wraps a caught error. */
+export function reasonOf(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
+}
+
 /** The message shown to the user; anything unexpected is marked as such. */
 export function errorMessage(error: unknown): string {
 	if (error instanceof ConfigError || error instanceof EntryError) return error.message;
-	const detail = error instanceof Error ? error.message : String(error);
-	return `Unexpected error: ${detail}`;
+	return `Unexpected error: ${reasonOf(error)}`;
 }

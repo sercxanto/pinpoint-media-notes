@@ -11,6 +11,11 @@ export interface HttpResponse {
 	arrayBuffer(): ArrayBuffer;
 }
 
+/** The Content-Type without parameters, lower-cased; "" when absent. */
+export function mediaType(response: HttpResponse): string {
+	return (response.header("Content-Type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+}
+
 export type HttpGet = (url: string, headers?: Record<string, string>) => Promise<HttpResponse>;
 
 /**

@@ -31,10 +31,7 @@ export function parseBookInput(raw: string): BookQuery {
 		return { kind: "idn", idn };
 	}
 
-	const compact = input
-		.replace(/^ISBN(?:-1[03])?\s*:?/i, "")
-		.replace(/[\s-]/g, "")
-		.toUpperCase();
+	const compact = compactIsbn(input.replace(/^ISBN(?:-1[03])?\s*:?/i, ""));
 
 	if (/^\d{13}$/.test(compact)) {
 		if (!/^97[89]/.test(compact)) {
@@ -58,6 +55,21 @@ export function parseBookInput(raw: string): BookQuery {
 	if (IDN.test(compact)) return { kind: "idn", idn: compact };
 
 	throw new EntryError(`"${input}" is neither an ISBN nor a DNB record number.`);
+}
+
+/** Spaces and hyphens removed, `x` upper-cased. */
+export function compactIsbn(raw: string): string {
+	return raw.replace(/[\s-]/g, "").toUpperCase();
+}
+
+/**
+ * One ISBN as catalogued, as ISBN-13: an ISBN-13 kept, a valid ISBN-10
+ * converted, anything else null.
+ */
+export function toIsbn13(raw: string): string | null {
+	const value = compactIsbn(raw);
+	if (/^97[89]\d{10}$/.test(value)) return value;
+	return isValidIsbn10(value) ? isbn10To13(value) : null;
 }
 
 /** EAN-13 check digit over 12 digits: weights 1, 3, 1, 3, … */

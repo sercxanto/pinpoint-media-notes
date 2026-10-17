@@ -1,8 +1,8 @@
-import { ConfigError, EntryError } from "../core/errors";
+import { ConfigError, EntryError, reasonOf } from "../core/errors";
 import { requireVaultFolder } from "../core/paths";
 import type { HttpGet } from "../io/http";
 import type { VaultFiles } from "../io/vault";
-import type { PinpointSettings } from "../settings";
+import { SETTING_NAMES, type PinpointSettings } from "../settings";
 import { detailsUrl, externalIdsUrl, fetchPoster, getJson } from "./api";
 import { fillMissing, needsFallback, readDetails, readImdbId, type TmdbEntry } from "./entry";
 import { parseTmdbInput, type TmdbRef } from "./input";
@@ -17,31 +17,32 @@ export interface TmdbImportConfig {
 	assetsDir: string;
 }
 
-const TOKEN_SETTING = "TMDB read access token";
-
 /** Checks the settings before any work; throws a ConfigError naming the setting. */
 export function tmdbImportConfig(settings: PinpointSettings): TmdbImportConfig {
 	const token = settings.tmdbToken.trim();
-	if (token === "") throw new ConfigError(`Setting "${TOKEN_SETTING}": No token set.`);
+	if (token === "") throw new ConfigError(`Setting "${SETTING_NAMES.tmdbToken}": No token set.`);
 	// The API key sits next to the token in TMDB's account settings and is
 	// easily copied instead; it does not work as a bearer token.
 	if (/^[\da-f]{32}$/i.test(token)) {
 		throw new ConfigError(
-			`Setting "${TOKEN_SETTING}": This looks like the short API key. Use the long API read access token shown next to it.`,
+			`Setting "${SETTING_NAMES.tmdbToken}": This looks like the short API key. Use the long API read access token shown next to it.`,
 		);
 	}
 	const language = settings.tmdbLanguage.trim();
-	if (language === "") throw new ConfigError('Setting "Language": No language set.');
+	if (language === "")
+		throw new ConfigError(`Setting "${SETTING_NAMES.tmdbLanguage}": No language set.`);
 	const posterSize = settings.posterSize.trim();
 	if (!/^(?:w\d+|original)$/.test(posterSize)) {
-		throw new ConfigError(`Setting "Poster size": "${posterSize}" is not a TMDB image size.`);
+		throw new ConfigError(
+			`Setting "${SETTING_NAMES.posterSize}": "${posterSize}" is not a TMDB image size.`,
+		);
 	}
 	return {
 		token,
 		language,
 		posterSize,
-		notesDir: requireVaultFolder("Movie and series notes folder", settings.tmdbNotesDir),
-		assetsDir: requireVaultFolder("Image folder", settings.assetsDir),
+		notesDir: requireVaultFolder(SETTING_NAMES.tmdbNotesDir, settings.tmdbNotesDir),
+		assetsDir: requireVaultFolder(SETTING_NAMES.assetsDir, settings.assetsDir),
 	};
 }
 
@@ -114,7 +115,7 @@ export async function importTmdb(input: string, deps: TmdbImportDeps): Promise<T
 		await files.ensureFolder(config.notesDir);
 		await files.createNote(notePath, tmdbNote(ref, entry, poster.path));
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not create "${notePath}": ${reason}`);
 	}
 
@@ -196,7 +197,7 @@ async function providePoster(
 		await files.ensureFolder(config.assetsDir);
 		await files.createBinary(path, poster.data);
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
+		const reason = reasonOf(error);
 		throw new EntryError(`Could not save the poster "${path}": ${reason}`);
 	}
 	return { path, message: "Poster saved." };
