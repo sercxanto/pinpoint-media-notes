@@ -1,6 +1,6 @@
-import { Notice, Plugin } from "obsidian";
+import { normalizePath, Notice, Plugin } from "obsidian";
 import { bookImportConfig, importBook } from "./book/importer";
-import { ConfigError, errorMessage } from "./core/errors";
+import { ConfigError, errorMessage, reasonOf } from "./core/errors";
 import { httpGet } from "./io/http";
 import { vaultFiles } from "./io/vault";
 import { DEFAULT_SETTINGS, PinpointSettingTab, type PinpointSettings } from "./settings";
@@ -50,15 +50,14 @@ export default class PinpointMediaNotesPlugin extends Plugin {
 
 	/** Imports one book and reports the outcome. */
 	importBookEntry(input: string): Promise<SubmitOutcome> {
-		return this.report(async () => {
-			const result = await importBook(input, {
+		return this.report(() =>
+			importBook(input, {
 				http: httpGet,
 				files: vaultFiles(this.app.vault),
 				config: bookImportConfig(this.settings),
 				chooseRecord: (records) => new RecordPickerModal(this.app, records).pick(),
-			});
-			return result.message;
-		});
+			}),
+		);
 	}
 
 	/** Checks the settings first, so a missing token stops before any input. */
@@ -73,14 +72,13 @@ export default class PinpointMediaNotesPlugin extends Plugin {
 
 	/** Imports one movie or series and reports the outcome. */
 	importTmdbEntry(input: string): Promise<SubmitOutcome> {
-		return this.report(async () => {
-			const result = await importTmdb(input, {
+		return this.report(() =>
+			importTmdb(input, {
 				http: httpGet,
 				files: vaultFiles(this.app.vault),
 				config: tmdbImportConfig(this.settings),
-			});
-			return result.message;
-		});
+			}),
+		);
 	}
 
 	private configOk(check: () => unknown): boolean {
@@ -94,16 +92,31 @@ export default class PinpointMediaNotesPlugin extends Plugin {
 	}
 
 	/**
-	 * Shows the result or the error. A configuration problem (such as a token
-	 * TMDB rejects) ends the session: no further entry could succeed.
+	 * Shows the result or the error. A success closes the modal and opens the
+	 * new note; a configuration problem (such as a token TMDB rejects) closes
+	 * it too, since no further entry could succeed.
 	 */
-	private async report(run: () => Promise<string>): Promise<SubmitOutcome> {
+	private async report(
+		run: () => Promise<{ notePath: string; message: string }>,
+	): Promise<SubmitOutcome> {
 		try {
-			new Notice(await run(), NOTICE_MS);
-			return "next";
+			const result = await run();
+			new Notice(result.message, NOTICE_MS);
+			return { close: true, afterClose: () => this.openNote(result.notePath) };
 		} catch (error) {
 			new Notice(errorMessage(error), NOTICE_MS);
-			return error instanceof ConfigError ? "stop" : "retry";
+			return { close: error instanceof ConfigError };
+		}
+	}
+
+	/** Opens the note in a new tab, so the note shown before stays open. */
+	async openNote(path: string): Promise<void> {
+		try {
+			const file = this.app.vault.getFileByPath(normalizePath(path));
+			if (!file) throw new Error("not found in the vault");
+			await this.app.workspace.getLeaf("tab").openFile(file);
+		} catch (error) {
+			new Notice(`Could not open "${path}": ${reasonOf(error)}`, NOTICE_MS);
 		}
 	}
 }

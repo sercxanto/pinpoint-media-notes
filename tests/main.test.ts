@@ -1,10 +1,11 @@
 import type { RequestUrlParam, RequestUrlResponse } from "obsidian";
 import { App } from "obsidian";
-import { http, notices } from "./__mocks__/obsidian";
+import { http, notices, type Workspace } from "./__mocks__/obsidian";
 import { beforeEach, describe, expect, it } from "vitest";
 import { coverUrl, sruUrl } from "../src/book/dnb";
 import { detailsUrl, posterUrl } from "../src/tmdb/api";
 import PinpointMediaNotesPlugin from "../src/main";
+import type { SubmitOutcome } from "../src/ui/import-modal";
 import { fixture } from "./helpers";
 
 async function loadPlugin(settings: unknown): Promise<PinpointMediaNotesPlugin> {
@@ -34,6 +35,15 @@ function serve(routes: Record<string, RequestUrlResponse>): void {
 		if (!route) throw new Error(`unexpected ${request.url}`);
 		return route;
 	};
+}
+
+/** Runs what the modal runs after closing, and returns the paths opened. */
+async function openedAfterClose(
+	plugin: PinpointMediaNotesPlugin,
+	outcome: SubmitOutcome,
+): Promise<string[]> {
+	if (outcome.close) await outcome.afterClose?.();
+	return (plugin.app.workspace as unknown as Workspace).opened;
 }
 
 beforeEach(() => {
@@ -77,7 +87,11 @@ describe("book import command", () => {
 		});
 
 		const plugin = await loadPlugin({ bookNotesDir: "Books" });
-		expect(await plugin.importBookEntry(isbn)).toBe("next");
+		const outcome = await plugin.importBookEntry(isbn);
+		expect(outcome.close).toBe(true);
+		expect(await openedAfterClose(plugin, outcome)).toEqual([
+			"Books/Die 1 % Methode (2020).md",
+		]);
 
 		const vault = plugin.app.vault as unknown as { files: Map<string, unknown> };
 		expect([...vault.files.keys()]).toEqual([
@@ -89,7 +103,7 @@ describe("book import command", () => {
 		]);
 
 		// The same entry again: a collision, reported, nothing overwritten.
-		expect(await plugin.importBookEntry(isbn)).toBe("retry");
+		expect(await plugin.importBookEntry(isbn)).toEqual({ close: false });
 		expect(notices[1]).toBe('Skipped: "Books/Die 1 % Methode (2020).md" already exists.');
 	});
 });
@@ -119,9 +133,10 @@ describe("movie and series import command", () => {
 		});
 
 		const plugin = await loadPlugin(settings);
-		expect(await plugin.importTmdbEntry("https://www.themoviedb.org/movie/800815")).toBe(
-			"next",
-		);
+		const outcome = await plugin.importTmdbEntry("https://www.themoviedb.org/movie/800815");
+		expect(await openedAfterClose(plugin, outcome)).toEqual([
+			"Movies/Der beste Film aller Zeiten (2021).md",
+		]);
 
 		const vault = plugin.app.vault as unknown as { files: Map<string, unknown> };
 		expect([...vault.files.keys()]).toEqual([
@@ -139,7 +154,7 @@ describe("movie and series import command", () => {
 
 	it("keeps the input after an entry error", async () => {
 		const plugin = await loadPlugin(settings);
-		expect(await plugin.importTmdbEntry("800815")).toBe("retry");
+		expect(await plugin.importTmdbEntry("800815")).toEqual({ close: false });
 		expect(http.calls).toEqual([]);
 	});
 
@@ -152,9 +167,20 @@ describe("movie and series import command", () => {
 			),
 		});
 		const plugin = await loadPlugin(settings);
-		expect(await plugin.importTmdbEntry("movie/800815")).toBe("stop");
+		expect(await plugin.importTmdbEntry("movie/800815")).toEqual({ close: true });
 		expect(notices).toHaveLength(1);
 		expect(notices[0]).toMatch(/^TMDB rejected the access token/);
 		expect(notices[0]).not.toContain(TOKEN);
+	});
+});
+
+describe("opening the new note", () => {
+	it("reports a note that is not in the vault", async () => {
+		const plugin = await loadPlugin(null);
+		await plugin.openNote("Books/Missing (2020).md");
+		expect((plugin.app.workspace as unknown as Workspace).opened).toEqual([]);
+		expect(notices).toEqual([
+			'Could not open "Books/Missing (2020).md": not found in the vault',
+		]);
 	});
 });

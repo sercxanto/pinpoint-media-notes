@@ -63,6 +63,11 @@ export class Vault {
 		return this.add(path, data);
 	}
 
+	/** A stand-in for a `TFile`: only its path. */
+	getFileByPath(path: string): { path: string } | null {
+		return this.files.has(path) ? { path } : null;
+	}
+
 	private add(path: string, data: string | ArrayBuffer): Promise<void> {
 		if (this.files.has(path)) return Promise.reject(new Error("File already exists."));
 		this.files.set(path, data);
@@ -70,8 +75,23 @@ export class Vault {
 	}
 }
 
+/** Records the paths of the files opened, in order. */
+export class Workspace {
+	opened: string[] = [];
+
+	getLeaf(_newLeaf?: "tab"): { openFile(file: { path: string }): Promise<void> } {
+		return {
+			openFile: (file) => {
+				this.opened.push(file.path);
+				return Promise.resolve();
+			},
+		};
+	}
+}
+
 export class App {
 	vault = new Vault();
+	workspace = new Workspace();
 }
 
 export class Plugin {

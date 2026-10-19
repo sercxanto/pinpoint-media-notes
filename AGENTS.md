@@ -91,7 +91,7 @@ src/
     note.ts        file stem, note builder
     importer.ts    importTmdb: the per-entry order, poster; tmdbImportConfig
   ui/
-    import-modal.ts  text field modal, stays open for the next entry; closes on a ConfigError
+    import-modal.ts  text field modal; closes after a success (then the note opens) or a ConfigError
     record-picker.ts choose one of several catalogue records; closing skips
 tests/
   __mocks__/obsidian.ts   hand-written fake of the obsidian API (aliased in vitest.config.ts)
@@ -107,8 +107,10 @@ Tests run under jsdom, because the book importer uses the `DOMParser` that
 Obsidian provides.
 
 The obsidian mock: `Modal.close` calls `onClose`, as Obsidian does;
-`onOpen` is not run in tests. `requestUrl` and the in-memory `Vault` serve
-the `io/` and plugin tests; importer tests use the fakes in `helpers.ts`.
+`onOpen` is not run in tests. `Workspace` records the files opened;
+`getFileByPath` returns a stand-in holding only the path. `requestUrl` and
+the in-memory `Vault` serve the `io/` and plugin tests; importer tests use
+the fakes in `helpers.ts`.
 
 scripts/install-to-vault.sh  copies main.js and manifest.json into a vault
 scripts/install-schema-to-vault.sh  copies docs/schema/ into a vault; --diff previews
@@ -245,6 +247,11 @@ go into the spec.
   `docs/MANUAL_TEST.md` checks it. Should it not, the title lookup reports
   `HTTP 302` and the cover chain stops as blocked, so nothing wrong is
   written.
+- **The new note opens after the modal closes:** `SubmitOutcome` carries an
+  `afterClose` callback that the modal runs once it is closed, so the note
+  opens with the modal gone and the editor gets the focus. The note is
+  looked up with `vault.getFileByPath`, not opened through
+  `openLinkText`, so a path is never read as link text.
 - **LoC original titles are kept as catalogued** (initial articles dropped,
   romanised), like `240 $a` for the DNB; settled with the maintainer
   (2026-10-16).

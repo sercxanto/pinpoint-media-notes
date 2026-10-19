@@ -175,10 +175,9 @@ the entry.
 also holds sheet music, maps, films and more; those are reported and
 skipped.
 
-The window stays open after each import, so you can work through a stack of
-books. After a success the field is cleared for the next entry; after an
-error the input stays, so you can correct it. Close the window when you are
-done.
+After a successful import the window closes and the new note opens in a new
+tab. After an error the window
+stays open with your input, so you can correct it; close it to give up.
 
 ## Importing a movie or series
 
@@ -414,7 +413,7 @@ its title came from.
 | Kind           | Examples                                                                   | What happens                                                      |
 | -------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | Settings       | folder not set, no token, API key instead of token, token rejected by TMDB | The import does not start, or the window closes. Fix the setting. |
-| This entry     | typo, nothing found, name clash, unsupported material, a failed request    | The entry is skipped; the window stays open for the next.         |
+| This entry     | typo, nothing found, name clash, unsupported material, a failed request    | The entry is skipped; the window stays open to correct the input. |
 | Partial result | no blurb, no cover, no poster                                              | The note is written without it; the message says why.             |
 
 ## Network use and privacy

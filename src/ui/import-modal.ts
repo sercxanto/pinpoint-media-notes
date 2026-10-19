@@ -1,11 +1,12 @@
 import { Modal, Setting, type App, type TextComponent } from "obsidian";
 
 /**
- * What the modal does after an entry: `next` clears the field for the next
- * entry, `retry` keeps the input for correcting a typo, `stop` closes the
- * modal because no entry can succeed until a setting is fixed.
+ * What the modal does after an entry: stay open with the input kept, for
+ * correcting a typo, or close and then run `afterClose` (opening the new
+ * note). Closing without it ends the session because no entry can succeed
+ * until a setting is fixed.
  */
-export type SubmitOutcome = "next" | "retry" | "stop";
+export type SubmitOutcome = { close: false } | { close: true; afterClose?: () => Promise<void> };
 
 export interface ImportModalOptions {
 	title: string;
@@ -15,8 +16,8 @@ export interface ImportModalOptions {
 }
 
 /**
- * A single text field. Submitting imports one entry; the modal stays open,
- * cleared, for the next one. Closing it ends the session.
+ * A single text field. Submitting imports one entry; the modal closes after
+ * a success and stays open after an error. Closing it ends the session.
  */
 export class ImportModal extends Modal {
 	private busy = false;
@@ -62,13 +63,18 @@ export class ImportModal extends Modal {
 		if (input === "" || this.busy) return;
 		this.busy = true;
 		text.setDisabled(true);
+		let outcome: SubmitOutcome;
 		try {
-			const outcome = await this.options.onSubmit(input);
-			if (outcome === "next") text.setValue("");
-			if (outcome === "stop") this.close();
+			outcome = await this.options.onSubmit(input);
 		} finally {
 			this.busy = false;
 			text.setDisabled(false);
+		}
+		if (outcome.close) {
+			// Closed first, so the note opens with the modal gone.
+			this.close();
+			await outcome.afterClose?.();
+		} else {
 			text.inputEl.focus();
 		}
 	}
