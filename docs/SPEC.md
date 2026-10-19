@@ -110,14 +110,19 @@ Otherwise a window with one text field and an **Import** button opens. Enter
 or the button imports one entry; the field is disabled while it runs. After
 the entry:
 
-| Outcome                     | Window                                       |
-| --------------------------- | -------------------------------------------- |
-| success                     | stays open, field cleared for the next entry |
-| per-entry error             | stays open, input kept for correcting it     |
-| configuration error (a 401) | closes                                       |
+| Outcome                     | Window                                   |
+| --------------------------- | ---------------------------------------- |
+| success                     | closes, then the new note opens          |
+| per-entry error             | stays open, input kept for correcting it |
+| configuration error (a 401) | closes                                   |
+
+One import per window, because the maintainer works on each note right after
+creating it. The note opens in a new tab (`workspace.getLeaf("tab")`), so the
+note shown before stays open. Should the note not open, a notice says so;
+the note stays.
 
 Every entry ends with a notice of ten seconds; result messages run to several
-sentences. Closing the window ends the session.
+sentences. Closing the window without importing ends the session.
 
 ## Processing one entry
 

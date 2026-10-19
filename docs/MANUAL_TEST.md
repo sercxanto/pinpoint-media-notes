@@ -63,9 +63,10 @@ exist yet.
       `year` as a number, `isbn` as text, `authors` and `tags` as lists,
       `genres` as an empty list, `description` filled.
 - [ ] The cover link resolves: hovering or opening `cover` shows the image.
-- [ ] The window stays open and the field is cleared.
-- [ ] `9783442178582` again: skipped, "already exists"; the field keeps the
-      input. No new file in `assets`.
+- [ ] The window closes and the new note opens in a new tab; the tab
+      active before keeps its note. The editor has the focus.
+- [ ] `9783442178582` again: skipped, "already exists"; the window stays
+      open and the field keeps the input. No new file in `assets`.
 - [ ] Delete the note, keep the image, import again: notice "Kept the
       existing cover". The image's modification time is unchanged.
 - [ ] `3442178584` (ISBN-10 of the same book, after deleting the note):
@@ -133,6 +134,7 @@ Language `de-DE`.
 - [ ] `800815` alone: refused as a bare number.
 - [ ] `https://example.com/movie/1`: refused as not a TMDB link.
 - [ ] `movie/999999999`: a per-entry error; the window stays open.
+- [ ] A successful import closes the window and opens the new note.
 - [ ] Poster size `original`: the poster is downloaded at full size.
 
 ## Name clash and file names
