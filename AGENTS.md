@@ -184,9 +184,12 @@ Principles:
   change. The golden examples in the README match the spec's.
 - Neither the spec nor the README explains what the properties mean; that
   belongs to `docs/schema/`, and both point there.
-- `docs/MANUAL_TEST.md` covers what the test suite cannot: the plugin
-  inside Obsidian. Add an item when a change touches the settings tab, a
-  modal, notices, `io/` or platform behaviour.
+- `docs/MANUAL_TEST.md` covers only what the test suite cannot: the
+  plugin inside Obsidian. It is kept short on purpose: a smoke test for
+  every release, plus one section per area (settings tab, import window,
+  `io/`, mobile), run only when that area changed. What a test can check
+  goes into a test, not the checklist; add an item to the matching section
+  only for behaviour seen nothing but in Obsidian.
 
 ## Decisions
 
@@ -261,8 +264,8 @@ go into the spec.
 - Re-check the plugin name and id against
   `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugins.json`.
 - Run `npm run check`; the obsidianmd lint rules cover the review guidelines.
-- Run `docs/MANUAL_TEST.md` on desktop and, if possible, on mobile. Mobile
-  is untested so far.
+- Run the smoke test in `docs/MANUAL_TEST.md` and the sections for the
+  areas changed. iOS is in daily use; Android is untested so far.
 - Replace the "not in the community plugin list yet" sentence in the
   README's installation section with the real installation path.
 - Version: `manifest.json`, `package.json` and `versions.json` in step; the
