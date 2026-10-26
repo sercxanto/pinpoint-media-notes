@@ -30,7 +30,8 @@ image and a fixed frontmatter schema:
 | `docs/SPEC.md`                   | what the plugin does and why. The authority on behaviour. Read it first.         |
 | `docs/schema/`                   | the vault notes describing the schema the plugin writes: conventions, templates. |
 | `docs/book-source-evaluation.md` | why the book importer uses the DNB, measurements behind the cover fallback.      |
-| `README.md`                      | user documentation, derived from the spec.                                       |
+| `README.md`                      | the overview for users: motivation, features, quick start, network use.          |
+| `docs/USER_GUIDE.md`             | the user documentation in detail, derived from the spec.                         |
 | `docs/MANUAL_TEST.md`            | checklist for the manual test in Obsidian.                                       |
 | `CONTRIBUTING.md`                | how to work here: commands, architecture, rules, implementation decisions.       |
 | `AGENTS.md`                      | the working agreement for coding agents, on top of this file.                    |
@@ -44,7 +45,8 @@ image and a fixed frontmatter schema:
 - Commit messages: a short subject in the imperative, then a body that
   says why, not only what.
 - Before handing in: `npm run check` passes, and `docs/SPEC.md`,
-  `README.md`, `docs/MANUAL_TEST.md` and this file are updated where the
+  `README.md`, `docs/USER_GUIDE.md`, `docs/MANUAL_TEST.md` and this file
+  are updated where the
   change affects them (see _Documentation_). New implementation decisions
   and architecture changes go into this file.
 - Code, comments and docs in the repository are in English.
@@ -117,8 +119,12 @@ docs/
   SPEC.md                    behaviour, the authority
   book-source-evaluation.md  why the DNB
   MANUAL_TEST.md             checklist for the manual test in Obsidian
+  USER_GUIDE.md              user documentation in detail
+  images/                    pictures for the README
   schema/                    vault notes: conventions and templates, copied 1:1 into a vault
-README.md                    user documentation
+README.md                    overview for users
+.github/workflows/ci.yml     runs npm run check on pushes to main and on pull requests
+.github/dependabot.yml       monthly updates of the GitHub Actions
 ```
 
 Tests run under jsdom, because the book importer uses the `DOMParser` that
@@ -186,13 +192,17 @@ Principles:
 ## Documentation
 
 - `docs/SPEC.md` changes with every change in behaviour.
-- `README.md` is the user documentation: settings, accepted input, note
-  format with field mapping tables, file naming, covers, messages, network
-  use. A change to behaviour the user sees (a setting, an accepted input, a
-  property, a message category, a host contacted) updates it in the same
-  change. The golden examples in the README match the spec's.
-- Neither the spec nor the README explains what the properties mean; that
-  belongs to `docs/schema/`, and both point there.
+- `README.md` is the front page: motivation, what the plugin does, a sample
+  note, quick start, network use, documentation links, credits. It stays
+  short and gets no detail beyond that; detail goes into the user guide.
+- `docs/USER_GUIDE.md` is the user documentation: settings, accepted input,
+  note format with field mapping tables, file naming, covers, messages,
+  sync and mobile. A change to behaviour the user sees (a setting, an
+  accepted input, a property, a message category) updates it in the same
+  change; a new host contacted updates the README's network table. The
+  golden examples in the README and the user guide match the spec's.
+- Neither the spec nor the user documentation explains what the properties
+  mean; that belongs to `docs/schema/`, and both point there.
 - `docs/MANUAL_TEST.md` covers only what the test suite cannot: the
   plugin inside Obsidian. It is kept short on purpose: a smoke test for
   every release, plus one section per area (settings tab, import window,
@@ -243,10 +253,19 @@ go into the spec.
 - **TMDB contract tests** skip themselves without `TMDB_READ_ACCESS_TOKEN`,
   except the 401 check, which needs no token.
 - **README discloses network use:** a table of every host contacted and
-  what it receives, and that there is no telemetry, as the community plugin
-  guidelines ask for network use and needed accounts. It also
+  what it receives, that there is no telemetry, and which accounts are
+  needed, as the Obsidian developer policies ask of the README. It stays
+  in the README, not the user guide, for that reason. It also
   carries TMDB's attribution sentence ("This product uses the TMDB API but
   is not endorsed or certified by TMDB."), which TMDB's API terms require.
+- **CI** (`.github/workflows/ci.yml`) runs `npm run check` on every push
+  to `main` and every pull request, on Node 22 as in the dev container.
+  The contract tests stay out of it: they depend on live services and,
+  for TMDB, on a token.
+- **Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions up to
+  date, monthly and grouped into one pull request. npm dependencies are
+  not covered: their majors are held back on purpose (see _TypeScript 6.0,
+  ESLint 9_).
 - **`docs/schema/` is excluded from Prettier**, see _Behaviour and schema_.
 - **One cover chain for both catalogues:** `findCover` in `importer.ts`
   takes the candidates (`isbnCandidates`: own ISBN, then the listed other
