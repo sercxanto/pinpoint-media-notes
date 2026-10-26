@@ -8,8 +8,8 @@ the two.
 What the properties _mean_ (what a `shelf` value stands for, why a book note
 describes an edition, which genre values are allowed) is not specified here.
 That lives in the vault notes under [`docs/schema/`](schema/), which this
-plugin writes to. `README.md` is the user documentation and is derived from
-this file.
+plugin writes to. The user documentation, `README.md` and
+[`USER_GUIDE.md`](USER_GUIDE.md), is derived from this file.
 
 ## Contents
 
