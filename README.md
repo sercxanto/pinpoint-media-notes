@@ -16,6 +16,12 @@ There is no search by title, on purpose. You pick the exact movie on the TMDB
 website, comparing poster, year and plot by eye, and paste its link; for a
 book, the ISBN printed in the copy at hand names exactly one edition.
 
+The plugin is opinionated. It is built for one vault and its data model,
+described in [`docs/schema/`](docs/schema/): the properties, their values and
+the file names are fixed, not configurable. If that model suits you, use it;
+if not, a fork is the better starting point. It is not in the community
+plugin list and is not meant to be.
+
 ## Contents
 
 - [Requirements](#requirements)
@@ -40,13 +46,7 @@ book, the ISBN printed in the copy at hand names exactly one edition.
 
 ## Installation
 
-### From the community plugin list
-
-The plugin is not in the community plugin list yet. Once it is, install it
-from **Settings → Community plugins → Browse** by searching for _Pinpoint
-Media Notes_, then enable it.
-
-### By hand
+The plugin is installed by hand:
 
 1. Build the plugin (needs Node, for example in the dev container):
 
@@ -481,7 +481,8 @@ npm run test:contract  # live checks against DNB and TMDB (TMDB needs TMDB_READ_
 ```
 
 See [`docs/SPEC.md`](docs/SPEC.md) for the full behaviour,
-[`AGENTS.md`](AGENTS.md) for architecture and working conventions,
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for architecture, working conventions and
+pull requests,
 [`docs/MANUAL_TEST.md`](docs/MANUAL_TEST.md) for the manual test in Obsidian.
 
 ## License

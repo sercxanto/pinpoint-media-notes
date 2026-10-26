@@ -58,6 +58,9 @@ Considered and rejected. Do not add them.
 - Asking for `rating`, `last_finished` or `shelf` during the import. They are
   filled in later, in Obsidian.
 - Deduplicating against existing notes beyond the file name check.
+- Making the schema configurable (property names, values, file names). The
+  plugin writes the data model of `docs/schema/`; a vault with another model
+  is better served by a fork.
 - Further book catalogues after the LoC, such as the British Library for
   British-only editions. A miss in the DNB and the LoC is reported, and the
   note is made by hand.
