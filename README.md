@@ -84,10 +84,13 @@ and is not meant to be.
 
 ## Quick start
 
-1. **Install** by hand (Obsidian 1.13 or later): build with `npm install` and
-   `npm run build`, copy it into your vault with
-   `scripts/install-to-vault.sh <path to vault>`, then enable **Pinpoint
-   Media Notes** under **Settings → Community plugins**.
+1. **Install** (Obsidian 1.13 or later): with the
+   [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin, add the beta
+   plugin `sercxanto/pinpoint-media-notes`; BRAT also keeps it up to date.
+   Or copy `main.js` and `manifest.json` from the
+   [latest release](https://github.com/sercxanto/pinpoint-media-notes/releases/latest)
+   into `<vault>/.obsidian/plugins/pinpoint-media-notes/`. Then enable
+   **Pinpoint Media Notes** under **Settings → Community plugins**.
 2. **Configure:** set a folder for book notes and, for movies, one for movie
    and series notes, your TMDB **API Read Access Token** (free account) and
    your language, for example `de-DE`.

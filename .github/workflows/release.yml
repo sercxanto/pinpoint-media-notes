@@ -1,0 +1,44 @@
+name: Release
+
+# Pushing a tag that is the bare version (0.2.0, no "v") builds the plugin
+# and creates a draft release with main.js and manifest.json attached.
+on:
+    push:
+        tags: ["[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version: 22
+                  cache: npm
+            - name: Check that the tag matches the version files
+              env:
+                  TAG: ${{ github.ref_name }}
+              run: |
+                  node -e '
+                    const fs = require("fs");
+                    const tag = process.env.TAG;
+                    const manifest = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
+                    const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+                    const versions = JSON.parse(fs.readFileSync("versions.json", "utf8"));
+                    const errors = [];
+                    if (manifest.version !== tag) errors.push(`manifest.json has ${manifest.version}`);
+                    if (pkg.version !== tag) errors.push(`package.json has ${pkg.version}`);
+                    if (versions[tag] !== manifest.minAppVersion) errors.push(`versions.json lacks "${tag}": "${manifest.minAppVersion}"`);
+                    if (errors.length) { console.error(`Tag ${tag}: ${errors.join("; ")}`); process.exit(1); }
+                  '
+            - run: npm ci
+            # Typecheck, lint, format check, tests and production build.
+            - run: npm run check
+            - name: Create a draft release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.ref_name }}
+              run: gh release create "$TAG" --draft --title "$TAG" --generate-notes main.js manifest.json

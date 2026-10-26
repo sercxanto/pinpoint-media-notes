@@ -10,6 +10,7 @@ what the properties _mean_ is in the conventions notes in
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Schema notes](#schema-notes)
 - [Settings](#settings)
 - [Importing a book](#importing-a-book)
 - [Importing a movie or series](#importing-a-movie-or-series)
@@ -28,11 +29,33 @@ what the properties _mean_ is in the conventions notes in
 
 ## Installation
 
-The plugin is installed by hand:
+The plugin is not in the community plugin list. Install it in one of three
+ways; in each case, open **Settings → Community plugins** afterwards, turn
+off **Restricted mode** if it is on, enable **Pinpoint Media Notes** and
+fill in the [settings](#settings).
+
+### With BRAT
+
+[BRAT](https://github.com/TfTHacker/obsidian42-brat) installs plugins from
+their GitHub releases and keeps them up to date, on desktop and mobile.
+Install BRAT from the community plugin list, run its command **Add a beta
+plugin for testing** and enter `sercxanto/pinpoint-media-notes`.
+
+### From a release
+
+Download `main.js` and `manifest.json` from the
+[latest release](https://github.com/sercxanto/pinpoint-media-notes/releases/latest)
+and put them into `<vault>/.obsidian/plugins/pinpoint-media-notes/`; the
+folder's name must be the plugin id. For an update, replace both files,
+then turn the plugin off and on or run **Reload app without saving**.
+
+### From source
 
 1. Build the plugin (needs Node, for example in the dev container):
 
    ```sh
+   git clone https://github.com/sercxanto/pinpoint-media-notes.git
+   cd pinpoint-media-notes
    npm install
    npm run build
    ```
@@ -54,16 +77,10 @@ The plugin is installed by hand:
    folder without `.obsidian` and a development build. To do it by hand, copy
    those two files into that folder; its name must be the plugin id.
 
-3. In Obsidian, open **Settings → Community plugins**, turn off
-   **Restricted mode** if it is on, reload the plugin list and enable
-   **Pinpoint Media Notes**.
-
-4. Fill in the [settings](#settings).
-
 After a new build, run the script again, then turn the plugin off and on or
 run **Reload app without saving**.
 
-### Schema notes
+## Schema notes
 
 The templates and conventions notes in [`docs/schema/`](schema/) can be
 copied into the vault the same way:
