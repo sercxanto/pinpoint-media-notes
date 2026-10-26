@@ -1,7 +1,7 @@
 {
 	"name": "pinpoint-media-notes",
 	"version": "0.1.0",
-	"description": "Create book notes from an ISBN (DNB catalogue) and movie/series notes from a TMDB URL, with cover image and fixed frontmatter.",
+	"description": "Create a note with cover image from an exact identifier: a book's ISBN (German National Library, Library of Congress) or a TMDB movie or series link.",
 	"private": true,
 	"type": "module",
 	"main": "main.js",

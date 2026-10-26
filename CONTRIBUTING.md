@@ -124,6 +124,7 @@ docs/
   schema/                    vault notes: conventions and templates, copied 1:1 into a vault
 README.md                    overview for users
 .github/workflows/ci.yml     runs npm run check on pushes to main and on pull requests
+.github/workflows/release.yml  a tag push builds a draft release, see "Releases"
 .github/dependabot.yml       monthly updates of the GitHub Actions
 ```
 
@@ -262,6 +263,13 @@ go into the spec.
   to `main` and every pull request, on Node 22 as in the dev container.
   The contract tests stay out of it: they depend on live services and,
   for TMDB, on a token.
+- **Release tags are the bare version** (`0.2.0`, no `v`), as Obsidian's
+  own updater requires for listed plugins. BRAT would accept a `v` too,
+  but the bare form keeps the community list open without a change of
+  convention.
+- **Actions are pinned to a commit SHA**, with the version as a comment
+  (`actions/checkout@<sha> # v7.0.1`). A tag can be moved to other code; a
+  SHA cannot. Dependabot updates SHA and comment together.
 - **Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions up to
   date, monthly and grouped into one pull request. npm dependencies are
   not covered: their majors are held back on purpose (see _TypeScript 6.0,
@@ -295,6 +303,12 @@ go into the spec.
 - Run `npm run check`.
 - Run the smoke test in `docs/MANUAL_TEST.md` and the sections for the
   areas changed. iOS is in daily use; Android is untested so far.
-- Version: `manifest.json`, `package.json` and `versions.json` in step; the
-  release tag is the bare version (no `v`), with `main.js` and
-  `manifest.json` attached.
+- Version: `manifest.json`, `package.json` and `versions.json` in step
+  (`versions.json` maps each version to its `minAppVersion`). Commit that
+  on `main`.
+- Tag the bare version (`0.2.0`, no `v`) and push the tag. The release
+  workflow (`.github/workflows/release.yml`) checks the tag against the
+  three files, runs `npm run check` and creates a draft release with
+  `main.js` and `manifest.json` attached and generated notes. Review the
+  notes and publish it; BRAT and the README's links see only published
+  releases.
