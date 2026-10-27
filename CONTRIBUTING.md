@@ -59,6 +59,7 @@ image and a fixed frontmatter schema:
 | --------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `npm run check`             | typecheck, lint, format check, tests, production build. Must pass before handing over.               |
 | `npm test`                  | offline test suite (Vitest)                                                                          |
+| `npm run test:coverage`     | the test suite with coverage of `src/`; HTML report in `coverage/`                                   |
 | `npm run test:contract`     | opt-in checks against the live DNB/TMDB APIs; TMDB needs `TMDB_READ_ACCESS_TOKEN` in the environment |
 | `npm run lint` / `lint:fix` | ESLint, warnings fail the run                                                                        |
 | `npm run format`            | Prettier                                                                                             |
@@ -124,7 +125,7 @@ docs/
   images/                    pictures for the README
   schema/                    vault notes: conventions and templates, copied 1:1 into a vault
 README.md                    overview for users
-.github/workflows/ci.yml     runs npm run check on pushes to main and on pull requests
+.github/workflows/ci.yml     runs npm run check and the coverage on pushes to main and on pull requests; publishes the coverage badge
 .github/workflows/release.yml  a tag push builds a draft release, see "Releases"
 .github/dependabot.yml       monthly updates of the GitHub Actions and npm (no majors)
 ```
@@ -264,6 +265,16 @@ go into the spec.
   to `main` and every pull request, on Node 22 as in the dev container.
   The contract tests stay out of it: they depend on live services and,
   for TMDB, on a token.
+- **Coverage badge without a third-party service:** `@vitest/coverage-v8`
+  measures `src/`; CI turns the line coverage into a shields.io endpoint
+  JSON and, on pushes to `main`, force-pushes it as the single commit of
+  the `badges` branch, which the README badge reads through
+  `raw.githubusercontent.com`. No Codecov or Coveralls account, no upload
+  action. There is no threshold: the field-coverage tests already guard
+  what matters, and `src/ui` is tested by hand on purpose
+  (`docs/MANUAL_TEST.md`), so a percentage gate would mostly punish that.
+  `@vitest/coverage-v8` must have the same version as `vitest`; the
+  grouped Dependabot pull request updates both together.
 - **Release tags are the bare version** (`0.2.0`, no `v`), as Obsidian's
   own updater requires for listed plugins. BRAT would accept a `v` too,
   but the bare form keeps the community list open without a change of
@@ -275,7 +286,9 @@ go into the spec.
   `persist-credentials: false`, so the token is not left in `.git/config`.
   The release workflow builds in a job with a read-only token and hands
   `main.js` and `manifest.json` on as an artifact; only the release job,
-  which runs nothing but `gh`, may write. npm packages run code during
+  which runs nothing but `gh`, may write. CI does the same with the
+  coverage badge: only the badge job, which runs nothing but `git`, may
+  write, and only to the `badges` branch. npm packages run code during
   install and the check, and with write access they could change tags,
   releases or `main`.
 - **Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions and
