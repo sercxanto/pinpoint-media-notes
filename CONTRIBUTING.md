@@ -115,8 +115,8 @@ tests/
     node-http.ts            HttpGet over fetch, because requestUrl exists only in Obsidian
 
 
-scripts/install-to-vault.sh  copies main.js and manifest.json into a vault
-scripts/install-schema-to-vault.sh  copies docs/schema/ into a vault; --diff previews
+scripts/install-to-vault.py  copies main.js and manifest.json into a vault
+scripts/install-schema-to-vault.py  copies docs/schema/ into a vault; --diff previews
 docs/
   SPEC.md                    behaviour, the authority
   book-source-evaluation.md  why the DNB

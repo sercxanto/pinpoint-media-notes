@@ -24,7 +24,7 @@ Record the result at the end.
 Before a release. Set **Book notes folder** to `Books`, **Movie and series
 notes folder** to `Movies` and the real token.
 
-- [ ] `npm run build`, then `scripts/install-to-vault.sh <test vault>`.
+- [ ] `npm run build`, then `python3 scripts/install-to-vault.py <test vault>`.
       Reload the plugin: no error in the developer console
       (**Ctrl/Cmd+Shift+I**), both commands in the command palette.
 - [ ] Book from the DNB, `9783442178582`: the window closes, the new note
