@@ -1,4 +1,5 @@
 import { reasonOf } from "../core/errors";
+import { imageExtension } from "../core/images";
 import { BOOK_HOST_HEADERS, mediaType, type HttpGet, type HttpResponse } from "../io/http";
 
 // Cover downloads, judged the same way for every cover host (MVB through the
@@ -36,7 +37,7 @@ export async function downloadCover(
 	}
 	const contentType = mediaType(response);
 	if (contentType.startsWith("image/")) {
-		const extension = IMAGE_TYPES[contentType];
+		const extension = imageExtension(contentType);
 		if (extension === undefined) {
 			return {
 				ok: false,
@@ -66,22 +67,3 @@ export async function downloadCover(
 		reason: `the cover server answered with HTTP ${response.status} and ${contentType || "no content type"} instead of an image`,
 	};
 }
-
-/** Image types accepted as covers, by Content-Type, with their file extension. */
-const IMAGE_TYPES: Partial<Record<string, string>> = {
-	"image/jpeg": "jpg",
-	"image/pjpeg": "jpg",
-	"image/png": "png",
-	"image/gif": "gif",
-	"image/webp": "webp",
-	"image/avif": "avif",
-};
-
-/**
- * Extensions an existing cover may have. The extension comes from the
- * response, so an existing file is looked for under each of them before any
- * download.
- */
-export const COVER_EXTENSIONS = [...new Set(Object.values(IMAGE_TYPES))].filter(
-	(extension) => extension !== undefined,
-);

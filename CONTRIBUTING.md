@@ -74,6 +74,7 @@ src/
   core/          pure logic, no `obsidian` import
     errors.ts      ConfigError (stop the import), EntryError (report, continue), reasonOf
     text.ts        nfc, sanitizeFileName, noteStem
+    images.ts      image types written to the vault (Content-Type → extension), IMAGE_EXTENSIONS
     frontmatter.ts yamlScalar, buildFrontmatter, buildNote
     paths.ts       vault-relative folder check for settings and imports
   io/
@@ -88,7 +89,7 @@ src/
     loc-record.ts  JSON-LD → LocRecord, LOC_RECORD_SOURCES, matchLocRecords (the cancinv rule)
     blurb.ts       blurb HTML → text, truncation
     note.ts        file stem with type suffix, note builder
-    cover.ts       downloadCover: one cover request, judged by Content-Type; COVER_EXTENSIONS
+    cover.ts       downloadCover: one cover request, judged by Content-Type
     dnb.ts         SRU, blurb and cover requests (over HttpGet)
     loc.ts         id.loc.gov search and record requests (over HttpGet)
     openlibrary.ts Open Library title and cover requests (over HttpGet)
@@ -283,6 +284,9 @@ go into the spec.
   editions; the DNB adds the linked `776 $w` records) and the cover host
   (MVB or Open Library). `downloadCover` in `cover.ts` judges every host's
   response the same way.
+- **One list of image types** (`core/images.ts`) for covers and posters:
+  only these are written to the vault, whatever a server or a poster path
+  claims.
 - **`chooseRecord` is generic** over `BookRecord`, so the record picker
   returns the catalogue's own record type and the importer branches on
   `catalogue` without casts.

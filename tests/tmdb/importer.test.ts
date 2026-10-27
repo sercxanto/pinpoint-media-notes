@@ -176,6 +176,11 @@ describe("importTmdb", () => {
 			"the image server sent text/html instead of an image",
 		],
 		[
+			"an unsupported image type",
+			{ contentType: "image/svg+xml", body: "<svg/>" },
+			"the image server sent an unsupported image type, image/svg+xml",
+		],
+		[
 			"a network failure",
 			new Error("net::ERR_TIMED_OUT"),
 			"the image server could not be reached (net::ERR_TIMED_OUT)",
@@ -203,6 +208,28 @@ describe("importTmdb", () => {
 		expect(result.message).toContain('No poster: TMDB\'s poster path "/../x.jpg"');
 		expect(log).toHaveLength(2);
 	});
+
+	it.each(["/abc.svg", "/abc.md", "/abc.html"])(
+		"does not follow a poster path %j that is not an accepted image type",
+		async (posterPath) => {
+			const movie = JSON.parse(fixture("tmdb/movie-800815-de-DE.json")) as Record<
+				string,
+				unknown
+			>;
+			const { log, files, run } = setup({
+				[detailsUrl(MOVIE, "de-DE")]: {
+					body: JSON.stringify({ ...movie, poster_path: posterPath }),
+				},
+			});
+			const result = await run("movie/800815");
+			expect(result.coverPath).toBeNull();
+			expect(result.message).toBe(
+				`Created "${MOVIE_NOTE}". No poster: TMDB's poster "${posterPath}" is not a supported image type.`,
+			);
+			expect(log.filter((line) => line.includes("image.tmdb.org"))).toEqual([]);
+			expect([...files.files.keys()]).toEqual([MOVIE_NOTE]);
+		},
+	);
 
 	it("keeps the localised values when the fallback request fails", async () => {
 		const { files, run } = setup({

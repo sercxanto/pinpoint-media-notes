@@ -1,4 +1,5 @@
 import { ConfigError, EntryError, reasonOf } from "../core/errors";
+import { IMAGE_EXTENSIONS } from "../core/images";
 import { requireVaultFolder } from "../core/paths";
 import type { HttpGet } from "../io/http";
 import type { VaultFiles } from "../io/vault";
@@ -166,7 +167,8 @@ interface PosterOutcome {
 
 /**
  * Reuses an existing image of the target name; otherwise downloads the
- * poster, named like the note, with the extension of TMDB's file.
+ * poster, named like the note, with the extension of TMDB's file, which
+ * must be one of the accepted image types.
  */
 async function providePoster(
 	deps: TmdbImportDeps,
@@ -182,6 +184,12 @@ async function providePoster(
 		return {
 			path: null,
 			message: `No poster: TMDB's poster path "${entry.posterPath}" is not a plain file name.`,
+		};
+	}
+	if (!IMAGE_EXTENSIONS.includes(extension)) {
+		return {
+			path: null,
+			message: `No poster: TMDB's poster "${entry.posterPath}" is not a supported image type.`,
 		};
 	}
 

@@ -1,9 +1,10 @@
 import { EntryError, reasonOf } from "../core/errors";
+import { IMAGE_EXTENSIONS } from "../core/images";
 import { requireVaultFolder } from "../core/paths";
 import type { HttpGet } from "../io/http";
 import type { VaultFiles } from "../io/vault";
 import { SETTING_NAMES, type CoverSize, type PinpointSettings } from "../settings";
-import { COVER_EXTENSIONS, type CoverResult } from "./cover";
+import type { CoverResult } from "./cover";
 import { fetchBlurb, fetchCover, searchCatalogue } from "./dnb";
 import { dnbRecordUrl, readDnbRecord, recordIsbn, type DnbRecord } from "./dnb-record";
 import { parseBookInput, type BookQuery } from "./input";
@@ -250,7 +251,9 @@ async function provideCover(
 ): Promise<CoverOutcome> {
 	const { files, config } = deps;
 
-	for (const extension of COVER_EXTENSIONS) {
+	// The extension comes from the response, so an existing file is looked
+	// for under each accepted one before any download.
+	for (const extension of IMAGE_EXTENSIONS) {
 		const path = `${config.assetsDir}/${stem}.${extension}`;
 		if (await files.exists(path))
 			return { path, message: `Kept the existing cover "${path}".` };

@@ -1,4 +1,5 @@
 import { ConfigError, EntryError, reasonOf } from "../core/errors";
+import { imageExtension } from "../core/images";
 import { nfc } from "../core/text";
 import { mediaType, type HttpGet, type HttpResponse } from "../io/http";
 import { SETTING_NAMES } from "../settings";
@@ -87,7 +88,7 @@ export type PosterResult = { ok: true; data: ArrayBuffer } | { ok: false; reason
 
 /**
  * Downloads a poster from the image host, without the token. Only an
- * `image/*` answer counts; a failure is reported and the note written
+ * accepted image type counts; a failure is reported and the note written
  * without cover.
  */
 export async function fetchPoster(
@@ -110,6 +111,12 @@ export async function fetchPoster(
 		return {
 			ok: false,
 			reason: `the image server sent ${contentType || "no content type"} instead of an image`,
+		};
+	}
+	if (imageExtension(contentType) === undefined) {
+		return {
+			ok: false,
+			reason: `the image server sent an unsupported image type, ${contentType}`,
 		};
 	}
 	return { ok: true, data: response.arrayBuffer() };
