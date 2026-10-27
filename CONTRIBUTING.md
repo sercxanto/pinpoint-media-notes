@@ -270,6 +270,13 @@ go into the spec.
 - **Actions are pinned to a commit SHA**, with the version as a comment
   (`actions/checkout@<sha> # v7.0.1`). A tag can be moved to other code; a
   SHA cannot. Dependabot updates SHA and comment together.
+- **Least privilege in the workflows:** `actions/checkout` runs with
+  `persist-credentials: false`, so the token is not left in `.git/config`.
+  The release workflow builds in a job with a read-only token and hands
+  `main.js` and `manifest.json` on as an artifact; only the release job,
+  which runs nothing but `gh`, may write. npm packages run code during
+  install and the check, and with write access they could change tags,
+  releases or `main`.
 - **Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions and
   the npm dependencies up to date, monthly, each ecosystem grouped into one
   pull request. npm majors are ignored, because they are held back on
