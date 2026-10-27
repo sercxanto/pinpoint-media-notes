@@ -5,6 +5,9 @@ on:
         branches: [main]
     pull_request:
 
+# The check runs third-party code (npm packages), so it gets a read-only
+# token; only the job that publishes the coverage badge can write, and it
+# runs nothing but git.
 permissions:
     contents: read
 
@@ -26,3 +29,49 @@ jobs:
             - run: npm ci
             # Typecheck, lint, format check, tests and production build.
             - run: npm run check
+            - run: npm run test:coverage
+            # The shields.io endpoint format: line coverage, rounded down.
+            - name: Write the coverage badge
+              if: github.event_name == 'push'
+              run: |
+                  node -e '
+                    const fs = require("fs");
+                    const pct = JSON.parse(fs.readFileSync("coverage/coverage-summary.json", "utf8")).total.lines.pct;
+                    const color = pct >= 90 ? "brightgreen" : pct >= 80 ? "green" : pct >= 70 ? "yellowgreen" : pct >= 60 ? "yellow" : "red";
+                    const badge = { schemaVersion: 1, label: "coverage", message: `${Math.floor(pct)}%`, color };
+                    fs.writeFileSync("coverage-badge.json", JSON.stringify(badge) + "\n");
+                    console.log(badge);
+                  '
+            - if: github.event_name == 'push'
+              uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+              with:
+                  name: coverage-badge
+                  path: coverage-badge.json
+                  if-no-files-found: error
+                  retention-days: 1
+
+    # The badge lives on its own branch, "badges", as a single commit that
+    # each push to main replaces; main itself is never written to.
+    badge:
+        needs: check
+        if: github.event_name == 'push'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+              with:
+                  name: coverage-badge
+                  path: badges
+            - name: Publish the badge to the badges branch
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              working-directory: badges
+              run: |
+                  mv coverage-badge.json coverage.json
+                  git init -q -b badges
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add coverage.json
+                  git commit -q -m "Coverage badge for $GITHUB_SHA"
+                  git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" badges

@@ -16,5 +16,12 @@ export default defineConfig({
 		include: ["tests/**/*.test.ts"],
 		// Live-API checks only run via `npm run test:contract`.
 		exclude: ["tests/contract/**", "node_modules/**"],
+		// Only via `npm run test:coverage`. CI turns the json-summary into
+		// the README badge.
+		coverage: {
+			provider: "v8",
+			include: ["src/**"],
+			reporter: ["text", "html", "json-summary"],
+		},
 	},
 });
