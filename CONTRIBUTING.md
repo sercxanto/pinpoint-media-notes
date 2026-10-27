@@ -125,7 +125,7 @@ docs/
 README.md                    overview for users
 .github/workflows/ci.yml     runs npm run check on pushes to main and on pull requests
 .github/workflows/release.yml  a tag push builds a draft release, see "Releases"
-.github/dependabot.yml       monthly updates of the GitHub Actions
+.github/dependabot.yml       monthly updates of the GitHub Actions and npm (no majors)
 ```
 
 Tests run under jsdom, because the book importer uses the `DOMParser` that
@@ -270,10 +270,13 @@ go into the spec.
 - **Actions are pinned to a commit SHA**, with the version as a comment
   (`actions/checkout@<sha> # v7.0.1`). A tag can be moved to other code; a
   SHA cannot. Dependabot updates SHA and comment together.
-- **Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions up to
-  date, monthly and grouped into one pull request. npm dependencies are
-  not covered: their majors are held back on purpose (see _TypeScript 6.0,
-  ESLint 9_).
+- **Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions and
+  the npm dependencies up to date, monthly, each ecosystem grouped into one
+  pull request. npm majors are ignored, because they are held back on
+  purpose (see _TypeScript 6.0, ESLint 9_) and are upgraded by hand. For
+  0.x packages (esbuild, `eslint-plugin-obsidianmd`) a minor can still
+  break, and a new lint rule can turn the check red; such a pull request
+  needs work by hand.
 - **`docs/schema/` is excluded from Prettier**, see _Behaviour and schema_.
 - **One cover chain for both catalogues:** `findCover` in `importer.ts`
   takes the candidates (`isbnCandidates`: own ISBN, then the listed other

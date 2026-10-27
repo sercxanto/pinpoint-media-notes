@@ -7,3 +7,15 @@ updates:
       groups:
           actions:
               patterns: ["*"]
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: monthly
+      ignore:
+          # Majors are held back on purpose, see "TypeScript 6.0, ESLint 9"
+          # in CONTRIBUTING.md.
+          - dependency-name: "*"
+            update-types: ["version-update:semver-major"]
+      groups:
+          npm:
+              patterns: ["*"]
