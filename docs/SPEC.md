@@ -184,11 +184,17 @@ The suffix is empty except for e-books and audiobooks (see
 
 - remove `* " \ / < > : | ? # ^ [ ]`: the first set is rejected by file
   systems or Obsidian, the rest break wikilinks,
+- remove control characters, which Windows rejects, and bidirectional
+  controls (U+061C, U+200E, U+200F, U+202A–U+202E, U+2066–U+2069), which
+  make a name display as something it is not,
 - collapse runs of whitespace into one space, trim,
 - strip leading dots, because Obsidian ignores files starting with a dot.
 
-A title that sanitises to nothing is a per-entry error. The unmodified title
-goes into the `title` property.
+A title that sanitises to nothing is a per-entry error. So is a stem that
+Windows reserves for a device: `CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`,
+`LPT1`–`LPT9`, in any case, alone or before a dot (`Aux. Tales (2020)`).
+Windows cannot create such a file, so a vault synced to it would lose the
+note. The unmodified title goes into the `title` property.
 
 Notes go to `<notes folder>/<stem>.md`, images to
 `<image folder>/<stem>.<extension>`.
@@ -766,10 +772,14 @@ https://image.tmdb.org/t/p/<poster size><poster_path>
 ```
 
 Requested without the token. The extension is that of `poster_path`,
-lower-cased; a `poster_path` that is not a plain `/<name>.<ext>` is not
-followed. An existing `<stem>.<ext>` is kept. The download counts only with
-HTTP 200 and `image/*`; otherwise the note is written with `cover` blank and
-the reason reported.
+lower-cased; a `poster_path` that is not a plain `/<name>.<ext>`, or whose
+extension is not one of the cover extensions (`jpg`, `png`, `gif`, `webp`,
+`avif`, see [Cover](#cover)), is not followed. An existing `<stem>.<ext>` is
+kept. The download counts only with HTTP 200 and one of the cover image
+types; otherwise the note is written with `cover` blank and the reason
+reported. Like covers, posters are only written as the raster formats the
+plugin knows, so an answer cannot put another kind of file (SVG, Markdown,
+…) into the vault.
 
 ### Movie or series note
 

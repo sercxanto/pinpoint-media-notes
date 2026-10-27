@@ -341,9 +341,11 @@ query string.
 
 ### File names
 
-The file name uses the title with `* " \ / < > : | ? # ^ [ ]` and leading
-dots removed and whitespace collapsed; the `title` property keeps the title
-as it is. Without a year, the file is named after the title alone (plus the
+The file name uses the title with `* " \ / < > : | ? # ^ [ ]`, control
+characters, bidirectional controls and leading dots removed and whitespace
+collapsed; the `title` property keeps the title as it is. A title that
+would give a name Windows reserves for a device (`CON`, `NUL`, `AUX`, …,
+also `Aux. Tales`) is skipped with a message. Without a year, the file is named after the title alone (plus the
 book suffix). Titles are normalised to Unicode NFC, because both sources
 sometimes deliver characters such as `ü` in decomposed form, which breaks the
 `cover` link.
@@ -399,7 +401,8 @@ again later (delete the note first).
 
 Posters come from TMDB's image server in the configured size, in the
 configured language if TMDB has one, otherwise in TMDB's default language.
-The file extension is that of TMDB's file.
+The file extension is that of TMDB's file. Posters, like covers, are only
+saved as JPEG, PNG, GIF, WebP or AVIF.
 
 ## Messages
 

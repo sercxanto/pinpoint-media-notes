@@ -33,6 +33,10 @@ const json = (path: string): FakeResponse => ({
 });
 const image: FakeResponse = { contentType: "image/jpeg", body: JPEG };
 
+/** The requests that went to TMDB's image host, matched on the host name. */
+const imageHostCalls = (calls: string[]) =>
+	calls.filter((url) => new URL(url).hostname === "image.tmdb.org");
+
 const movieRoutes = {
 	[detailsUrl(MOVIE, "de-DE")]: json("tmdb/movie-800815-de-DE.json"),
 	[posterUrl("w500", MOVIE_POSTER)]: image,
@@ -155,7 +159,7 @@ describe("importTmdb", () => {
 
 	it("writes the note without cover when TMDB has no poster in any language", async () => {
 		const series = JSON.parse(fixture("tmdb/tv-1396.json")) as Record<string, unknown>;
-		const { log, files, run } = setup({
+		const { http, files, run } = setup({
 			...seriesRoutes,
 			[detailsUrl(SERIES, null)]: { body: JSON.stringify({ ...series, poster_path: null }) },
 		});
@@ -164,7 +168,7 @@ describe("importTmdb", () => {
 		expect(result.message).toBe(
 			`Created "${SERIES_NOTE}". No de-DE translation for description; took TMDB's default language. No poster: TMDB has none for this entry.`,
 		);
-		expect(log.filter((line) => line.includes("image.tmdb.org"))).toEqual([]);
+		expect(imageHostCalls(http.calls)).toEqual([]);
 		expect(files.files.get(SERIES_NOTE)).toContain("\ncover:\nrating:\n");
 	});
 
@@ -174,6 +178,11 @@ describe("importTmdb", () => {
 			"an HTML page",
 			{ contentType: "text/html", body: "<html></html>" },
 			"the image server sent text/html instead of an image",
+		],
+		[
+			"an unsupported image type",
+			{ contentType: "image/svg+xml", body: "<svg/>" },
+			"the image server sent an unsupported image type, image/svg+xml",
 		],
 		[
 			"a network failure",
@@ -203,6 +212,28 @@ describe("importTmdb", () => {
 		expect(result.message).toContain('No poster: TMDB\'s poster path "/../x.jpg"');
 		expect(log).toHaveLength(2);
 	});
+
+	it.each(["/abc.svg", "/abc.md", "/abc.html"])(
+		"does not follow a poster path %j that is not an accepted image type",
+		async (posterPath) => {
+			const movie = JSON.parse(fixture("tmdb/movie-800815-de-DE.json")) as Record<
+				string,
+				unknown
+			>;
+			const { http, files, run } = setup({
+				[detailsUrl(MOVIE, "de-DE")]: {
+					body: JSON.stringify({ ...movie, poster_path: posterPath }),
+				},
+			});
+			const result = await run("movie/800815");
+			expect(result.coverPath).toBeNull();
+			expect(result.message).toBe(
+				`Created "${MOVIE_NOTE}". No poster: TMDB's poster "${posterPath}" is not a supported image type.`,
+			);
+			expect(imageHostCalls(http.calls)).toEqual([]);
+			expect([...files.files.keys()]).toEqual([MOVIE_NOTE]);
+		},
+	);
 
 	it("keeps the localised values when the fallback request fails", async () => {
 		const { files, run } = setup({
