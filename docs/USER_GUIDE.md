@@ -64,12 +64,14 @@ then turn the plugin off and on or run **Reload app without saving**.
    source map, which makes `main.js` much larger, and every synced device has
    to download that larger file.
 
-2. Copy it into your vault. On the machine that holds the vault (no Node
-   needed there), run:
+2. Copy it into your vault. On the machine that holds the vault (Python 3
+   needed there, no Node), run:
 
    ```sh
-   scripts/install-to-vault.sh <path to vault>
+   python3 scripts/install-to-vault.py <path to vault>
    ```
+
+   On Windows, run `py scripts\install-to-vault.py <path to vault>`.
 
    It copies `main.js` and `manifest.json` to
    `<vault>/.obsidian/plugins/pinpoint-media-notes/`, creating the folder if
@@ -86,9 +88,11 @@ The templates and conventions notes in [`docs/schema/`](schema/) can be
 copied into the vault the same way:
 
 ```sh
-scripts/install-schema-to-vault.sh --diff <path to vault>
-scripts/install-schema-to-vault.sh <path to vault>
+python3 scripts/install-schema-to-vault.py --diff <path to vault>
+python3 scripts/install-schema-to-vault.py <path to vault>
 ```
+
+On Windows, use `py` and backslashes here too.
 
 Templates go to `Obsidian/Templates`, conventions notes to
 `Obsidian/Conventions`; `--templates <dir>` and `--conventions <dir>` choose
