@@ -15,8 +15,8 @@ const CONFIG: TmdbImportConfig = {
 	assetsDir: "assets",
 };
 
-const MOVIE: TmdbRef = { kind: "movie", id: "800815" };
-const MOVIE_URL = "https://www.themoviedb.org/movie/800815-official-competition?language=de";
+const MOVIE: TmdbRef = { kind: "movie", id: "668640" };
+const MOVIE_URL = "https://www.themoviedb.org/movie/668640-competencia-oficial?language=de";
 const MOVIE_POSTER = "/3VqKmtBv4sG1iVFYWKPrJmVZXYT.jpg";
 const MOVIE_NOTE = "Movies/Der beste Film aller Zeiten (2021).md";
 const MOVIE_IMAGE = "assets/Der beste Film aller Zeiten (2021).jpg";
@@ -38,7 +38,7 @@ const imageHostCalls = (calls: string[]) =>
 	calls.filter((url) => new URL(url).hostname === "image.tmdb.org");
 
 const movieRoutes = {
-	[detailsUrl(MOVIE, "de-DE")]: json("tmdb/movie-800815-de-DE.json"),
+	[detailsUrl(MOVIE, "de-DE")]: json("tmdb/movie-668640-de-DE.json"),
 	[posterUrl("w500", MOVIE_POSTER)]: image,
 };
 
@@ -76,14 +76,14 @@ describe("importTmdb", () => {
 		});
 		expect(files.files.get(MOVIE_IMAGE)).toBe(JPEG);
 		const note = files.files.get(MOVIE_NOTE) as string;
-		expect(note).toContain("\nurl: https://www.themoviedb.org/movie/800815\n");
+		expect(note).toContain("\nurl: https://www.themoviedb.org/movie/668640\n");
 		expect(note).toContain(`\ncover: "[[${MOVIE_IMAGE}]]"\n`);
 		expect([...files.folders].sort()).toEqual(["Movies", "assets"]);
 	});
 
 	it("builds the API and image URLs from the spec", () => {
 		expect(detailsUrl(MOVIE, "de-DE")).toBe(
-			"https://api.themoviedb.org/3/movie/800815?language=de-DE",
+			"https://api.themoviedb.org/3/movie/668640?language=de-DE",
 		);
 		expect(detailsUrl(SERIES, null)).toBe("https://api.themoviedb.org/3/tv/1396");
 		expect(externalIdsUrl(SERIES)).toBe("https://api.themoviedb.org/3/tv/1396/external_ids");
@@ -142,7 +142,7 @@ describe("importTmdb", () => {
 	});
 
 	it("names the poster with the extension of TMDB's file", async () => {
-		const movie = JSON.parse(fixture("tmdb/movie-800815-de-DE.json")) as Record<
+		const movie = JSON.parse(fixture("tmdb/movie-668640-de-DE.json")) as Record<
 			string,
 			unknown
 		>;
@@ -152,7 +152,7 @@ describe("importTmdb", () => {
 			},
 			[posterUrl("w500", "/abc.PNG")]: { contentType: "image/png", body: JPEG },
 		});
-		const result = await run("movie/800815");
+		const result = await run("movie/668640");
 		expect(result.coverPath).toBe("assets/Der beste Film aller Zeiten (2021).png");
 		expect(files.files.has("assets/Der beste Film aller Zeiten (2021).png")).toBe(true);
 	});
@@ -198,7 +198,7 @@ describe("importTmdb", () => {
 	});
 
 	it("does not follow a poster path that is not a plain file name", async () => {
-		const movie = JSON.parse(fixture("tmdb/movie-800815-de-DE.json")) as Record<
+		const movie = JSON.parse(fixture("tmdb/movie-668640-de-DE.json")) as Record<
 			string,
 			unknown
 		>;
@@ -207,7 +207,7 @@ describe("importTmdb", () => {
 				body: JSON.stringify({ ...movie, poster_path: "/../x.jpg" }),
 			},
 		});
-		const result = await run("movie/800815");
+		const result = await run("movie/668640");
 		expect(result.coverPath).toBeNull();
 		expect(result.message).toContain('No poster: TMDB\'s poster path "/../x.jpg"');
 		expect(log).toHaveLength(2);
@@ -216,7 +216,7 @@ describe("importTmdb", () => {
 	it.each(["/abc.svg", "/abc.md", "/abc.html"])(
 		"does not follow a poster path %j that is not an accepted image type",
 		async (posterPath) => {
-			const movie = JSON.parse(fixture("tmdb/movie-800815-de-DE.json")) as Record<
+			const movie = JSON.parse(fixture("tmdb/movie-668640-de-DE.json")) as Record<
 				string,
 				unknown
 			>;
@@ -225,7 +225,7 @@ describe("importTmdb", () => {
 					body: JSON.stringify({ ...movie, poster_path: posterPath }),
 				},
 			});
-			const result = await run("movie/800815");
+			const result = await run("movie/668640");
 			expect(result.coverPath).toBeNull();
 			expect(result.message).toBe(
 				`Created "${MOVIE_NOTE}". No poster: TMDB's poster "${posterPath}" is not a supported image type.`,
@@ -257,8 +257,8 @@ describe("importTmdb", () => {
 		const { log, run } = setup({
 			[detailsUrl(MOVIE, "de-DE")]: { status: 404, body: fixture("tmdb/error-404.json") },
 		});
-		await expect(run("movie/800815")).rejects.toThrow(
-			new EntryError("TMDB has no movie 800815."),
+		await expect(run("movie/668640")).rejects.toThrow(
+			new EntryError("TMDB has no movie 668640."),
 		);
 		expect(log).toHaveLength(1);
 	});
@@ -267,7 +267,7 @@ describe("importTmdb", () => {
 		const { run } = setup({
 			[detailsUrl(MOVIE, "de-DE")]: { status: 401, body: fixture("tmdb/error-401.json") },
 		});
-		const error: unknown = await run("movie/800815").catch((caught: unknown) => caught);
+		const error: unknown = await run("movie/668640").catch((caught: unknown) => caught);
 		expect(error).toBeInstanceOf(ConfigError);
 		expect((error as Error).message).toMatch(/^TMDB rejected the access token \(HTTP 401\)/);
 		expect((error as Error).message).not.toContain(TOKEN);
@@ -295,33 +295,33 @@ describe("importTmdb", () => {
 				`request failed: Authorization: Bearer ${TOKEN}`,
 			),
 		});
-		const error: unknown = await run("movie/800815").catch((caught: unknown) => caught);
+		const error: unknown = await run("movie/668640").catch((caught: unknown) => caught);
 		expect(error).toBeInstanceOf(EntryError);
 		expect((error as Error).message).toBe(
-			"Could not reach TMDB for movie 800815: request failed: Authorization: Bearer ***",
+			"Could not reach TMDB for movie 668640: request failed: Authorization: Bearer ***",
 		);
 	});
 
 	it("reports an unreadable answer", async () => {
 		const { run } = setup({ [detailsUrl(MOVIE, "de-DE")]: { body: "<html>" } });
-		await expect(run("movie/800815")).rejects.toThrow(
-			"TMDB sent an unreadable answer for movie 800815.",
+		await expect(run("movie/668640")).rejects.toThrow(
+			"TMDB sent an unreadable answer for movie 668640.",
 		);
 	});
 
 	it("reports an entry without title", async () => {
 		const { run } = setup({ [detailsUrl(MOVIE, "de-DE")]: { body: '{"overview":"x"}' } });
-		await expect(run("movie/800815")).rejects.toThrow("TMDB has no title for movie 800815.");
+		await expect(run("movie/668640")).rejects.toThrow("TMDB has no title for movie 668640.");
 	});
 
 	it("rejects bad input before any request", async () => {
 		const { log, run } = setup(movieRoutes);
-		await expect(run("800815")).rejects.toBeInstanceOf(EntryError);
+		await expect(run("668640")).rejects.toBeInstanceOf(EntryError);
 		expect(log).toEqual([]);
 	});
 
 	it("writes NFC names and links when TMDB delivers decomposed text", async () => {
-		const movie = JSON.parse(fixture("tmdb/movie-800815-de-DE.json")) as Record<
+		const movie = JSON.parse(fixture("tmdb/movie-668640-de-DE.json")) as Record<
 			string,
 			unknown
 		>;
@@ -331,7 +331,7 @@ describe("importTmdb", () => {
 			},
 			[posterUrl("w500", MOVIE_POSTER)]: image,
 		});
-		const result = await run("movie/800815");
+		const result = await run("movie/668640");
 		expect(result.notePath).toBe("Movies/Die Königin (2021).md");
 		expect(result.coverPath).toBe("assets/Die Königin (2021).jpg");
 		expect(files.files.get(result.notePath)).toContain("\ntitle: Die Königin\n");
