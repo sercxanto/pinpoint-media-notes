@@ -34,7 +34,8 @@ notes folder** to `Movies` and the real token.
       case) and cover from Open Library. This checks that `requestUrl`
       follows Open Library's redirects; if not, the notice reports
       `HTTP 302`.
-- [ ] Movie, `movie/800815`: note and poster created, the note opens.
+- [ ] Movie, `https://www.themoviedb.org/movie/800815-the-pale-blue-eye`:
+      note and poster created, the note opens.
 - [ ] `9783442178582` again: skipped as "already exists"; the window stays
       open and keeps the input.
 
@@ -87,6 +88,7 @@ When `src/ui/` or `src/io/` changed, on iOS (and Android, if available).
 
 ## Result
 
-| Date | Obsidian | Platform | Plugin | Sections run | Failed items |
-| ---- | -------- | -------- | ------ | ------------ | ------------ |
-|      |          |          |        |              |              |
+| Date       | Obsidian | Platform | Plugin | Sections run | Failed items |
+| ---------- | -------- | -------- | ------ | ------------ | ------------ |
+| 2026-10-28 | 1.14.5   | macOS    | 0.1.0  | non-mobile   | none         |
+| 2026-10-28 | 1.14.5   | iOS      | 0.1.0  | mobile       | none         |

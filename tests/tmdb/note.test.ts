@@ -6,9 +6,9 @@ import { fixture } from "../helpers";
 
 const movie = (): TmdbEntry =>
 	readDetails(
-		normalizeStrings(JSON.parse(fixture("tmdb/movie-800815-de-DE.json"))),
+		normalizeStrings(JSON.parse(fixture("tmdb/movie-668640-de-DE.json"))),
 		"movie",
-		"movie 800815",
+		"movie 668640",
 	);
 
 // The spec's example note, character for character. A change here is a
@@ -18,7 +18,7 @@ template: "[[Movie Template]]"
 type: movie
 title: Der beste Film aller Zeiten
 original_title: Competencia oficial
-url: https://www.themoviedb.org/movie/800815
+url: https://www.themoviedb.org/movie/668640
 imdb_id: tt8740768
 year: 2021
 genres:
@@ -39,7 +39,7 @@ tags:
 describe("tmdbNote", () => {
 	it("reproduces the golden note from the movie response", () => {
 		const note = tmdbNote(
-			{ kind: "movie", id: "800815" },
+			{ kind: "movie", id: "668640" },
 			movie(),
 			"assets/Der beste Film aller Zeiten (2021).jpg",
 		);

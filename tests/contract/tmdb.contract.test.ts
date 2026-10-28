@@ -15,7 +15,7 @@ import { shapeMismatches } from "./tmdb-shape";
 const TOKEN = process.env.TMDB_READ_ACCESS_TOKEN?.trim() ?? "";
 
 /** Der beste Film aller Zeiten (Competencia oficial): the spec's example. */
-const MOVIE: TmdbRef = { kind: "movie", id: "800815" };
+const MOVIE: TmdbRef = { kind: "movie", id: "668640" };
 /** Breaking Bad: a series with an IMDb id in external_ids. */
 const SERIES: TmdbRef = { kind: "tv", id: "1396" };
 /** Far beyond TMDB's ids. */

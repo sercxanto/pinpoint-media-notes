@@ -189,10 +189,10 @@ the movie or series page on [themoviedb.org](https://www.themoviedb.org).
 All of these work:
 
 ```
-https://www.themoviedb.org/movie/800815-official-competition
-https://www.themoviedb.org/movie/800815/cast?language=de#top
+https://www.themoviedb.org/movie/668640-competencia-oficial
+https://www.themoviedb.org/movie/668640/cast?language=de#top
 https://www.themoviedb.org/tv/1396-breaking-bad/season/2
-movie/800815
+movie/668640
 tv/1396
 ```
 
@@ -292,7 +292,7 @@ template: "[[Movie Template]]"
 type: movie
 title: Der beste Film aller Zeiten
 original_title: Competencia oficial
-url: https://www.themoviedb.org/movie/800815
+url: https://www.themoviedb.org/movie/668640
 imdb_id: tt8740768
 year: 2021
 genres:

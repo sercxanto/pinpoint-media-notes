@@ -111,7 +111,7 @@ describe("book import command", () => {
 describe("movie and series import command", () => {
 	const TOKEN = "eyJhbGciOiJIUzI1NiJ9.main-test-token";
 	const settings = { tmdbNotesDir: "Movies", tmdbToken: TOKEN, tmdbLanguage: "de-DE" };
-	const movie = { kind: "movie", id: "800815" } as const;
+	const movie = { kind: "movie", id: "668640" } as const;
 
 	it("stops with a message naming the setting when the token is missing", async () => {
 		const plugin = await loadPlugin({ tmdbNotesDir: "Movies" });
@@ -124,7 +124,7 @@ describe("movie and series import command", () => {
 		serve({
 			[detailsUrl(movie, "de-DE")]: response(
 				"application/json",
-				fixture("tmdb/movie-800815-de-DE.json"),
+				fixture("tmdb/movie-668640-de-DE.json"),
 			),
 			[posterUrl("w500", "/3VqKmtBv4sG1iVFYWKPrJmVZXYT.jpg")]: response(
 				"image/jpeg",
@@ -133,7 +133,7 @@ describe("movie and series import command", () => {
 		});
 
 		const plugin = await loadPlugin(settings);
-		const outcome = await plugin.importTmdbEntry("https://www.themoviedb.org/movie/800815");
+		const outcome = await plugin.importTmdbEntry("https://www.themoviedb.org/movie/668640");
 		expect(await openedAfterClose(plugin, outcome)).toEqual([
 			"Movies/Der beste Film aller Zeiten (2021).md",
 		]);
@@ -154,7 +154,7 @@ describe("movie and series import command", () => {
 
 	it("keeps the input after an entry error", async () => {
 		const plugin = await loadPlugin(settings);
-		expect(await plugin.importTmdbEntry("800815")).toEqual({ close: false });
+		expect(await plugin.importTmdbEntry("668640")).toEqual({ close: false });
 		expect(http.calls).toEqual([]);
 	});
 
@@ -167,7 +167,7 @@ describe("movie and series import command", () => {
 			),
 		});
 		const plugin = await loadPlugin(settings);
-		expect(await plugin.importTmdbEntry("movie/800815")).toEqual({ close: true });
+		expect(await plugin.importTmdbEntry("movie/668640")).toEqual({ close: true });
 		expect(notices).toHaveLength(1);
 		expect(notices[0]).toMatch(/^TMDB rejected the access token/);
 		expect(notices[0]).not.toContain(TOKEN);

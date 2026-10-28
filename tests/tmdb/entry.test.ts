@@ -14,7 +14,7 @@ import { fixture } from "../helpers";
 
 const json = (path: string): unknown => normalizeStrings(JSON.parse(fixture(path)));
 
-const movie = () => readDetails(json("tmdb/movie-800815-de-DE.json"), "movie", "movie 800815");
+const movie = () => readDetails(json("tmdb/movie-668640-de-DE.json"), "movie", "movie 668640");
 const seriesDe = () => readDetails(json("tmdb/tv-1396-de-DE.json"), "tv", "series 1396");
 const seriesEn = () => readDetails(json("tmdb/tv-1396.json"), "tv", "series 1396");
 
