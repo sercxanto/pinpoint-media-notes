@@ -2,7 +2,7 @@
 
 What changed for users of Pinpoint Media Notes, version by version. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are the release tags. Each entry is one line, because GitHub shows every line break in the release notes.
 
-## Unreleased
+## 0.1.0 - 2026-10-29
 
 The first release.
 
