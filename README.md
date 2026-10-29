@@ -132,6 +132,7 @@ Movies and series need a TMDB account for the token; books need none.
 | [Schema notes](docs/schema/)                             | what the properties mean; templates for the vault      |
 | [Specification](docs/SPEC.md)                            | the exact behaviour, and the reasons behind it         |
 | [Book source evaluation](docs/book-source-evaluation.md) | why the DNB, and the cover measurements                |
+| [Changelog](CHANGELOG.md)                                | what changed in each version                           |
 | [Contributing](CONTRIBUTING.md)                          | development, architecture, pull requests               |
 
 ## Credits and license

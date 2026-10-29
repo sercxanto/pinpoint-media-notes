@@ -1,7 +1,8 @@
 name: Release
 
 # Pushing a tag that is the bare version (0.2.0, no "v") builds the plugin
-# and creates a draft release with main.js and manifest.json attached.
+# and creates a draft release with main.js and manifest.json attached and
+# the tag's section of CHANGELOG.md as notes.
 on:
     push:
         tags: ["[0-9]+.[0-9]+.[0-9]+"]
@@ -42,12 +43,32 @@ jobs:
             - run: npm ci
             # Typecheck, lint, format check, tests and production build.
             - run: npm run check
+            # The release notes are the tag's section of CHANGELOG.md, from
+            # its "## <tag>" heading to the next "## " heading. After the
+            # check, so that the format check does not see release-notes.md.
+            - name: Take the release notes from the changelog
+              env:
+                  TAG: ${{ github.ref_name }}
+              run: |
+                  node -e '
+                    const fs = require("fs");
+                    const tag = process.env.TAG;
+                    const lines = fs.readFileSync("CHANGELOG.md", "utf8").split("\n");
+                    const start = lines.findIndex((line) => line === `## ${tag}` || line.startsWith(`## ${tag} `));
+                    if (start < 0) { console.error(`CHANGELOG.md has no "## ${tag}" section`); process.exit(1); }
+                    const rest = lines.slice(start + 1);
+                    const end = rest.findIndex((line) => line.startsWith("## "));
+                    const notes = (end < 0 ? rest : rest.slice(0, end)).join("\n").trim();
+                    if (!notes) { console.error(`The "## ${tag}" section of CHANGELOG.md is empty`); process.exit(1); }
+                    fs.writeFileSync("release-notes.md", notes + "\n");
+                  '
             - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
               with:
                   name: plugin
                   path: |
                       main.js
                       manifest.json
+                      release-notes.md
                   if-no-files-found: error
                   retention-days: 1
 
@@ -64,4 +85,4 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
                   TAG: ${{ github.ref_name }}
-              run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --title "$TAG" --generate-notes main.js manifest.json
+              run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --title "$TAG" --notes-file release-notes.md main.js manifest.json

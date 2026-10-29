@@ -33,6 +33,7 @@ image and a fixed frontmatter schema:
 | `README.md`                      | the overview for users: motivation, features, quick start, network use.          |
 | `docs/USER_GUIDE.md`             | the user documentation in detail, derived from the spec.                         |
 | `docs/MANUAL_TEST.md`            | checklist for the manual test in Obsidian.                                       |
+| `CHANGELOG.md`                   | what changed for users, version by version; the source of the release notes.     |
 | `CONTRIBUTING.md`                | how to work here: commands, architecture, rules, implementation decisions.       |
 | `AGENTS.md`                      | the working agreement for coding agents, on top of this file.                    |
 
@@ -45,10 +46,10 @@ image and a fixed frontmatter schema:
 - Commit messages: a short subject in the imperative, then a body that
   says why, not only what.
 - Before handing in: `npm run check` passes, and `docs/SPEC.md`,
-  `README.md`, `docs/USER_GUIDE.md`, `docs/MANUAL_TEST.md` and this file
-  are updated where the
-  change affects them (see _Documentation_). New implementation decisions
-  and architecture changes go into this file.
+  `README.md`, `docs/USER_GUIDE.md`, `docs/MANUAL_TEST.md`,
+  `CHANGELOG.md` and this file are updated where the change affects them
+  (see _Documentation_). New implementation decisions and architecture
+  changes go into this file.
 - Code, comments and docs in the repository are in English.
 - A change to the settings tab, a modal, notices or `src/io/` is checked in
   Obsidian as well, with the matching section of `docs/MANUAL_TEST.md`.
@@ -125,6 +126,7 @@ docs/
   images/                    pictures for the README
   schema/                    vault notes: conventions and templates, copied 1:1 into a vault
 README.md                    overview for users
+CHANGELOG.md                 changes for users per version; the release notes
 .github/workflows/ci.yml     runs npm run check and the coverage on pushes to main and on pull requests; publishes the coverage badge
 .github/workflows/release.yml  a tag push builds a draft release, see "Releases"
 .github/dependabot.yml       monthly updates of the GitHub Actions and npm (no majors)
@@ -212,6 +214,12 @@ Principles:
   `io/`, mobile), run only when that area changed. What a test can check
   goes into a test, not the checklist; add an item to the matching section
   only for behaviour seen nothing but in Obsidian.
+- `CHANGELOG.md` gets an entry under _Unreleased_ for every change a
+  user notices: a new or changed feature, setting, property, message or
+  host, a fix. Entries are written for users and grouped as in Keep a
+  Changelog (_Added_, _Changed_, _Fixed_, _Removed_). Refactorings, tests,
+  CI and dependency updates get none. Each entry is one line, unwrapped,
+  because GitHub shows every line break in the release notes.
 
 ## Decisions
 
@@ -279,6 +287,13 @@ go into the spec.
   own updater requires for listed plugins. BRAT would accept a `v` too,
   but the bare form keeps the community list open without a change of
   convention.
+- **Changelog by hand** (decided 2026-10-29): `CHANGELOG.md`, kept with
+  each change, instead of GitHub's generated notes, which list every pull
+  request by title, Dependabot's included, and say nothing to users. The
+  release workflow takes the tag's section as the release notes and
+  fails without one, so a release cannot go out without its entry. The
+  version headings carry no link references, which would need upkeep of
+  their own.
 - **Actions are pinned to a commit SHA**, with the version as a comment
   (`actions/checkout@<sha> # v7.0.1`). A tag can be moved to other code; a
   SHA cannot. Dependabot updates SHA and comment together.
@@ -331,11 +346,13 @@ go into the spec.
 - Run the smoke test in `docs/MANUAL_TEST.md` and the sections for the
   areas changed. iOS is in daily use; Android is untested so far.
 - Version: `manifest.json`, `package.json` and `versions.json` in step
-  (`versions.json` maps each version to its `minAppVersion`). Commit that
-  on `main`.
+  (`versions.json` maps each version to its `minAppVersion`). In
+  `CHANGELOG.md`, rename _Unreleased_ to the version and date
+  (`## 0.2.0 - 2026-11-15`) and start a new, empty _Unreleased_ above it.
+  Commit that on `main`.
 - Tag the bare version (`0.2.0`, no `v`) and push the tag. The release
   workflow (`.github/workflows/release.yml`) checks the tag against the
   three files, runs `npm run check` and creates a draft release with
-  `main.js` and `manifest.json` attached and generated notes. Review the
-  notes and publish it; BRAT and the README's links see only published
-  releases.
+  `main.js` and `manifest.json` attached and the tag's section of
+  `CHANGELOG.md` as notes. Review the draft and publish it; BRAT and the
+  README's links see only published releases.
